@@ -3,7 +3,7 @@ require "magellan/gcs/proxy/version"
 module Magellan
   module Gcs
     module Proxy
-      # Your code goes here...
+      autoload :Command, 'magellan/gcs/proxy/command'
     end
   end
 end
