@@ -36,15 +36,17 @@ module Magellan
               puts "Error: #{cmd.inspect}"
             end
 
-            if gcs
-              deleted_files =
-                gcs['download_files'].map{|obj| obj['dest']} +
-                gcs['upload_files'  ].map{|obj| obj['src']}
-              puts "Deleting..."
-              p deleted_files
-              deleted_files.each{|f| File.delete(f)}
-            end
+            cleanup(gcs) if gcs
           end
+        end
+
+        def cleanup(gcs)
+          deleted_files =
+            gcs['download_files'].map{|obj| obj['dest']} +
+            gcs['upload_files'  ].map{|obj| obj['src']}
+          puts "Deleting..."
+          p deleted_files
+          deleted_files.each{|f| File.delete(f)}
         end
 
       end
