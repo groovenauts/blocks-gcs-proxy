@@ -1,13 +1,13 @@
 require "magellan/gcs/proxy"
 
 require 'json'
-require "google/cloud/pubsub"
 
 module Magellan
   module Gcs
     module Proxy
       class Command
         include FileOperation
+        include PubsubOperation
 
         attr_reader :base_cmd
         def initialize(*args)
@@ -15,19 +15,6 @@ module Magellan
         end
 
         def run
-          pubsub = Google::Cloud::Pubsub.new(
-            project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
-
-          topic_name = ENV['BATCH_TOPIC_NAME'] || 'test-topic'
-          topic = pubsub.topic(topic_name) || pubsub.create_topic(topic_name)
-          p topic
-
-          sub_name = ENV['BATCH_SUBSCRIPTION_NAME'] || 'test-subscription'
-          sub = topic.subscription(sub_name) || topic.subscribe(sub_name)
-          p sub
-
           sub.listen do |msg|
             p msg
 
