@@ -1,25 +1,17 @@
 require "magellan/gcs/proxy"
 
 require 'json'
-require 'uri'
 require "google/cloud/pubsub"
-require "google/cloud/storage"
 
 module Magellan
   module Gcs
     module Proxy
       class Command
+        include FileOperation
 
         attr_reader :base_cmd
         def initialize(*args)
           @base_cmd = args.join(' ')
-        end
-
-        def storage
-          @storage ||= Google::Cloud::Storage.new(
-            project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
         end
 
         def run
@@ -42,31 +34,14 @@ module Magellan
             gcs = msg.attributes['gcs']
             gcs = JSON.parse(gcs) if gcs
 
-            if gcs
-              (gcs['download_files'] || []).each do |obj|
-                p obj
-                uri = URI.parse(obj['src'])
-                raise "Unsupported scheme #{uri.scheme.inspect} in #{obj.inspect}" unless uri.scheme == 'gs'
-                bucket = storage.bucket(uri.host)
-                file = bucket.file uri.path.sub(/\A\//, '')
-                file.download obj['dest']
-              end
-            end
+            download(gcs['download_files']) if gcs
 
             cmd = base_cmd.dup
             cmd << ' ' << msg.data unless msg.data.nil?
             p cmd
 
             if system(cmd)
-              if gcs
-                (gcs['upload_files'] || []).each do |obj|
-                  p obj
-                  uri = URI.parse(obj['dest'])
-                  raise "Unsupported scheme #{uri.scheme.inspect} in #{obj.inspect}" unless uri.scheme == 'gs'
-                  bucket = storage.bucket(uri.host)
-                  bucket.create_file obj['src'], uri.path.sub(/\A\//, '')
-                end
-              end
+              download(gcs['upload_files']) if gcs
 
               sub.acknowledge msg
               puts "acknowledge!"
