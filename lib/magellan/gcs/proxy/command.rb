@@ -18,6 +18,14 @@ module Magellan
         def run
           logger.info("Start listening")
           sub.listen do |msg|
+            process(msg)
+          end
+        rescue => e
+          logger.error("[#{e.class.name}] #{e.message}")
+          raise e
+        end
+
+        def process(msg)
             logger.info("Processing message: #{msg.inspect}")
 
             gcs = paese(msg.attributes['gcs'])
@@ -39,10 +47,6 @@ module Magellan
             end
 
             cleanup(gcs) if gcs
-          end
-        rescue => e
-          logger.error("[#{e.class.name}] #{e.message}")
-          raise e
         end
 
         def cleanup(gcs)
