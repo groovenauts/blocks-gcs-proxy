@@ -20,8 +20,7 @@ module Magellan
           sub.listen do |msg|
             logger.info("Processing message: #{msg.inspect}")
 
-            gcs = msg.attributes['gcs']
-            gcs = JSON.parse(gcs) if gcs
+            gcs = paese(msg.attributes['gcs'])
 
             download(gcs['download_files']) if gcs
 
@@ -31,7 +30,7 @@ module Magellan
             logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
-              download(gcs['upload_files']) if gcs
+              upload(gcs['upload_files']) if gcs
 
               sub.acknowledge msg
               logger.info("Complete processing and acknowledged")
@@ -56,6 +55,11 @@ module Magellan
 
         def logger
           @logger ||= Logger.new($stdout)
+        end
+
+        def parse(str)
+          return nil if str.nil? || str.empty?
+          JSON.parse(str)
         end
       end
     end
