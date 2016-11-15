@@ -18,7 +18,11 @@ module Magellan
         def run
           logger.info("Start listening")
           sub.listen do |msg|
-            process(msg)
+            begin
+              process(msg)
+            rescue => e
+              logger.error("[#{e.class.name}] #{e.message}")
+            end
           end
         rescue => e
           logger.error("[#{e.class.name}] #{e.message}")
