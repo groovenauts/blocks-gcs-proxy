@@ -26,27 +26,27 @@ module Magellan
         end
 
         def process(msg)
-            logger.info("Processing message: #{msg.inspect}")
+          logger.info("Processing message: #{msg.inspect}")
 
-            gcs = paese(msg.attributes['gcs'])
+          gcs = paese(msg.attributes['gcs'])
 
-            download(gcs['download_files']) if gcs
+          download(gcs['download_files']) if gcs
 
-            cmd = base_cmd.dup
-            cmd << ' ' << msg.data unless msg.data.nil?
+          cmd = base_cmd.dup
+          cmd << ' ' << msg.data unless msg.data.nil?
 
-            logger.info("Executing command: #{cmd.inspect}")
+          logger.info("Executing command: #{cmd.inspect}")
 
-            if system(cmd)
-              upload(gcs['upload_files']) if gcs
+          if system(cmd)
+            upload(gcs['upload_files']) if gcs
 
-              sub.acknowledge msg
-              logger.info("Complete processing and acknowledged")
-            else
-              logger.error("Error: #{cmd.inspect}")
-            end
+            sub.acknowledge msg
+            logger.info("Complete processing and acknowledged")
+          else
+            logger.error("Error: #{cmd.inspect}")
+          end
 
-            cleanup(gcs) if gcs
+          cleanup(gcs) if gcs
         end
 
         def cleanup(gcs)
