@@ -1,6 +1,7 @@
 require "magellan/gcs/proxy"
 
 require 'json'
+require 'logger'
 
 module Magellan
   module Gcs
@@ -15,8 +16,9 @@ module Magellan
         end
 
         def run
+          logger.info("Start listening")
           sub.listen do |msg|
-            p msg
+            logger.info("Processing message: #{msg.inspect}")
 
             gcs = msg.attributes['gcs']
             gcs = JSON.parse(gcs) if gcs
@@ -25,30 +27,36 @@ module Magellan
 
             cmd = base_cmd.dup
             cmd << ' ' << msg.data unless msg.data.nil?
-            p cmd
+
+            logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
               download(gcs['upload_files']) if gcs
 
               sub.acknowledge msg
-              puts "acknowledge!"
+              logger.info("Complete processing and acknowledged")
             else
-              puts "Error: #{cmd.inspect}"
+              logger.error("Error: #{cmd.inspect}")
             end
 
             cleanup(gcs) if gcs
           end
+        rescue => e
+          logger.error("[#{e.class.name}] #{e.message}")
+          raise e
         end
 
         def cleanup(gcs)
           deleted_files =
             gcs['download_files'].map{|obj| obj['dest']} +
             gcs['upload_files'  ].map{|obj| obj['src']}
-          puts "Deleting..."
-          p deleted_files
+          logger.error("Cleaning up: #{deleted_files.inspect}")
           deleted_files.each{|f| File.delete(f)}
         end
 
+        def logger
+          @logger ||= Logger.new($stdout)
+        end
       end
     end
   end

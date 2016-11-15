@@ -17,7 +17,7 @@ module Magellan
           unless @topic
             topic_name = ENV['BATCH_TOPIC_NAME'] || 'test-topic'
             @topic = pubsub.topic(topic_name) || pubsub.create_topic(topic_name)
-            p @topic
+            logger.info("topic: #{@topic.inspect}")
           end
           @topic
         end
@@ -26,7 +26,7 @@ module Magellan
           unless @sub
             sub_name = ENV['BATCH_SUBSCRIPTION_NAME'] || 'test-subscription'
             @sub = topic.subscription(sub_name) || topic.subscribe(sub_name)
-            p @sub
+            logger.info("subscription: #{@sub.inspect}")
           end
           @sub
         end

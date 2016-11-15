@@ -16,7 +16,7 @@ module Magellan
 
         def download(definitions)
           (definitions || []).each do |obj|
-            p obj
+            logger.info("Downloading: #{obj.inspect}")
             uri = URI.parse(obj['src'])
             raise "Unsupported scheme #{uri.scheme.inspect} in #{obj.inspect}" unless uri.scheme == 'gs'
             bucket = storage.bucket(uri.host)
@@ -27,7 +27,7 @@ module Magellan
 
         def upload(definitions)
           (definitions || []).each do |obj|
-            p obj
+            logger.info("Uploading: #{obj.inspect}")
             uri = URI.parse(obj['dest'])
             raise "Unsupported scheme #{uri.scheme.inspect} in #{obj.inspect}" unless uri.scheme == 'gs'
             bucket = storage.bucket(uri.host)
