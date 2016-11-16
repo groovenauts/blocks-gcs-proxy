@@ -6,13 +6,6 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
   context :case1 do
     let(:downloads_dir){ '/tmp/workspace/downloads' }
     let(:uploads_dir){ '/tmp/workspace/uploads' }
-    let(:context) do
-      {
-        workspace: '/tmp/workspace',
-        downloads_dir: downloads_dir,
-        uploads_dir: uploads_dir,
-      }
-    end
 
     let(:download_files) do
       {
@@ -33,6 +26,11 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'gs://bucket1/path/to/file3',
       ]
     end
+
+    let(:context) do
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
+    end
+
     let(:msg) do
       attrs = {
         'download_files' => download_files,
@@ -56,13 +54,6 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
   context :case2 do
     let(:downloads_dir){ '/tmp/workspace/downloads' }
     let(:uploads_dir){ '/tmp/workspace/uploads' }
-    let(:context) do
-      {
-        workspace: '/tmp/workspace',
-        downloads_dir: downloads_dir,
-        uploads_dir: uploads_dir,
-      }
-    end
 
     let(:download_files) do
       {
@@ -92,6 +83,9 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'gs://bucket2/path/to/file2',
         'gs://bucket2/path/to/file3',
       ]
+    end
+    let(:context) do
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
     end
 
     let(:msg) do
