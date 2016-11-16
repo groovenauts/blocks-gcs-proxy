@@ -31,8 +31,8 @@ module Magellan
         def process(msg)
           logger.info("Processing message: #{msg.inspect}")
           Dir.mktmpdir 'workspace' do |dir|
-            dfiles = paese(msg.attributes['download_files'])
-            ufiles =  paese(msg.attributes['upload_files'])
+            dfiles = parse(msg.attributes['download_files'])
+            ufiles =  parse(msg.attributes['upload_files'])
 
             context = Context.new(dir, dfiles, ufiles)
             context.setup
