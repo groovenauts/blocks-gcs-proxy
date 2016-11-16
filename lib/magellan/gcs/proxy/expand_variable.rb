@@ -15,8 +15,7 @@ module Magellan
           value = vars.inject(data) do |tmp, v|
             case v
             when String
-              case tmp
-              when Hash
+              if tmp.respond_to?(:[]) && tmp.respond_to?(:include?)
                 if tmp.include?(v)
                   tmp[v]
                 else

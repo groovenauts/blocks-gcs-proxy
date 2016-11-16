@@ -17,6 +17,11 @@ module Magellan
           context[key.to_sym]
         end
 
+        def include?(key)
+          k = key.to_sym
+          context.include?(k) || [:attrs, :attributes, :data].include?(k)
+        end
+
         def attributes
           Attrs.new(msg.attributes)
         end
@@ -35,6 +40,11 @@ module Magellan
               value
             end
           end
+
+          def include?(key)
+            data.include?(key.to_sym)
+          end
+
         end
       end
     end
