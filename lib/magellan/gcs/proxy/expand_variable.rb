@@ -51,8 +51,8 @@ module Magellan
               end
 
             case value
-            when String then quote_string ? value.to_json : value
-            else value.to_json
+            when String then quote_string ? value.to_s : value
+            else value.to_s
             end
           end
         end
