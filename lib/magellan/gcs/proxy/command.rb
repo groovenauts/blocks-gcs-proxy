@@ -11,9 +11,9 @@ module Magellan
         include FileOperation
         include PubsubOperation
 
-        attr_reader :base_cmd
+        attr_reader :cmd_template
         def initialize(*args)
-          @base_cmd = args.join(' ')
+          @cmd_template = args.join(' ')
         end
 
         def run
@@ -35,8 +35,7 @@ module Magellan
           Dir.mktmpdir 'workspace' do |dir|
             download(flatten_values(paese(msg.attributes['download_files'])))
 
-            cmd = base_cmd.dup
-            cmd << ' ' << msg.data unless msg.data.nil?
+            cmd = build_command(msg, dir)
 
             logger.info("Executing command: #{cmd.inspect}")
 
@@ -66,6 +65,11 @@ module Magellan
           when Array then obj.map{|i| flatten_values(i) }
           else obj
           end
+        end
+
+        def build_command(msg)
+          msg_wrapper = MessageWrapper.new(msg)
+          ExpandVariable.expand_variables(cmd_template, msg_wrapper)
         end
       end
     end
