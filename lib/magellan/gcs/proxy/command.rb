@@ -33,9 +33,7 @@ module Magellan
         def process(msg)
           logger.info("Processing message: #{msg.inspect}")
           Dir.mktmpdir 'workspace' do |dir|
-            gcs = paese(msg.attributes['gcs'])
-
-            download(gcs['download_files']) if gcs
+            download(flatten_values(paese(msg.attributes['download_files'])))
 
             cmd = base_cmd.dup
             cmd << ' ' << msg.data unless msg.data.nil?
@@ -43,7 +41,7 @@ module Magellan
             logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
-              upload(gcs['upload_files']) if gcs
+              upload(flatten_values(paese(msg.attributes['upload_files'])))
 
               sub.acknowledge msg
               logger.info("Complete processing and acknowledged")
@@ -60,6 +58,14 @@ module Magellan
         def parse(str)
           return nil if str.nil? || str.empty?
           JSON.parse(str)
+        end
+
+        def flatten_values(obj)
+          case obj
+          when Hash then flatten_values(obj.values)
+          when Array then obj.map{|i| flatten_values(i) }
+          else obj
+          end
         end
       end
     end
