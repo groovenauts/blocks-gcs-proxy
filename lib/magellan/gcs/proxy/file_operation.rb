@@ -14,22 +14,22 @@ module Magellan
           )
         end
 
-        def download(definitions)
-          (definitions || []).each do |obj|
-            logger.info("Downloading: #{obj.inspect}")
-            uri = parse_uri(obj['src'])
+        def download(base_dir, urls)
+          (urls || []).each do |url|
+            logger.info("Downloading: #{url}")
+            uri = parse_uri(url)
             bucket = storage.bucket(uri.host)
             file = bucket.file uri.path.sub(/\A\//, '')
-            file.download obj['dest']
+            file.download File.join(base_dir, uri.path)
           end
         end
 
-        def upload(definitions)
-          (definitions || []).each do |obj|
-            logger.info("Uploading: #{obj.inspect}")
-            uri = parse_uri(obj['dest'])
+        def upload(base_dir, urls)
+          (urls || []).each do |url|
+            logger.info("Uploading: #{url}")
+            uri = parse_uri(url)
             bucket = storage.bucket(uri.host)
-            bucket.create_file obj['src'], uri.path.sub(/\A\//, '')
+            bucket.create_file File.join(base_dir, uri.path), uri.path.sub(/\A\//, '')
           end
         end
 

@@ -33,14 +33,19 @@ module Magellan
         def process(msg)
           logger.info("Processing message: #{msg.inspect}")
           Dir.mktmpdir 'workspace' do |dir|
-            download(flatten_values(paese(msg.attributes['download_files'])))
+            context = {
+              workspace: dir,
+              downloads_dir: File.join(dir, 'downloads'),
+              uploads_dir: File.join(dir, 'uploads'),
+            }
+            [:download_dir, :upload_dir].each{|k| Dir.mkdir(context[k])}
 
-            cmd = build_command(msg, dir)
+            download(context[:downloads_dir], flatten_values(paese(msg.attributes['download_files'])))
 
             logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
-              upload(flatten_values(paese(msg.attributes['upload_files'])))
+              upload(context[:uploads_dir], flatten_values(paese(msg.attributes['upload_files'])))
 
               sub.acknowledge msg
               logger.info("Complete processing and acknowledged")
