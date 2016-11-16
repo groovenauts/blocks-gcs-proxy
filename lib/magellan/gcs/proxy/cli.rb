@@ -8,8 +8,6 @@ module Magellan
   module Gcs
     module Proxy
       class Cli
-        include FileOperation
-        include PubsubOperation
 
         attr_reader :cmd_template
         def initialize(*args)
