@@ -42,7 +42,7 @@ module Magellan
           end
 
           def include?(key)
-            data.include?(key.to_sym)
+            data.include?(key) || data.include?(key.to_sym)
           end
 
         end
