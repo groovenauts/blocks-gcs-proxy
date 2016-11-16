@@ -8,8 +8,9 @@ module Magellan
       module PubsubOperation
         def pubsub
           @pubsub ||= Google::Cloud::Pubsub.new(
-            project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
+            # default credential を利用するため、プロジェクトの指定はしない
+            # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
+            # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
           )
         end
 
