@@ -33,21 +33,20 @@ module Magellan
         def process(msg)
           logger.info("Processing message: #{msg.inspect}")
           Dir.mktmpdir 'workspace' do |dir|
-            context = {
-              workspace: dir,
-              downloads_dir: File.join(dir, 'downloads'),
-              uploads_dir: File.join(dir, 'uploads'),
-            }
-            [:downloads_dir, :uploads_dir].each{|k| Dir.mkdir(context[k])}
+            dfiles = paese(msg.attributes['download_files'])
+            ufiles =  paese(msg.attributes['upload_files'])
 
-            download(context[:downloads_dir], flatten_values(paese(msg.attributes['download_files'])))
+            context = Context.new(dir, dfiles, ufiles)
+            context.setup
+
+            context.download
 
             cmd = build_command(msg, context)
 
             logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
-              upload(context[:uploads_dir], flatten_values(paese(msg.attributes['upload_files'])))
+              context.upload
 
               sub.acknowledge msg
               logger.info("Complete processing and acknowledged")
@@ -66,13 +65,6 @@ module Magellan
           JSON.parse(str)
         end
 
-        def flatten_values(obj)
-          case obj
-          when Hash then flatten_values(obj.values)
-          when Array then obj.map{|i| flatten_values(i) }
-          else obj
-          end
-        end
 
         def build_command(msg, context)
           msg_wrapper = MessageWrapper.new(msg, context)
