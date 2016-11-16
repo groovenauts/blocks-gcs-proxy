@@ -38,7 +38,7 @@ module Magellan
               downloads_dir: File.join(dir, 'downloads'),
               uploads_dir: File.join(dir, 'uploads'),
             }
-            [:download_dir, :upload_dir].each{|k| Dir.mkdir(context[k])}
+            [:downloads_dir, :uploads_dir].each{|k| Dir.mkdir(context[k])}
 
             download(context[:downloads_dir], flatten_values(paese(msg.attributes['download_files'])))
 
