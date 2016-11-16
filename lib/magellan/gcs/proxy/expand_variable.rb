@@ -7,7 +7,7 @@ module Magellan
 
         class InvalidReferenceError < StandardError
         end
-        
+
         module_function
 
         def dig_variables(variable_ref, data)
@@ -52,14 +52,8 @@ module Magellan
               end
 
             case value
-            when String
-              if quote_string
-                value.to_json
-              else
-                value
-              end
-            else
-              value.to_json
+            when String then quote_string ? value.to_json : value
+            else value.to_json
             end
           end
         end
