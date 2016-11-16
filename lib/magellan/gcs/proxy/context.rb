@@ -6,23 +6,30 @@ module Magellan
   module Gcs
     module Proxy
       class Context
-        attr_reader :workspace, :remorte_download_files, :remote_upload_files
-        def initialize(workspace, remorte_download_files, remote_upload_files)
+        attr_reader :workspace, :remote_download_files, :remote_upload_files
+        def initialize(workspace, remote_download_files, remote_upload_files)
           @workspace = workspace
-          @remorte_download_files = remorte_download_files
+          @remote_download_files = remote_download_files
           @remote_upload_files = remote_upload_files
         end
 
+        KEYS = [
+          :workspace,
+          :downloads_dir, :uploads_dir,
+          :download_files, :upload_files,
+          :local_download_files, :local_upload_files,
+          :remote_download_files, :remote_upload_files
+        ].freeze
+
         def [](key)
           case key.to_sym
-          when :workspace,
-               :downloads_dir, :uploads_dir,
-               :download_files, :upload_files,
-               :local_download_files, :local_upload_files,
-               :remorte_download_files, :remote_upload_files
-            send(key)
+          when *KEYS then send(key)
           else nil
           end
+        end
+
+        def include?(key)
+          KEYS.include?(key)
         end
 
         def downloads_dir
@@ -30,7 +37,7 @@ module Magellan
         end
 
         def download_mapping
-          @download_mapping ||= build_mapping(downloads_dir, remorte_download_files)
+          @download_mapping ||= build_mapping(downloads_dir, remote_download_files)
         end
 
         def local_download_files
@@ -79,7 +86,7 @@ module Magellan
         end
 
         def build_mapping(base_dir, obj)
-          flatten_values(obj).each_with_object({}) do |url, d|
+          flatten_values(obj).flatten.each_with_object({}) do |url, d|
             uri = parse_uri(url)
             d[url] = File.join(base_dir, uri.path)
           end
@@ -101,8 +108,8 @@ module Magellan
 
         def build_local_files_obj(obj, mapping)
           case obj
-          when Hash then obj.each_with_object({}){|(k,v), d| d[k] = build_local_files_obj(v)}
-          when Array then obj.map{|i| build_local_files_obj(i)}
+          when Hash then obj.each_with_object({}){|(k,v), d| d[k] = build_local_files_obj(v, mapping)}
+          when Array then obj.map{|i| build_local_files_obj(i, mapping)}
           when String then mapping[obj]
           else obj
           end
