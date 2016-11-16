@@ -3,7 +3,7 @@ require "spec_helper"
 describe Magellan::Gcs::Proxy::Cli do
   context :case1 do
     let(:template) do
-      "cmd1 %{attrs.download_files.foo} %{attrs.download_files.bar} %{attrs.baz} %{uploads_dir} %{attrs.qux}"
+      "cmd1 %{download_files.foo} %{download_files.bar} %{attrs.baz} %{uploads_dir} %{attrs.qux}"
     end
     let(:msg) do
       attrs = {
@@ -39,7 +39,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
   context :case2 do
     let(:template) do
-      "cmd2 %{attrs.foo} %{attrs.download_files.bar} %{uploads_dir} %{attrs.download_files.baz} %{attrs.download_files.qux}"
+      "cmd2 %{attrs.foo} %{download_files.bar} %{uploads_dir} %{download_files.baz} %{download_files.qux}"
     end
     let(:msg) do
       attrs = {
