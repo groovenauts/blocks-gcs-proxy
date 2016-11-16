@@ -52,6 +52,7 @@ module Magellan
 
             case value
             when String then quote_string ? value.to_s : value
+            when Array then value.flatten.join(' ')
             else value.to_s
             end
           end
