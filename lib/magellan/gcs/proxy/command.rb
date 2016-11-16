@@ -2,6 +2,7 @@ require "magellan/gcs/proxy"
 
 require 'json'
 require 'logger'
+require 'tmpdir'
 
 module Magellan
   module Gcs
@@ -30,6 +31,7 @@ module Magellan
         end
 
         def process(msg)
+          Dir.mktmpdir 'workspace' do |dir|
           logger.info("Processing message: #{msg.inspect}")
 
           gcs = paese(msg.attributes['gcs'])
@@ -49,16 +51,7 @@ module Magellan
           else
             logger.error("Error: #{cmd.inspect}")
           end
-
-          cleanup(gcs) if gcs
-        end
-
-        def cleanup(gcs)
-          deleted_files =
-            gcs['download_files'].map{|obj| obj['dest']} +
-            gcs['upload_files'  ].map{|obj| obj['src']}
-          logger.error("Cleaning up: #{deleted_files.inspect}")
-          deleted_files.each{|f| File.delete(f)}
+          end
         end
 
         def logger
