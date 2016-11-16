@@ -2,4 +2,4 @@
 
 require "magellan/gcs/proxy"
 
-Magellan::Gcs::Proxy::Command.new(*ARGV).run
+Magellan::Gcs::Proxy::Cli.new(*ARGV).run

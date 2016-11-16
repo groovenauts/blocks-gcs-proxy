@@ -7,7 +7,7 @@ require 'tmpdir'
 module Magellan
   module Gcs
     module Proxy
-      class Command
+      class Cli
         include FileOperation
         include PubsubOperation
 

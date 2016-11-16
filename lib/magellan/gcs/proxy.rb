@@ -3,7 +3,7 @@ require "magellan/gcs/proxy/version"
 module Magellan
   module Gcs
     module Proxy
-      autoload :Command, 'magellan/gcs/proxy/command'
+      autoload :Cli, 'magellan/gcs/proxy/command'
       autoload :ExpandVariable, 'magellan/gcs/proxy/expand_variable'
       autoload :FileOperation, 'magellan/gcs/proxy/file_operation'
       autoload :MessageWrapper, 'magellan/gcs/proxy/message_wrapper'
