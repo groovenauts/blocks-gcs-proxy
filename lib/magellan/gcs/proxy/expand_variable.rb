@@ -12,10 +12,6 @@ module Magellan
 
         def dig_variables(variable_ref, data)
           vars = variable_ref.split(".").map{|i| (/\A\d+\z/.match(i)) ? i.to_i : i }
-          # ".a" indicate data["_"]["a"]
-          if vars[0] == ""
-            vars[0] = "_"
-          end
           value = vars.inject(data) do |tmp, v|
             case v
             when String
