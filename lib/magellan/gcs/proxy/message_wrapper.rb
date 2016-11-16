@@ -4,9 +4,9 @@ module Magellan
   module Gcs
     module Proxy
       class MessageWrapper
-        attr_reader :msg, :options
-        def initialize(msg, options)
-          @msg, @options = msg, options
+        attr_reader :msg, :context
+        def initialize(msg, context)
+          @msg, @context = msg, context
         end
 
         def [](key)
@@ -14,7 +14,7 @@ module Magellan
           when :attrs, :attributes then return attributes
           when :data then return msg.data
           end
-          options[key.to_sym]
+          context[key.to_sym]
         end
 
         def attributes

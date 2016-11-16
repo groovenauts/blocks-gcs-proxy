@@ -42,6 +42,8 @@ module Magellan
 
             download(context[:downloads_dir], flatten_values(paese(msg.attributes['download_files'])))
 
+            cmd = build_command(msg, context)
+
             logger.info("Executing command: #{cmd.inspect}")
 
             if system(cmd)
@@ -72,8 +74,8 @@ module Magellan
           end
         end
 
-        def build_command(msg)
-          msg_wrapper = MessageWrapper.new(msg)
+        def build_command(msg, context)
+          msg_wrapper = MessageWrapper.new(msg, context)
           ExpandVariable.expand_variables(cmd_template, msg_wrapper)
         end
       end
