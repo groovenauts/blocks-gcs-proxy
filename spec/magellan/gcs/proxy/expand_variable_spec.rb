@@ -4,10 +4,26 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
   include Magellan::Gcs::Proxy::ExpandVariable
 
   context :case1 do
+    let(:downloads_dir){ '/tmp/workspace/downloads' }
+    let(:uploads_dir){ '/tmp/workspace/uploads' }
+    let(:context) do
+      {
+        workspace: '/tmp/workspace',
+        downloads_dir: downloads_dir,
+        uploads_dir: uploads_dir,
+      }
+    end
+
     let(:download_files) do
       {
         'foo' => 'gs://bucket1/path/to/foo',
         'bar' => 'gs://bucket1/path/to/bar',
+      }
+    end
+    let(:local_download_files) do
+      {
+        'foo' => "#{downloads_dir}/path/to/foo",
+        'bar' => "#{downloads_dir}/path/to/bar",
       }
     end
     let(:upload_files) do
@@ -26,23 +42,26 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       }
       double(:msg, attributes: attrs)
     end
-    let(:context) do
-      {
-        workspace: '/tmp/workspace',
-        downloads_dir: '/tmp/workspace/downloads',
-        uploads_dir: '/tmp/workspace/uploads',
-      }
-    end
 
     let(:data){ Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }
 
-    it{ expect(expand_variables('%{uploads_dir}', data)).to eq '/tmp/workspace/uploads' }
-    it{ expect(expand_variables('%{attrs.baz}', data)).to eq 60 }
-    it{ expect(expand_variables('%{attrs.download_files.foo}', data)).to eq download_files['foo'] }
-    it{ expect(expand_variables('%{attrs.download_files.bar}', data)).to eq download_files['bar'] }
+    it{ expect(expand_variables('%{uploads_dir}', data)).to eq uploads_dir }
+    it{ expect(expand_variables('%{attrs.baz}', data)).to eq '60' }
+    it{ expect(expand_variables('%{attrs.download_files.foo}', data)).to eq local_download_files['foo'] }
+    it{ expect(expand_variables('%{attrs.download_files.bar}', data)).to eq local_download_files['bar'] }
   end
 
   context :case2 do
+    let(:downloads_dir){ '/tmp/workspace/downloads' }
+    let(:uploads_dir){ '/tmp/workspace/uploads' }
+    let(:context) do
+      {
+        workspace: '/tmp/workspace',
+        downloads_dir: downloads_dir,
+        uploads_dir: uploads_dir,
+      }
+    end
+
     let(:download_files) do
       {
         'bar' => 'gs://bucket2/path/to/bar',
@@ -53,6 +72,18 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         ],
       }
     end
+
+    let(:local_download_files) do
+      {
+        'bar' => "#{downloads_dir}/path/to/bar",
+        'baz' => "#{downloads_dir}/path/to/baz",
+        'qux' => [
+          "#{downloads_dir}/path/to/qux1",
+          "#{downloads_dir}/path/to/qux2",
+        ],
+      }
+    end
+
     let(:upload_files) do
       [
         'gs://bucket2/path/to/file1',
@@ -69,14 +100,11 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       }
       double(:msg, attributes: attrs)
     end
-    let(:context) do
-      {
-        workspace: '/tmp/workspace',
-        downloads_dir: '/tmp/workspace/downloads',
-        uploads_dir: '/tmp/workspace/uploads',
-      }
-    end
 
+    let(:data){ Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }
+
+    it{ expect(expand_variables('%{attrs.foo}', data)).to eq '123' }
+    it{ expect(expand_variables('%{attrs.download_files.qux}', data)).to eq download_files['qux'].join(' ') }
   end
 
 end
