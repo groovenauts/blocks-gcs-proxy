@@ -7,13 +7,6 @@ module Magellan
   module Gcs
     module Proxy
       module FileOperation
-        def storage
-          @storage ||= Google::Cloud::Storage.new(
-            # default credential を利用するため、プロジェクトの指定はしない
-            # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
-        end
 
         def download(base_dir, urls)
           (urls || []).each do |url|
