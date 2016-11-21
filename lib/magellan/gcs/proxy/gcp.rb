@@ -8,6 +8,8 @@ module Magellan
   module Gcs
     module Proxy
       module GCP
+        extend Log
+        include Log
 
         module_function
 
