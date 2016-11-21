@@ -1,5 +1,6 @@
 # coding: utf-8
 require "magellan/gcs/proxy"
+require "magellan/gcs/proxy/log"
 
 require 'uri'
 
@@ -7,6 +8,7 @@ module Magellan
   module Gcs
     module Proxy
       class Context
+        include Log
 
         attr_reader :workspace, :remote_download_files, :remote_upload_files
         def initialize(workspace, remote_download_files, remote_upload_files)
