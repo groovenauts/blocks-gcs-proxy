@@ -62,7 +62,8 @@ module Magellan
             FileUtils.mkdir_p File.dirname(path)
             logger.debug("Downloading: #{url} to #{path}")
             uri = parse_uri(url)
-            bucket = GCP.storage.bucket(uri.host)
+            @last_bucket_name = uri.host
+            bucket = GCP.storage.bucket(@last_bucket_name)
             file = bucket.file uri.path.sub(/\A\//, '')
             file.download(path)
             logger.info("Download OK: #{url} to #{path}")
