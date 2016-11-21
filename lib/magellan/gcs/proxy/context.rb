@@ -2,6 +2,7 @@
 require "magellan/gcs/proxy"
 require "magellan/gcs/proxy/log"
 
+require 'fileutils'
 require 'uri'
 
 module Magellan
@@ -68,11 +69,13 @@ module Magellan
 
         def download
           download_mapping.each do |url, path|
-            logger.info("Downloading: #{url}")
+            FileUtils.mkdir_p File.dirname(path)
+            logger.debug("Downloading: #{url} to #{path}")
             uri = parse_uri(url)
             bucket = GCP.storage.bucket(uri.host)
             file = bucket.file uri.path.sub(/\A\//, '')
             file.download(path)
+            logger.info("Download OK: #{url} to #{path}")
           end
         end
 
