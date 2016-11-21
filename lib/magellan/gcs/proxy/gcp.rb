@@ -24,11 +24,15 @@ module Magellan
         end
 
         def storage
-          @storage ||= Google::Cloud::Storage.new(
-            # default credential を利用するため、プロジェクトの指定はしない
-            # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
+          unless @storage
+            @storage = Google::Cloud::Storage.new(
+              # default credential を利用するため、プロジェクトの指定はしない
+              # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
+              # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
+            )
+            @storage.service.authorization = authorization
+          end
+          @storage
         end
 
         def pubsub
