@@ -7,7 +7,7 @@ module Magellan
   module Gcs
     module Proxy
       class Context
-        
+
         attr_reader :workspace, :remote_download_files, :remote_upload_files
         def initialize(workspace, remote_download_files, remote_upload_files)
           @workspace = workspace
@@ -64,19 +64,11 @@ module Magellan
           setup_dirs
         end
 
-        def storage
-          @storage ||= Google::Cloud::Storage.new(
-            # default credential を利用するため、プロジェクトの指定はしない
-            # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
-        end
-
         def download
           download_mapping.each do |url, path|
             logger.info("Downloading: #{url}")
             uri = parse_uri(url)
-            bucket = storage.bucket(uri.host)
+            bucket = GCP.storage.bucket(uri.host)
             file = bucket.file uri.path.sub(/\A\//, '')
             file.download(path)
           end
@@ -86,7 +78,7 @@ module Magellan
           upload_mapping.each do |url, path|
             logger.info("Uploading: #{url}")
             uri = parse_uri(url)
-            bucket = storage.bucket(uri.host)
+            bucket = GCP.storage.bucket(uri.host)
             bucket.create_file path, uri.path.sub(/\A\//, '')
           end
         end
