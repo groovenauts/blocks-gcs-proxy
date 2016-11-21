@@ -5,6 +5,7 @@ require 'magellan/gcs/proxy/expand_variable'
 require 'magellan/gcs/proxy/file_operation'
 require 'magellan/gcs/proxy/message_wrapper'
 require 'magellan/gcs/proxy/pubsub_operation'
+require 'magellan/gcs/proxy/log'
 
 module Magellan
   module Gcs
