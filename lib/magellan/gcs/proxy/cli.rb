@@ -1,5 +1,4 @@
 require "magellan/gcs/proxy"
-require "magellan/gcs/proxy/pubsub_operation"
 
 require 'json'
 require 'logger'
@@ -9,7 +8,6 @@ module Magellan
   module Gcs
     module Proxy
       class Cli
-        include PubsubOperation
 
         attr_reader :cmd_template
         def initialize(*args)
@@ -18,7 +16,7 @@ module Magellan
 
         def run
           logger.info("Start listening")
-          sub.listen do |msg|
+          GCP.subscription.listen do |msg|
             begin
               process(msg)
             rescue => e

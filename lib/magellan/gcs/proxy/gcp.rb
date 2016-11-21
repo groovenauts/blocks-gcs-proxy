@@ -39,6 +39,13 @@ module Magellan
           )
         end
 
+        def subscription
+          unless @subscription
+            @subscription = pubsub.subscription(ENV['BLOCKS_BATCH_PUBSUB_SUBSCRIPTION'] || 'test-subscription')
+            logger.info("subscription: #{@subscription.inspect}")
+          end
+          @subscription
+        end
       end
     end
   end
