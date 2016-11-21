@@ -11,19 +11,18 @@ module Magellan
       class Context
         include Log
 
-        attr_reader :workspace, :remote_download_files, :remote_upload_files
-        def initialize(workspace, remote_download_files, remote_upload_files)
+        attr_reader :workspace, :remote_download_files
+        def initialize(workspace, remote_download_files)
           @workspace = workspace
           @remote_download_files = remote_download_files
-          @remote_upload_files = remote_upload_files
         end
 
         KEYS = [
           :workspace,
           :downloads_dir, :uploads_dir,
-          :download_files, :upload_files,
-          :local_download_files, :local_upload_files,
-          :remote_download_files, :remote_upload_files
+          :download_files,
+          :local_download_files,
+          :remote_download_files,
         ].freeze
 
         def [](key)
@@ -53,15 +52,6 @@ module Magellan
         def uploads_dir
           File.join(workspace, 'uploads')
         end
-
-        def upload_mapping
-          @upload_mapping ||= build_mapping(uploads_dir, remote_upload_files)
-        end
-
-        def local_upload_files
-          @local_upload_files ||= build_local_files_obj(remote_upload_files, upload_mapping)
-        end
-        alias_method :upload_files, :local_upload_files
 
         def setup
           setup_dirs
