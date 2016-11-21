@@ -4,6 +4,7 @@ require "magellan/gcs/proxy/log"
 require 'json'
 require 'logger'
 require 'tmpdir'
+require 'logger_pipe'
 
 module Magellan
   module Gcs
@@ -23,6 +24,9 @@ module Magellan
               process(msg)
             rescue => e
               logger.error("[#{e.class.name}] #{e.message}")
+              if ENV['VERBOSE'] =~ /true|yes|on|1/i
+                logger.debug("Backtrace\n  " << e.backtrace.join("\n  "))
+              end
             end
           end
         rescue => e
@@ -49,15 +53,14 @@ module Magellan
 
             cmd = build_command(msg, context)
 
-            logger.info("Executing command: #{cmd.inspect}")
-
-            if system(cmd)
-              context.upload
-
-              sub.acknowledge msg
-              logger.info("Complete processing and acknowledged")
-            else
+            begin
+              LoggerPipe.run(logger, cmd, returns: :none, logging: :both)
+            rescue => e
               logger.error("Error: #{cmd.inspect}")
+            else
+              context.upload
+              msg.acknowledge!
+              logger.info("Complete processing and acknowledged")
             end
           end
         end
