@@ -71,12 +71,15 @@ module Magellan
         end
 
         def upload
-          upload_mapping.each do |url, path|
-            logger.info("Uploading: #{path} to #{url}")
-            uri = parse_uri(url)
-            bucket = GCP.storage.bucket(uri.host)
-            bucket.create_file path, uri.path.sub(/\A\//, '')
-            logger.info("Upload OK: #{path} to #{url}")
+          Dir.chdir(uploads_dir) do
+            Dir.glob('**/*') do |path|
+              next if File.directory?(path)
+              url = "gs://#{@last_bucket_name}/#{path}"
+              logger.info("Uploading: #{path} to #{url}")
+              bucket = GCP.storage.bucket(@last_bucket_name)
+              bucket.create_file path, path
+              logger.info("Upload OK: #{path} to #{url}")
+            end
           end
         end
 
