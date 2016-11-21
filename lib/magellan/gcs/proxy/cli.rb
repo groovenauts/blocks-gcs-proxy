@@ -1,5 +1,6 @@
 require "magellan/gcs/proxy"
 require "magellan/gcs/proxy/pubsub_operation"
+require "magellan/gcs/proxy/log"
 
 require 'json'
 require 'logger'
@@ -10,6 +11,7 @@ module Magellan
     module Proxy
       class Cli
         include PubsubOperation
+        include Log
 
         attr_reader :cmd_template
         def initialize(*args)
@@ -34,12 +36,18 @@ module Magellan
           logger.info("Processing message: #{msg.inspect}")
           Dir.mktmpdir 'workspace' do |dir|
             dfiles = parse(msg.attributes['download_files'])
+            logger.info("dfiles: #{dfiles}")
             ufiles =  parse(msg.attributes['upload_files'])
+            logger.info("ufiles: #{ufiles}")
 
             context = Context.new(dir, dfiles, ufiles)
             context.setup
+            logger.info("context.setup done.")
 
             context.download
+            logger.info("context.download done.")
+            logger.info("msg: #{msg}")
+            logger.info("context: #{context}")
 
             cmd = build_command(msg, context)
 
@@ -54,10 +62,6 @@ module Magellan
               logger.error("Error: #{cmd.inspect}")
             end
           end
-        end
-
-        def logger
-          @logger ||= Logger.new($stdout)
         end
 
         def parse(str)
