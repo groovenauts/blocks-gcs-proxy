@@ -81,10 +81,11 @@ module Magellan
 
         def upload
           upload_mapping.each do |url, path|
-            logger.info("Uploading: #{url}")
+            logger.info("Uploading: #{path} to #{url}")
             uri = parse_uri(url)
             bucket = GCP.storage.bucket(uri.host)
             bucket.create_file path, uri.path.sub(/\A\//, '')
+            logger.info("Upload OK: #{path} to #{url}")
           end
         end
 
@@ -101,6 +102,7 @@ module Magellan
 
         def flatten_values(obj)
           case obj
+          when nil then []
           when Hash then flatten_values(obj.values)
           when Array then obj.map{|i| flatten_values(i) }
           else obj
