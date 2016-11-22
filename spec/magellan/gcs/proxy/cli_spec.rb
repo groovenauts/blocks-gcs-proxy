@@ -39,7 +39,7 @@ describe Magellan::Gcs::Proxy::Cli do
     end
 
     let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
     end
 
     subject{ Magellan::Gcs::Proxy::Cli.new(template) }
@@ -85,7 +85,7 @@ describe Magellan::Gcs::Proxy::Cli do
     end
 
     let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
     end
 
     subject{ Magellan::Gcs::Proxy::Cli.new(template) }

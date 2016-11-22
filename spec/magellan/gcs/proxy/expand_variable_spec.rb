@@ -28,7 +28,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
     end
 
     let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
     end
 
     let(:msg) do
@@ -85,7 +85,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       ]
     end
     let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files, upload_files)
+      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
     end
 
     let(:msg) do
