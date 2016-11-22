@@ -31,7 +31,7 @@ module Magellan
           res = http.get(METADATA_PATH_BASE + key, METADATA_HEADER)
           case res.code
           when /\A2\d{2}\z/ then res.body
-          else raise "#{res.code} #{res.body}"
+          else raise "[#{res.code}] #{res.body}"
           end
         end
 
@@ -49,6 +49,10 @@ module Magellan
             logger.info("subscription: #{@subscription.inspect}")
           end
           @subscription
+        end
+
+        def reset
+          instance_variables.each {|ivar| instance_variable_set(ivar, nil)}
         end
       end
     end
