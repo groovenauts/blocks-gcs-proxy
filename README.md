@@ -1,6 +1,6 @@
 # magellang-gcs-proxy
 
-[![Build Status](https://secure.travis-ci.org/groovenauts/magellan-gcs-proxy.png)](https://travis-ci.org/groovenauts/magellan-gcs-proxy)
+[![Gem Version](https://badge.fury.io/rb/magellan-gcs-proxy.png)](https://rubygems.org/gems/magellan-gcs-proxy) [![Build Status](https://secure.travis-ci.org/groovenauts/magellan-gcs-proxy.png)](https://travis-ci.org/groovenauts/magellan-gcs-proxy)
 
 magellang-gcs-proxy is a gem for MAGELLAN BLOCKS "Batch type" IoT board.
 
