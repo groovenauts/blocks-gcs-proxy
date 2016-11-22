@@ -3,6 +3,7 @@ require 'magellan/gcs/proxy'
 
 require "google/cloud/pubsub"
 require "google/cloud/storage"
+require 'net/http'
 
 module Magellan
   module Gcs
@@ -13,39 +14,33 @@ module Magellan
 
         module_function
 
-        SCOPE_STORAGE = "https://www.googleapis.com/auth/devstorage.full_control".freeze
-        SCOPE_PUBSUB  = "https://www.googleapis.com/auth/pubsub".freeze
-        SCOPES = [SCOPE_STORAGE, SCOPE_PUBSUB].freeze
+        def project_id
+          @project_id ||= retrieve_project_id
+        end
 
-        # See
-        #   https://developers.google.com/identity/protocols/application-default-credentials
-        #   https://github.com/google/google-auth-library-ruby
-        def authorization
-          @authorization ||= Google::Auth.get_application_default(SCOPES).tap{|auth| auth.apply({}) }
+        def retrieve_project_id
+          ENV['BLOCKS_BATCH_PROJECT_ID'] || retrieve_metadata('project/project-id')
+        end
+
+        METADATA_HOST = 'metadata.google.internal'.freeze
+        METADATA_PATH_BASE = '/computeMetadata/v1/'.freeze
+        METADATA_HEADER = {"Metadata-Flavor" => "Google"}.freeze
+
+        def retrieve_metadata(key)
+          http = Net::HTTP.new(METADATA_HOST)
+          res = http.get(METADATA_PATH_BASE + key, METADATA_HEADER)
+          case res.code
+          when /\A2\d{2}\z/ then res.body
+          else raise "[#{res.code}] #{res.body}"
+          end
         end
 
         def storage
-          unless @storage
-            # @storage = Google::Cloud::Storage.new(
-            #   # default credential を利用するため、プロジェクトの指定はしない
-            #   # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            #   # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-            # )
-            credentials = Google::Cloud::Storage::Credentials.default scope: SCOPE_STORAGE
-            service = Google::Cloud::Storage::Service.new(nil, credentials, retries: nil, timeout: nil)
-            impl = service.instance_variable_get(:@service)
-            impl.authorization = authorization
-            @storage = Google::Cloud::Storage::Project.new(service)
-          end
-          @storage
+          @storage ||= Google::Cloud::Storage.new(project: project_id)
         end
 
         def pubsub
-          @pubsub ||= Google::Cloud::Pubsub.new(
-            # default credential を利用するため、プロジェクトの指定はしない
-            # project: ENV['GOOGLE_PROJECT'] || 'dummy-project-id',
-            # keyfile: ENV['GOOGLE_KEY_JSON_FILE'],
-          )
+          @pubsub ||= Google::Cloud::Pubsub.new(project: project_id)
         end
 
         def subscription
@@ -54,6 +49,10 @@ module Magellan
             logger.info("subscription: #{@subscription.inspect}")
           end
           @subscription
+        end
+
+        def reset
+          instance_variables.each {|ivar| instance_variable_set(ivar, nil)}
         end
       end
     end
