@@ -6,6 +6,11 @@
 # [config]
 
 FROM ruby:2.3
+
+COPY Gemfile* /tmp/
+WORKDIR /tmp
+RUN bundle install
+
 ENV APP_HOME /usr/app/batch_type_example
 COPY . $APP_HOME
 WORKDIR $APP_HOME
