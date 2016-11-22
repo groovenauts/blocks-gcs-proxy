@@ -39,10 +39,8 @@ module Magellan
           Dir.mktmpdir 'workspace' do |dir|
             dfiles = parse(msg.attributes['download_files'])
             logger.info("dfiles: #{dfiles}")
-            ufiles =  parse(msg.attributes['upload_files'])
-            logger.info("ufiles: #{ufiles}")
 
-            context = Context.new(dir, dfiles, ufiles)
+            context = Context.new(dir, dfiles)
             context.setup
             logger.info("context.setup done.")
 

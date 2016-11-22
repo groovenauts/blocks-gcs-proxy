@@ -11,19 +11,18 @@ module Magellan
       class Context
         include Log
 
-        attr_reader :workspace, :remote_download_files, :remote_upload_files
-        def initialize(workspace, remote_download_files, remote_upload_files)
+        attr_reader :workspace, :remote_download_files
+        def initialize(workspace, remote_download_files)
           @workspace = workspace
           @remote_download_files = remote_download_files
-          @remote_upload_files = remote_upload_files
         end
 
         KEYS = [
           :workspace,
           :downloads_dir, :uploads_dir,
-          :download_files, :upload_files,
-          :local_download_files, :local_upload_files,
-          :remote_download_files, :remote_upload_files
+          :download_files,
+          :local_download_files,
+          :remote_download_files,
         ].freeze
 
         def [](key)
@@ -54,15 +53,6 @@ module Magellan
           File.join(workspace, 'uploads')
         end
 
-        def upload_mapping
-          @upload_mapping ||= build_mapping(uploads_dir, remote_upload_files)
-        end
-
-        def local_upload_files
-          @local_upload_files ||= build_local_files_obj(remote_upload_files, upload_mapping)
-        end
-        alias_method :upload_files, :local_upload_files
-
         def setup
           setup_dirs
         end
@@ -72,7 +62,8 @@ module Magellan
             FileUtils.mkdir_p File.dirname(path)
             logger.debug("Downloading: #{url} to #{path}")
             uri = parse_uri(url)
-            bucket = GCP.storage.bucket(uri.host)
+            @last_bucket_name = uri.host
+            bucket = GCP.storage.bucket(@last_bucket_name)
             file = bucket.file uri.path.sub(/\A\//, '')
             file.download(path)
             logger.info("Download OK: #{url} to #{path}")
@@ -80,12 +71,15 @@ module Magellan
         end
 
         def upload
-          upload_mapping.each do |url, path|
-            logger.info("Uploading: #{path} to #{url}")
-            uri = parse_uri(url)
-            bucket = GCP.storage.bucket(uri.host)
-            bucket.create_file path, uri.path.sub(/\A\//, '')
-            logger.info("Upload OK: #{path} to #{url}")
+          Dir.chdir(uploads_dir) do
+            Dir.glob('**/*') do |path|
+              next if File.directory?(path)
+              url = "gs://#{@last_bucket_name}/#{path}"
+              logger.info("Uploading: #{path} to #{url}")
+              bucket = GCP.storage.bucket(@last_bucket_name)
+              bucket.create_file path, path
+              logger.info("Upload OK: #{path} to #{url}")
+            end
           end
         end
 
