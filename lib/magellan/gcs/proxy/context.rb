@@ -1,16 +1,16 @@
+# coding: utf-8
 require "magellan/gcs/proxy"
-require "magellan/gcs/proxy/file_operation"
 require "magellan/gcs/proxy/log"
 
+require 'fileutils'
 require 'uri'
 
 module Magellan
   module Gcs
     module Proxy
       class Context
-        include FileOperation
         include Log
-        
+
         attr_reader :workspace, :remote_download_files, :remote_upload_files
         def initialize(workspace, remote_download_files, remote_upload_files)
           @workspace = workspace
@@ -69,20 +69,23 @@ module Magellan
 
         def download
           download_mapping.each do |url, path|
-            logger.info("Downloading: #{url}")
+            FileUtils.mkdir_p File.dirname(path)
+            logger.debug("Downloading: #{url} to #{path}")
             uri = parse_uri(url)
-            bucket = storage.bucket(uri.host)
+            bucket = GCP.storage.bucket(uri.host)
             file = bucket.file uri.path.sub(/\A\//, '')
             file.download(path)
+            logger.info("Download OK: #{url} to #{path}")
           end
         end
 
         def upload
           upload_mapping.each do |url, path|
-            logger.info("Uploading: #{url}")
+            logger.info("Uploading: #{path} to #{url}")
             uri = parse_uri(url)
-            bucket = storage.bucket(uri.host)
+            bucket = GCP.storage.bucket(uri.host)
             bucket.create_file path, uri.path.sub(/\A\//, '')
+            logger.info("Upload OK: #{path} to #{url}")
           end
         end
 
@@ -99,6 +102,7 @@ module Magellan
 
         def flatten_values(obj)
           case obj
+          when nil then []
           when Hash then flatten_values(obj.values)
           when Array then obj.map{|i| flatten_values(i) }
           else obj

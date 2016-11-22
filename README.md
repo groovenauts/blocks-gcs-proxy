@@ -1,8 +1,7 @@
-# Magellan::Gcs::Proxy
+# magellang-gcs-proxy
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/magellan/gcs/proxy`. To experiment with that code, run `bin/console` for an interactive prompt.
+magellang-gcs-proxy is a gem for MAGELLAN BLOCKS "Batch type" IoT board.
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
@@ -22,7 +21,42 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+magellan-gcs-proxy COMMAND ARGS...
+```
+
+### TODO How it works
+
+### TODO Expanding variables
+
+
+## Debugging with gcloud
+
+### Setup
+
+```
+export PROJECT_ID=[Project ID]
+export TOPIC=projects/$PROJECT_ID/topics/[Topic name]
+export SUB=projects/$PROJECT_ID/subscriptions/[Subscription name of topic]
+$ gcloud beta pubsub topics create projects/$PROJECT_ID/topics/$TOPIC
+$ gcloud beta pubsub topics list
+$ gcloud beta pubsub subscriptions create $SUB --topic $TOPIC
+$ gcloud beta pubsub subscriptions list
+```
+
+### Publish message
+
+```
+$ gcloud beta pubsub topics publish $TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
+```
+
+
+### Run application
+
+```
+$ magellan-gcs-proxy COMMAND ARGS...
+```
+
 
 ## Development
 
