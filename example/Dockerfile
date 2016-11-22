@@ -1,0 +1,14 @@
+# [config] IMAGE_NAME: "groovenauts/batch_type_iot_example"
+# [config]
+# [config] WORKING_DIR: "."
+# [config] VERSION_FILE: VERSION
+# [config] GIT_TAG_PREFIX: 'example/'
+# [config]
+
+FROM ruby:2.3
+ENV APP_HOME /usr/app/batch_type_example
+COPY . $APP_HOME
+WORKDIR $APP_HOME
+RUN bundle install --without development
+
+CMD ["bundle", "exec", "magellan-gcs-proxy", "./app.sh", "%{download_files.0}", "%{uploads_dir}"]
