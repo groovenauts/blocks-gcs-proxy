@@ -1,10 +1,35 @@
 require 'logger'
+
 module Magellan
   module Gcs
     module Proxy
       module Log
+        module_function
+
         def logger
-          @logger ||= Logger.new($stdout)
+          @logger ||= build_logger
+        end
+
+        def build_logger
+          loggers = (Proxy.config[:loggers] || []).map do |logger_def|
+            config = logger_def.dup
+            type = config.delete('type')
+            case type
+            when 'stdout' then Logger.new($stdout)
+            when 'stderr' then Logger.new($stderr)
+            when 'pubsub'        then build_pubsub_logger(config)
+            when 'cloud_logging' then build_cloud_logging_logger(config)
+            else raise "Unsupported logger type: #{type} with #{config.inspect}"
+            end
+          end
+
+          case loggers.length
+          when 0 then Logger.new('/dev/null')
+          when 1 then loggers.first
+          else CompositeLogger.new(loggers)
+          end
+        end
+
         CLOUD_LOGGING_RESOURCE_KEYS = [
           :project_id,
 					:cluster_name,

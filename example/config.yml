@@ -1,0 +1,10 @@
+loggers:
+<%- if progress_topic = ENV['BLOCKS_BATCH_PROGRESS_TOPIC'] -%>
+- type: pubsub
+  topic: <%= progress_topic %>
+<%- end -%>
+<%- if log_name = ENV['BLOCKS_BATCH_CLOUD_LOGGING_LOG_NAME'] -%>
+- type: cloud_logging
+  log_name: <%= log_name %>
+<%- end -%>
+- type: stdout
