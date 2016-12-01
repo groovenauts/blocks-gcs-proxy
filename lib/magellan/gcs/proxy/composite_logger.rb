@@ -23,7 +23,7 @@ module Magellan
           level_dc = level.downcase
           module_eval <<-INSTANCE_METHODS
             def #{level_dc}(message = nil, &block)
-              add(:#{level_dc}, message, &block)
+              add(Logger::Severity::#{level}, message, &block)
             end
 
             def #{level_dc}?
