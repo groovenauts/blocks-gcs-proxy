@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'logger'
 
 module Magellan
@@ -6,12 +7,37 @@ module Magellan
       module Log
         module_function
 
-        def logger
-          @logger ||= build_logger
+        # This logger doesn't exclude any logger
+        #
+        # Allowed logger classes
+        # - Magellan::Gcs::Proxy::PubsubLogger
+        # - Google::Cloud::Logging::Logger
+        # - Logger
+        def progress_logger
+          @progress_logger ||= build_logger(loggers)
         end
 
-        def build_logger
-          loggers = (Proxy.config[:loggers] || []).map do |logger_def|
+        # This logger excludes Magellan::Gcs::Proxy::PubsubLogger .
+        # Because pubsub subscribers expect only progress notifications.
+        def app_logger
+          @app_logger ||= build_logger(loggers.delete_if{|i| i.is_a?(Proxy::PubsubLogger) })
+        end
+        alias_method :logger, :app_logger
+
+        def build_logger(loggers)
+          case loggers.length
+          when 0 then Logger.new('/dev/null')
+          when 1 then loggers.first
+          else CompositeLogger.new(loggers)
+          end
+        end
+
+        def loggers
+          @loggers ||= build_loggers
+        end
+
+        def build_loggers
+          (Proxy.config[:loggers] || []).map do |logger_def|
             config = logger_def.dup
             type = config.delete('type')
             case type
@@ -21,12 +47,6 @@ module Magellan
             when 'cloud_logging' then build_cloud_logging_logger(config)
             else raise "Unsupported logger type: #{type} with #{config.inspect}"
             end
-          end
-
-          case loggers.length
-          when 0 then Logger.new('/dev/null')
-          when 1 then loggers.first
-          else CompositeLogger.new(loggers)
           end
         end
 

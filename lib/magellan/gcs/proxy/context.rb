@@ -40,7 +40,7 @@ module Magellan
         end
 
         def notify(progress, total, msg, severity: :info)
-          logger.send(severity, ltsv(message_id: message.message_id, progress: progress, total: total, message: msg))
+          progress_logger.send(severity, ltsv(message_id: message.message_id, progress: progress, total: total, message: msg))
         end
 
         def ltsv(hash)
