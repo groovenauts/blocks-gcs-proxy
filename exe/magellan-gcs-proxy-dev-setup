@@ -1,0 +1,29 @@
+#!/bin/bash
+
+usage() {
+  echo usage: `basename $0` GCP_PROJECT_ID
+}
+
+if [ $# -ne 1 ]; then
+  echo `basename $0`: missing operand 1>&2
+  usage
+  exit 1
+fi
+
+project_id=$1
+export job_topic=projects/${project_id}/topics/test-job-topic-${USER}
+export job_sub=projects/${project_id}/subscriptions/test-job-topic-${USER}-sub
+
+export progress_topic=projects/${project_id}/topics/test-progress-topic-${USER}
+export progress_sub=projects/${project_id}/subscriptions/test-progress-topic-${USER}-sub
+
+gcloud beta pubsub topics create ${job_topic}
+gcloud beta pubsub subscriptions create ${job_sub} --topic ${job_topic}
+
+gcloud beta pubsub topics create ${progress_topic}
+gcloud beta pubsub subscriptions create ${progress_sub} --topic ${progress_topic}
+
+gcloud beta pubsub topics list
+gcloud beta pubsub subscriptions list
+
+echo "export TOPIC=${job_topic}"

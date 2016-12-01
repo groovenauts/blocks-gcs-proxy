@@ -37,13 +37,7 @@ magellan-gcs-proxy COMMAND ARGS...
 ### Setup
 
 ```
-export PROJECT_ID=[Project ID]
-export TOPIC=projects/$PROJECT_ID/topics/[Topic name]
-export SUB=projects/$PROJECT_ID/subscriptions/[Subscription name of topic]
-$ gcloud beta pubsub topics create projects/$PROJECT_ID/topics/$TOPIC
-$ gcloud beta pubsub topics list
-$ gcloud beta pubsub subscriptions create $SUB --topic $TOPIC
-$ gcloud beta pubsub subscriptions list
+magellan-gcs-proxy-dev-setup [Project ID]
 ```
 
 ### Publish message
