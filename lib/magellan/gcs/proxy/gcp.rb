@@ -1,6 +1,8 @@
 # coding: utf-8
 require 'magellan/gcs/proxy'
 
+require 'google/cloud/logging'
+require 'google/cloud/logging/version'
 require "google/cloud/pubsub"
 require "google/cloud/storage"
 require 'net/http'
@@ -49,6 +51,10 @@ module Magellan
             logger.info("subscription: #{@subscription.inspect}")
           end
           @subscription
+        end
+
+        def logging
+          @logging ||= Google::Cloud::Logging.new(project: project_id)
         end
 
         def reset
