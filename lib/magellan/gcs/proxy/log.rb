@@ -7,22 +7,9 @@ module Magellan
       module Log
         module_function
 
-        # This logger doesn't exclude any logger
-        #
-        # Allowed logger classes
-        # - Magellan::Gcs::Proxy::PubsubLogger
-        # - Google::Cloud::Logging::Logger
-        # - Logger
-        def progress_logger
-          @progress_logger ||= build_logger(loggers)
+        def logger
+          @logger ||= build_logger(loggers)
         end
-
-        # This logger excludes Magellan::Gcs::Proxy::PubsubLogger .
-        # Because pubsub subscribers expect only progress notifications.
-        def app_logger
-          @app_logger ||= build_logger(loggers.delete_if{|i| i.is_a?(Proxy::PubsubLogger) })
-        end
-        alias_method :logger, :app_logger
 
         def build_logger(loggers)
           case loggers.length
@@ -43,7 +30,6 @@ module Magellan
             case type
             when 'stdout' then Logger.new($stdout)
             when 'stderr' then Logger.new($stderr)
-            when 'pubsub'        then build_pubsub_logger(config)
             when 'cloud_logging' then build_cloud_logging_logger(config)
             else raise "Unsupported logger type: #{type} with #{config.inspect}"
             end
@@ -81,11 +67,6 @@ module Magellan
           resource = GCP.logging.resource "container", options
           Google::Cloud::Logging::Logger.new GCP.logging, log_name, resource,
                                              {magellan_gcs_proxy: Magellan::Gcs::Proxy::VERSION}
-        end
-
-        def build_pubsub_logger(config)
-          topic = GCP.pubsub.topic(config['topic'])
-          Proxy::PubsubLogger.new(topic)
         end
       end
     end
