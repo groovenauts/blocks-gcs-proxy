@@ -38,6 +38,9 @@ module Magellan
                                              {magellan_gcs_proxy: Magellan::Gcs::Proxy::VERSION}
         end
 
+        def build_pubsub_logger(config)
+          topic = GCP.pubsub.topic(config['topic'])
+          Proxy::PubsubLogger.new(topic)
         end
       end
     end
