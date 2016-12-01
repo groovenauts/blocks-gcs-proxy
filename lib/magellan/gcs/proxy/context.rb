@@ -11,10 +11,40 @@ module Magellan
       class Context
         include Log
 
-        attr_reader :workspace, :remote_download_files
-        def initialize(workspace, remote_download_files)
-          @workspace = workspace
-          @remote_download_files = remote_download_files
+        attr_reader :message, :workspace, :remote_download_files
+        def initialize(message)
+          @message = message
+          @remote_download_files = parse_json(message.attributes['download_files'])
+          @workspace = nil
+        end
+
+        def setup
+          Dir.mktmpdir 'workspace' do |dir|
+            @workspace = dir
+            setup_dirs
+            yield
+          end
+        end
+
+        def process_with_notification(start_no, complete_no, error_no, total, base_message, main = nil)
+          notify(start_no, total, "#{base_message} starting")
+          begin
+            main ? main.call(self) : yield(self)
+          rescue => e
+            notify(error_no, total, "#{base_message} error: [#{e.class}] #{e.message}", severity: :error)
+            raise e unless main
+          else
+            notify(complete_no, total, "#{base_message} completed")
+            yield(self) if main
+          end
+        end
+
+        def notify(progress, total, msg, severity: :info)
+          logger.send(severity, ltsv(message_id: message.message_id, progress: progress, total: total, message: msg))
+        end
+
+        def ltsv(hash)
+          hash.map{|k,v| "#{k}:#{v}"}.join("\t")
         end
 
         KEYS = [
@@ -51,10 +81,6 @@ module Magellan
 
         def uploads_dir
           File.join(workspace, 'uploads')
-        end
-
-        def setup
-          setup_dirs
         end
 
         def download
@@ -101,6 +127,11 @@ module Magellan
           when Array then obj.map{|i| flatten_values(i) }
           else obj
           end
+        end
+
+        def parse_json(str)
+          return nil if str.nil? || str.empty?
+          JSON.parse(str)
         end
 
         def parse_uri(str)

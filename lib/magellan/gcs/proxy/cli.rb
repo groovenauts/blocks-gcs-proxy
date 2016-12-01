@@ -34,45 +34,34 @@ module Magellan
           raise e
         end
 
+        TOTAL = 12
         def process(msg)
-          logger.info("Processing message: #{msg.inspect}")
-          Dir.mktmpdir 'workspace' do |dir|
-            dfiles = parse(msg.attributes['download_files'])
-            logger.info("dfiles: #{dfiles}")
+          context = Context.new(msg)
+          context.notify(1, TOTAL, "Processing message: #{msg.inspect}")
+          context.setup do
 
-            context = Context.new(dir, dfiles)
-            context.setup
-            logger.info("context.setup done.")
-
-            context.download
-            logger.info("context.download done.")
-            logger.info("msg: #{msg}")
-            logger.info("context: #{context}")
+            context.process_with_notification(2, 3, 4, TOTAL, 'Download', &:download)
 
             cmd = build_command(msg, context)
 
-            begin
-              LoggerPipe.run(logger, cmd, returns: :none, logging: :both)
-            rescue => e
-              logger.error("Error: #{cmd.inspect}")
-            else
-              context.upload
+            exec = ->{ LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
+            context.process_with_notification(5, 6, 7, TOTAL, 'Command', exec) do
+
+              context.process_with_notification(8, 9, 10, TOTAL, 'Upload', &:upload)
+
               msg.acknowledge!
-              logger.info("Complete processing and acknowledged")
+              context.notify(11, TOTAL, "Acknowledged")
+
             end
           end
+          context.notify(12, TOTAL, "Cleanup")
         end
-
-        def parse(str)
-          return nil if str.nil? || str.empty?
-          JSON.parse(str)
-        end
-
 
         def build_command(msg, context)
           msg_wrapper = MessageWrapper.new(msg, context)
           ExpandVariable.expand_variables(cmd_template, msg_wrapper)
         end
+
       end
     end
   end
