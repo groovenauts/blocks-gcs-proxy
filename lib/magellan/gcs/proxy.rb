@@ -1,3 +1,6 @@
+require 'dotenv'
+Dotenv.load
+
 require "magellan/gcs/proxy/version"
 require 'magellan/gcs/proxy/cli'
 require 'magellan/gcs/proxy/composite_logger'
