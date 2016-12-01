@@ -1,5 +1,6 @@
 require "magellan/gcs/proxy/version"
 require 'magellan/gcs/proxy/cli'
+require 'magellan/gcs/proxy/composite_logger'
 require 'magellan/gcs/proxy/context'
 require 'magellan/gcs/proxy/expand_variable'
 require 'magellan/gcs/proxy/gcp'
