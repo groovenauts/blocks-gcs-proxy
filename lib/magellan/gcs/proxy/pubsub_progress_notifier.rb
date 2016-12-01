@@ -13,7 +13,7 @@ module Magellan
         end
 
         def notify(severity, job_message, data, attrs)
-          topic.publish data, {level: severity}.merge(attrs)
+          topic.publish data, {level: severity, job_message_id: job_message.message_id}.merge(attrs)
         end
 
       end

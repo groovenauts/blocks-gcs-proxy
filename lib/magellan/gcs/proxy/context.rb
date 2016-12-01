@@ -10,6 +10,7 @@ module Magellan
     module Proxy
       class Context
         include Log
+        include Proxy::ProgressNotification
 
         attr_reader :message, :workspace, :remote_download_files
         def initialize(message)
@@ -39,8 +40,8 @@ module Magellan
           end
         end
 
-        def notify(progress, total, msg, severity: :info)
-          progress_logger.send(severity, ltsv(message_id: message.message_id, progress: progress, total: total, message: msg))
+        def notify(progress, total, data, severity: :info)
+          notifier.notify(severity, message, data, {progress: progress, total: total})
         end
 
         def ltsv(hash)
