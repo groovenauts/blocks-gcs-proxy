@@ -1,6 +1,21 @@
 require "spec_helper"
 
 describe Magellan::Gcs::Proxy::Cli do
+  let(:config_data) do
+    {
+      'progress_notification' => {
+        'topic' => 'progress-topic-for-rspec'
+      },
+      'loggers' => [
+        {'type' => 'stdout'},
+        {'type' => 'cloud_logging', 'log_name' => 'cloud-logging-for-rspec'},
+      ],
+    }
+  end
+  before do
+    allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return(config_data)
+  end
+
   context :case1 do
     let(:template) do
       "cmd1 %{download_files.foo} %{download_files.bar} %{attrs.baz} %{uploads_dir} %{attrs.qux}"

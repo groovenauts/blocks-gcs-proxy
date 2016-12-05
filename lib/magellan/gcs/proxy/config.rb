@@ -9,10 +9,13 @@ module Magellan
     module Proxy
       class Config
 
-        attr_reader :path, :data
+        attr_reader :path
         def initialize(path = './config.yml')
           @path = path
-          @data = load_file
+        end
+
+        def data
+          @data ||= load_file
         end
 
         def load_file
