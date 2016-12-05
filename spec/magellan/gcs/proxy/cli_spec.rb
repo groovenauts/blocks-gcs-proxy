@@ -44,6 +44,7 @@ describe Magellan::Gcs::Proxy::Cli do
       ]
     end
 
+    let(:message_id){ '1234567890' }
     let(:msg) do
       attrs = {
         'download_files' => download_files.to_json,
@@ -51,7 +52,7 @@ describe Magellan::Gcs::Proxy::Cli do
         'qux' => 'data1 data2 data3',
         'upload_files' => upload_files,
       }
-      double(:msg, attributes: attrs)
+      double(:msg, message_id: message_id, attributes: attrs)
     end
 
     let(:context) do
@@ -60,11 +61,42 @@ describe Magellan::Gcs::Proxy::Cli do
       end
     end
 
+    let(:cmd1_by_msg) do
+      'cmd1 /tmp/workspace/downloads/path/to/foo /tmp/workspace/downloads/path/to/bar 60 /tmp/workspace/uploads data1 data2 data3'
+    end
+
     subject{ Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
       r = subject.build_command(msg, context)
-      expected = 'cmd1 /tmp/workspace/downloads/path/to/foo /tmp/workspace/downloads/path/to/bar 60 /tmp/workspace/uploads data1 data2 data3'
-      expect(r).to eq expected
+      expect(r).to eq cmd1_by_msg
+    end
+
+    describe :process do
+      let(:bucket){ double(:bucket) }
+      before do
+        # Context
+        expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
+
+        # To download
+        expect(Magellan::Gcs::Proxy::GCP.storage).to receive(:bucket).with(bucket_name).
+                                 and_return(bucket).exactly(download_files.length).times
+        download_file_paths.each_with_index do |(key, path), idx|
+          gcs_file = double(:"gcs_file_#{idx}")
+          expect(bucket).to receive(:file).with(path).and_return(gcs_file)
+          expect(gcs_file).to receive(:download).with("#{downloads_dir}/#{path}")
+        end
+
+        # Execute
+        expect(LoggerPipe).to receive(:run).with(an_instance_of(Magellan::Gcs::Proxy::CompositeLogger), cmd1_by_msg, returns: :none, logging: :both)
+
+        # Ack
+        expect(msg).to receive(:acknowledge!)
+      end
+      context "normal" do
+        it do
+          subject.process(msg)
+        end
+      end
     end
   end
 
