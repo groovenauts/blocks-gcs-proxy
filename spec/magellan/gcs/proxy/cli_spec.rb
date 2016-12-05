@@ -23,23 +23,24 @@ describe Magellan::Gcs::Proxy::Cli do
     let(:downloads_dir){ '/tmp/workspace/downloads' }
     let(:uploads_dir){ '/tmp/workspace/uploads' }
 
-    let(:download_files) do
+    let(:download_file_paths) do
       {
-        'foo' => 'gs://bucket1/path/to/foo',
-        'bar' => 'gs://bucket1/path/to/bar',
+        'foo' => "path/to/foo",
+        'bar' => "path/to/bar",
       }
+    end
+    let(:download_files) do
+      download_file_paths.each_with_object({}){|(k,v), d| d[k] = "gs://#{bucket_name}/#{v}"}
     end
     let(:local_download_files) do
-      {
-        'foo' => "#{downloads_dir}/path/to/foo",
-        'bar' => "#{downloads_dir}/path/to/bar",
-      }
+      download_file_paths.each_with_object({}){|(k,v), d| d[k] = "#{downloads_dir}/#{v}"}
     end
+    let(:bucket_name){ 'bucket1' }
     let(:upload_files) do
       [
-        'gs://bucket1/path/to/file1',
-        'gs://bucket1/path/to/file2',
-        'gs://bucket1/path/to/file3',
+        "gs://#{bucket_name}/path/to/file1",
+        "gs://#{bucket_name}/path/to/file2",
+        "gs://#{bucket_name}/path/to/file3",
       ]
     end
 
