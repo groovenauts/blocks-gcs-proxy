@@ -111,7 +111,7 @@ module Magellan
         end
 
         def setup_dirs
-          [:downloads_dir, :uploads_dir].each{|k| Dir.mkdir(send(k))}
+          [:downloads_dir, :uploads_dir].each{|k| FileUtils.mkdir_p(send(k))}
         end
 
         def build_mapping(base_dir, obj)
