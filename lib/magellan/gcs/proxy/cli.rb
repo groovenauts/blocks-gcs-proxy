@@ -39,12 +39,11 @@ module Magellan
           context = Context.new(msg)
           context.notify(1, TOTAL, "Processing message: #{msg.inspect}")
           context.setup do
-
             context.process_with_notification(2, 3, 4, TOTAL, 'Download', &:download)
 
             cmd = build_command(msg, context)
 
-            exec = ->{ LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
+            exec = ->(*){ LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
             context.process_with_notification(5, 6, 7, TOTAL, 'Command', exec) do
 
               context.process_with_notification(8, 9, 10, TOTAL, 'Upload', &:upload)
