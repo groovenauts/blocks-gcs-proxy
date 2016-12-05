@@ -14,8 +14,23 @@ describe Magellan::Gcs::Proxy::Cli do
     }
   end
   before do
+    # GCP
     allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return(config_data)
+    allow(Magellan::Gcs::Proxy::GCP).to receive(:pubsub).and_return(pubsub)
+    allow(Magellan::Gcs::Proxy::GCP).to receive(:storage).and_return(storage)
+    allow(Magellan::Gcs::Proxy::GCP).to receive(:logging).and_return(logging)
+    allow(logging).to receive(:resource).with('container', {}).and_return(logging_resource)
   end
+
+  let(:pubsub){ double(:pubsub) }
+  let(:storage){ double(:storage) }
+  let(:logging) do
+    double(:logging).tap do |l|
+      allow(l).to receive(:write_entries).with(an_instance_of(Google::Cloud::Logging::Entry),
+                                               an_instance_of(Hash))
+    end
+  end
+  let(:logging_resource){ double(:logging_resource) }
 
   context :case1 do
     let(:template) do
@@ -85,11 +100,11 @@ describe Magellan::Gcs::Proxy::Cli do
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
 
         # Notification Topic
-        allow(Magellan::Gcs::Proxy::GCP.pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
+        allow(pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
 
         # Download
-        expect(Magellan::Gcs::Proxy::GCP.storage).to receive(:bucket).with(bucket_name).
-                                 and_return(bucket).exactly(download_files.length).times
+        expect(storage).to receive(:bucket).with(bucket_name).
+                             and_return(bucket).exactly(download_files.length).times
         download_file_paths.each_with_index do |(key, path), idx|
           gcs_file = double(:"gcs_file_#{idx}")
           expect(bucket).to receive(:file).with(path).and_return(gcs_file)
@@ -102,7 +117,7 @@ describe Magellan::Gcs::Proxy::Cli do
         # Upload
         expect(Dir).to receive(:glob).with('**/*').and_yield(upload_file_path1)
         expect(context).to receive(:directory?).with(upload_file_path1).and_return(false)
-        expect(Magellan::Gcs::Proxy::GCP.storage).to receive(:bucket).with(bucket_name).and_return(bucket)
+        expect(storage).to receive(:bucket).with(bucket_name).and_return(bucket)
         expect(bucket).to receive(:create_file).with(upload_file_path1, upload_file_path1)
 
         # Ack
