@@ -10,13 +10,27 @@ module Magellan
           @notifier ||= build_notifier
         end
 
+        # Build the Notifier object like these...
+        #
+        # CompositeNotifier
+        #   @notifiers:
+        #     PubsubProgressNotifier
+        #     ProgressNotifierAdapter
+        #       @logger:
+        #         CompositeLogger
+        #           @loggers:
+        #             Logger
+        #             Google::Cloud::Logging::Logger
         def build_notifier
           notifiers = []
           if c = Proxy.config[:progress_notification]
-            notifiers << ProgressNotifierAdapter.new(c['topic'])
+            notifiers << PubsubProgressNotifier.new(c['topic'])
           end
           notifiers << ProgressNotifierAdapter.new(logger)
-          CompositeNotifier.new(notifiers)
+          case notifiers.length
+          when 1 then notifiers.first
+          else CompositeNotifier.new(notifiers)
+          end
         end
 
         class CompositeNotifier
