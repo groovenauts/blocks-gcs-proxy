@@ -1,10 +1,11 @@
 require "spec_helper"
 
 describe Magellan::Gcs::Proxy::Cli do
+  let(:notification_topic_name){ 'progress-topic-for-rspec' }
   let(:config_data) do
     {
       'progress_notification' => {
-        'topic' => 'progress-topic-for-rspec'
+        'topic' => notification_topic_name
       },
       'loggers' => [
         {'type' => 'stdout'},
@@ -73,11 +74,20 @@ describe Magellan::Gcs::Proxy::Cli do
 
     describe :process do
       let(:bucket){ double(:bucket) }
+      let(:notification_topic) do
+        double(:notification_topic).tap do |t|
+          allow(t).to receive(:publish).with(any_args)
+        end
+      end
+      let(:upload_file_path1){ 'path/to/upload_file1' }
       before do
         # Context
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
 
-        # To download
+        # Notification Topic
+        allow(Magellan::Gcs::Proxy::GCP.pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
+
+        # Download
         expect(Magellan::Gcs::Proxy::GCP.storage).to receive(:bucket).with(bucket_name).
                                  and_return(bucket).exactly(download_files.length).times
         download_file_paths.each_with_index do |(key, path), idx|
@@ -88,6 +98,12 @@ describe Magellan::Gcs::Proxy::Cli do
 
         # Execute
         expect(LoggerPipe).to receive(:run).with(an_instance_of(Magellan::Gcs::Proxy::CompositeLogger), cmd1_by_msg, returns: :none, logging: :both)
+
+        # Upload
+        expect(Dir).to receive(:glob).with('**/*').and_yield(upload_file_path1)
+        expect(context).to receive(:directory?).with(upload_file_path1).and_return(false)
+        expect(Magellan::Gcs::Proxy::GCP.storage).to receive(:bucket).with(bucket_name).and_return(bucket)
+        expect(bucket).to receive(:create_file).with(upload_file_path1, upload_file_path1)
 
         # Ack
         expect(msg).to receive(:acknowledge!)
