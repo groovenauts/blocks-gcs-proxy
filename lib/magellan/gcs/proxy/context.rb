@@ -100,7 +100,7 @@ module Magellan
         def upload
           Dir.chdir(uploads_dir) do
             Dir.glob('**/*') do |path|
-              next if File.directory?(path)
+              next if directory?(path)
               url = "gs://#{@last_bucket_name}/#{path}"
               logger.info("Uploading: #{path} to #{url}")
               bucket = GCP.storage.bucket(@last_bucket_name)
@@ -108,6 +108,10 @@ module Magellan
               logger.info("Upload OK: #{path} to #{url}")
             end
           end
+        end
+
+        def directory?(path)
+          File.directory?(path)
         end
 
         def setup_dirs
