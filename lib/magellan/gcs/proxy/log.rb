@@ -47,7 +47,7 @@ module Magellan
           :instance_id,
           :pod_id,
           :container_name,
-          :zone
+          :zone,
         ].freeze
 
         def build_cloud_logging_logger(config)

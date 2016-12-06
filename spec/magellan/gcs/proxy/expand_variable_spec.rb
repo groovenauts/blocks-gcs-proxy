@@ -10,20 +10,20 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
     let(:download_files) do
       {
         'foo' => 'gs://bucket1/path/to/foo',
-        'bar' => 'gs://bucket1/path/to/bar'
+        'bar' => 'gs://bucket1/path/to/bar',
       }
     end
     let(:local_download_files) do
       {
         'foo' => "#{downloads_dir}/path/to/foo",
-        'bar' => "#{downloads_dir}/path/to/bar"
+        'bar' => "#{downloads_dir}/path/to/bar",
       }
     end
     let(:upload_files) do
       [
         'gs://bucket1/path/to/file1',
         'gs://bucket1/path/to/file2',
-        'gs://bucket1/path/to/file3'
+        'gs://bucket1/path/to/file3',
       ]
     end
 
@@ -32,7 +32,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'download_files' => download_files.to_json,
         'baz' => 60,
         'qux' => 'data1 data2 data3',
-        'upload_files' => upload_files
+        'upload_files' => upload_files,
       }
       double(:msg, attributes: attrs)
     end
@@ -63,8 +63,8 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'baz' => 'gs://bucket2/path/to/baz',
         'qux' => [
           'gs://bucket2/path/to/qux1',
-          'gs://bucket2/path/to/qux2'
-        ]
+          'gs://bucket2/path/to/qux2',
+        ],
       }
     end
 
@@ -74,8 +74,8 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'baz' => "#{downloads_dir}/path/to/baz",
         'qux' => [
           "#{downloads_dir}/path/to/qux1",
-          "#{downloads_dir}/path/to/qux2"
-        ]
+          "#{downloads_dir}/path/to/qux2",
+        ],
       }
     end
 
@@ -83,7 +83,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       [
         'gs://bucket2/path/to/file1',
         'gs://bucket2/path/to/file2',
-        'gs://bucket2/path/to/file3'
+        'gs://bucket2/path/to/file3',
       ]
     end
 
@@ -91,7 +91,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       attrs = {
         'foo' => 123,
         'download_files' => download_files.to_json,
-        'upload_files' => upload_files
+        'upload_files' => upload_files,
       }
       double(:msg, attributes: attrs)
     end

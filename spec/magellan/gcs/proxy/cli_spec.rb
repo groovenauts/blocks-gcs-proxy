@@ -5,12 +5,12 @@ describe Magellan::Gcs::Proxy::Cli do
   let(:config_data) do
     {
       'progress_notification' => {
-        'topic' => notification_topic_name
+        'topic' => notification_topic_name,
       },
       'loggers' => [
         { 'type' => 'stdout' },
-        { 'type' => 'cloud_logging', 'log_name' => 'cloud-logging-for-rspec' }
-      ]
+        { 'type' => 'cloud_logging', 'log_name' => 'cloud-logging-for-rspec' },
+      ],
     }
   end
   before do
@@ -42,7 +42,7 @@ describe Magellan::Gcs::Proxy::Cli do
     let(:download_file_paths) do
       {
         'foo' => 'path/to/foo',
-        'bar' => 'path/to/bar'
+        'bar' => 'path/to/bar',
       }
     end
     let(:download_files) do
@@ -56,7 +56,7 @@ describe Magellan::Gcs::Proxy::Cli do
       [
         "gs://#{bucket_name}/path/to/file1",
         "gs://#{bucket_name}/path/to/file2",
-        "gs://#{bucket_name}/path/to/file3"
+        "gs://#{bucket_name}/path/to/file3",
       ]
     end
 
@@ -66,7 +66,7 @@ describe Magellan::Gcs::Proxy::Cli do
         'download_files' => download_files.to_json,
         'baz' => 60,
         'qux' => 'data1 data2 data3',
-        'upload_files' => upload_files
+        'upload_files' => upload_files,
       }
       double(:msg, message_id: message_id, attributes: attrs)
     end
@@ -144,15 +144,15 @@ describe Magellan::Gcs::Proxy::Cli do
         'baz' => 'gs://bucket2/path/to/baz',
         'qux' => [
           'gs://bucket2/path/to/qux1',
-          'gs://bucket2/path/to/qux2'
-        ]
+          'gs://bucket2/path/to/qux2',
+        ],
       }
     end
     let(:upload_files) do
       [
         'gs://bucket2/path/to/file1',
         'gs://bucket2/path/to/file2',
-        'gs://bucket2/path/to/file3'
+        'gs://bucket2/path/to/file3',
       ]
     end
 
@@ -160,7 +160,7 @@ describe Magellan::Gcs::Proxy::Cli do
       attrs = {
         'foo' => 123,
         'download_files' => download_files.to_json,
-        'upload_files' => upload_files
+        'upload_files' => upload_files,
       }
       double(:msg, attributes: attrs)
     end

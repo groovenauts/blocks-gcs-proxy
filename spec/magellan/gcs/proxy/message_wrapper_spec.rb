@@ -5,14 +5,14 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
     let(:download_files) do
       {
         'foo' => 'gs://bucket1/path/to/foo',
-        'bar' => 'gs://bucket1/path/to/bar'
+        'bar' => 'gs://bucket1/path/to/bar',
       }
     end
     let(:upload_files) do
       [
         'gs://bucket1/path/to/file1',
         'gs://bucket1/path/to/file2',
-        'gs://bucket1/path/to/file3'
+        'gs://bucket1/path/to/file3',
       ]
     end
     let(:msg) do
@@ -53,15 +53,15 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'baz' => 'gs://bucket2/path/to/baz',
         'qux' => [
           'gs://bucket2/path/to/qux1',
-          'gs://bucket2/path/to/qux2'
-        ]
+          'gs://bucket2/path/to/qux2',
+        ],
       }
     end
     let(:upload_files) do
       [
         'gs://bucket2/path/to/file1',
         'gs://bucket2/path/to/file2',
-        'gs://bucket2/path/to/file3'
+        'gs://bucket2/path/to/file3',
       ]
     end
 
