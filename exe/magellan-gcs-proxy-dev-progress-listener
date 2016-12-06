@@ -7,7 +7,8 @@ subname = ARGV.first
 puts "Listening to #{subname}"
 Magellan::Gcs::Proxy::GCP.pubsub.subscription(subname).tap do |sub|
   sub.listen do |msg|
-    puts (msg.attributes.map { |k, v| "#{k}:#{v}" } + [msg.data]).join("\t")
+    attrs = { 'data' => msg.data }.update(msg.attributes)
+    puts attrs.map { |k, v| "#{k}:#{v}" }.join("\t")
     msg.ack!
   end
 end
