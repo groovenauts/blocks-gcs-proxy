@@ -17,29 +17,29 @@ module Magellan
         end
 
         def dig_variable(tmp, v, variable_ref)
-            case v
-            when String
-              if tmp.respond_to?(:[]) && tmp.respond_to?(:include?)
-                if tmp.include?(v)
-                  tmp[v]
-                else
-                  raise InvalidReferenceError, variable_ref
-                end
+          case v
+          when String
+            if tmp.respond_to?(:[]) && tmp.respond_to?(:include?)
+              if tmp.include?(v)
+                tmp[v]
               else
                 raise InvalidReferenceError, variable_ref
               end
-            when Integer
-              case tmp
-              when Array
-                if tmp.size > v
-                  tmp[v]
-                else
-                  raise InvalidReferenceError, variable_ref
-                end
-              else
-                raise InvalidReferenceError, variable_ref
-              end
+            else
+              raise InvalidReferenceError, variable_ref
             end
+          when Integer
+            case tmp
+            when Array
+              if tmp.size > v
+                tmp[v]
+              else
+                raise InvalidReferenceError, variable_ref
+              end
+            else
+              raise InvalidReferenceError, variable_ref
+            end
+          end
         end
 
         def expand_variables(str, data, quote_string: false)
