@@ -1,19 +1,31 @@
 #!/bin/bash
 
 usage() {
-  echo usage: `basename $0` src_path dest_path
+  echo usage: `basename $0` download_filepath downloads_dir uploads_dir
 }
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 3 ]; then
   echo `basename $0`: missing operand 1>&2
   usage
   exit 1
 fi
 
 fpath=$1
+downloads_dir=$2
+uploads_dir=$3
+
+dl_localpath=${fpath##$downloads_dir/}
+dl_bucket=$(echo $dl_localpath | cut -d '/' -f1)
+dl_relpath=${dl_localpath##$dl_bucket/}
+dl_fname=${dl_relpath##*/}
+dl_dir=${dl_relpath%$dl_fname}
+
 fname="${fpath##*/}"
 fbase="${fname%.*}"
 fext="${fpath##*.}"
-mkdir -p $2
 
-cp $1 $2/${fbase}-$(date '+%Y%m%d-%T' | tr -d :).${fext}
+ul_dir="$3/${dl_bucket}/${dl_dir}"
+ul_path="${ul_dir}${fbase}-$(date '+%Y%m%d-%T' | tr -d :).${fext}"
+
+mkdir -p $ul_dir
+cp $fpath $ul_path
