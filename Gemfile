@@ -8,4 +8,5 @@ group :development do
   gem 'pry-byebug'
   gem 'pry-stack_explorer'
   gem 'simplecov'
+  gem 'rubocop', '~> 0.44.1', require: false
 end
