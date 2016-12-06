@@ -5,8 +5,8 @@ module Magellan
     module Proxy
       class MessageWrapper
         attr_reader :msg, :context
-        def initialize(msg, context)
-          @msg = msg
+        def initialize(context)
+          @msg = context.message
           @context = context
         end
 

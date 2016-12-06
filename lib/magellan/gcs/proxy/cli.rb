@@ -41,7 +41,7 @@ module Magellan
           context.setup do
             context.process_with_notification(2, 3, 4, TOTAL, 'Download', &:download)
 
-            cmd = build_command(msg, context)
+            cmd = build_command(context)
 
             exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
             context.process_with_notification(5, 6, 7, TOTAL, 'Command', exec) do
@@ -54,8 +54,8 @@ module Magellan
           context.notify(12, TOTAL, 'Cleanup')
         end
 
-        def build_command(msg, context)
-          msg_wrapper = MessageWrapper.new(msg, context)
+        def build_command(context)
+          msg_wrapper = MessageWrapper.new(context)
           ExpandVariable.expand_variables(cmd_template, msg_wrapper)
         end
       end
