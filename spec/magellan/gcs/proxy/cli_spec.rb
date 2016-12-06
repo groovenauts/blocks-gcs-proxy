@@ -83,7 +83,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
     subject { Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
-      r = subject.build_command(msg, context)
+      r = subject.build_command(context)
       expect(r).to eq cmd1_by_msg
     end
 
@@ -173,7 +173,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
     subject { Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
-      r = subject.build_command(msg, context)
+      r = subject.build_command(context)
       expected = 'cmd2 123 /tmp/workspace/downloads/path/to/bar /tmp/workspace/uploads /tmp/workspace/downloads/path/to/baz /tmp/workspace/downloads/path/to/qux1 /tmp/workspace/downloads/path/to/qux2'
       expect(r).to eq expected
     end

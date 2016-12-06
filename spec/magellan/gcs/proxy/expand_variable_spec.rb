@@ -43,7 +43,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       end
     end
 
-    let(:data) { Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }
+    let(:data) { Magellan::Gcs::Proxy::MessageWrapper.new(context) }
 
     it { expect(expand_variables('%{uploads_dir}', data)).to eq uploads_dir }
     it { expect(expand_variables('%{attrs.baz}', data)).to eq '60' }
@@ -102,7 +102,7 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       end
     end
 
-    let(:data) { Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }
+    let(:data) { Magellan::Gcs::Proxy::MessageWrapper.new(context) }
 
     it { expect(expand_variables('%{attrs.foo}', data)).to eq '123' }
     it { expect(expand_variables('%{download_files.qux}', data)).to eq local_download_files['qux'].join(' ') }
