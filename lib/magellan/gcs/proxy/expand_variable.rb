@@ -20,26 +20,15 @@ module Magellan
           case v
           when String
             if tmp.respond_to?(:[]) && tmp.respond_to?(:include?)
-              if tmp.include?(v)
-                tmp[v]
-              else
-                raise InvalidReferenceError, variable_ref
-              end
-            else
-              raise InvalidReferenceError, variable_ref
+              return tmp[v] if tmp.include?(v)
             end
           when Integer
             case tmp
             when Array
-              if tmp.size > v
-                tmp[v]
-              else
-                raise InvalidReferenceError, variable_ref
-              end
-            else
-              raise InvalidReferenceError, variable_ref
+              return tmp[v] if tmp.size > v
             end
           end
+          raise InvalidReferenceError, variable_ref
         end
 
         def expand_variables(str, data, quote_string: false)
