@@ -1,6 +1,6 @@
 # coding: utf-8
-require "magellan/gcs/proxy"
-require "magellan/gcs/proxy/log"
+require 'magellan/gcs/proxy'
+require 'magellan/gcs/proxy/log'
 
 require 'fileutils'
 require 'uri'
@@ -41,11 +41,11 @@ module Magellan
         end
 
         def notify(progress, total, data, severity: :info)
-          notifier.notify(severity, message, data, {progress: progress, total: total})
+          notifier.notify(severity, message, data, progress: progress, total: total)
         end
 
         def ltsv(hash)
-          hash.map{|k,v| "#{k}:#{v}"}.join("\t")
+          hash.map { |k, v| "#{k}:#{v}" }.join("\t")
         end
 
         KEYS = [
@@ -53,13 +53,12 @@ module Magellan
           :downloads_dir, :uploads_dir,
           :download_files,
           :local_download_files,
-          :remote_download_files,
+          :remote_download_files
         ].freeze
 
         def [](key)
           case key.to_sym
           when *KEYS then send(key)
-          else nil
           end
         end
 
@@ -78,7 +77,7 @@ module Magellan
         def local_download_files
           @local_download_files ||= build_local_files_obj(remote_download_files, download_mapping)
         end
-        alias_method :download_files, :local_download_files
+        alias download_files local_download_files
 
         def uploads_dir
           File.join(workspace, 'uploads')
@@ -115,7 +114,7 @@ module Magellan
         end
 
         def setup_dirs
-          [:downloads_dir, :uploads_dir].each{|k| FileUtils.mkdir_p(send(k))}
+          [:downloads_dir, :uploads_dir].each { |k| FileUtils.mkdir_p(send(k)) }
         end
 
         def build_mapping(base_dir, obj)
@@ -129,7 +128,7 @@ module Magellan
           case obj
           when nil then []
           when Hash then flatten_values(obj.values)
-          when Array then obj.map{|i| flatten_values(i) }
+          when Array then obj.map { |i| flatten_values(i) }
           else obj
           end
         end
@@ -147,13 +146,12 @@ module Magellan
 
         def build_local_files_obj(obj, mapping)
           case obj
-          when Hash then obj.each_with_object({}){|(k,v), d| d[k] = build_local_files_obj(v, mapping)}
-          when Array then obj.map{|i| build_local_files_obj(i, mapping)}
+          when Hash then obj.each_with_object({}) { |(k, v), d| d[k] = build_local_files_obj(v, mapping) }
+          when Array then obj.map { |i| build_local_files_obj(i, mapping) }
           when String then mapping[obj]
           else obj
           end
         end
-
       end
     end
   end

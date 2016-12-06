@@ -1,5 +1,5 @@
-require "magellan/gcs/proxy"
-require "magellan/gcs/proxy/log"
+require 'magellan/gcs/proxy'
+require 'magellan/gcs/proxy/log'
 
 require 'json'
 require 'logger'
@@ -18,7 +18,7 @@ module Magellan
         end
 
         def run
-          logger.info("Start listening")
+          logger.info('Start listening')
           GCP.subscription.listen do |msg|
             begin
               process(msg)
@@ -43,24 +43,21 @@ module Magellan
 
             cmd = build_command(msg, context)
 
-            exec = ->(*){ LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
+            exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
             context.process_with_notification(5, 6, 7, TOTAL, 'Command', exec) do
-
               context.process_with_notification(8, 9, 10, TOTAL, 'Upload', &:upload)
 
               msg.acknowledge!
-              context.notify(11, TOTAL, "Acknowledged")
-
+              context.notify(11, TOTAL, 'Acknowledged')
             end
           end
-          context.notify(12, TOTAL, "Cleanup")
+          context.notify(12, TOTAL, 'Cleanup')
         end
 
         def build_command(msg, context)
           msg_wrapper = MessageWrapper.new(msg, context)
           ExpandVariable.expand_variables(cmd_template, msg_wrapper)
         end
-
       end
     end
   end

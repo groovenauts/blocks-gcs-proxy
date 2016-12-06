@@ -1,4 +1,4 @@
-require "magellan/gcs/proxy"
+require 'magellan/gcs/proxy'
 
 module Magellan
   module Gcs
@@ -6,7 +6,8 @@ module Magellan
       class MessageWrapper
         attr_reader :msg, :context
         def initialize(msg, context)
-          @msg, @context = msg, context
+          @msg = msg
+          @context = context
         end
 
         def [](key)
@@ -35,7 +36,11 @@ module Magellan
           def [](key)
             value = data[key]
             if value.is_a?(String) && value =~ /\A\[.*\]\z|\A\{.*\}\z/
-              JSON.parse(value) rescue value
+              begin
+                JSON.parse(value)
+              rescue
+                value
+              end
             else
               value
             end
@@ -44,7 +49,6 @@ module Magellan
           def include?(key)
             data.include?(key) || data.include?(key.to_sym)
           end
-
         end
       end
     end

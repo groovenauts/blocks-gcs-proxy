@@ -1,16 +1,16 @@
-require "spec_helper"
+require 'spec_helper'
 
 describe Magellan::Gcs::Proxy::Cli do
-  let(:notification_topic_name){ 'progress-topic-for-rspec' }
+  let(:notification_topic_name) { 'progress-topic-for-rspec' }
   let(:config_data) do
     {
       'progress_notification' => {
         'topic' => notification_topic_name
       },
       'loggers' => [
-        {'type' => 'stdout'},
-        {'type' => 'cloud_logging', 'log_name' => 'cloud-logging-for-rspec'},
-      ],
+        { 'type' => 'stdout' },
+        { 'type' => 'cloud_logging', 'log_name' => 'cloud-logging-for-rspec' }
+      ]
     }
   end
   before do
@@ -22,51 +22,51 @@ describe Magellan::Gcs::Proxy::Cli do
     allow(logging).to receive(:resource).with('container', {}).and_return(logging_resource)
   end
 
-  let(:pubsub){ double(:pubsub) }
-  let(:storage){ double(:storage) }
+  let(:pubsub) { double(:pubsub) }
+  let(:storage) { double(:storage) }
   let(:logging) do
     double(:logging).tap do |l|
       allow(l).to receive(:write_entries).with(an_instance_of(Google::Cloud::Logging::Entry),
                                                an_instance_of(Hash))
     end
   end
-  let(:logging_resource){ double(:logging_resource) }
+  let(:logging_resource) { double(:logging_resource) }
 
   context :case1 do
     let(:template) do
-      "cmd1 %{download_files.foo} %{download_files.bar} %{attrs.baz} %{uploads_dir} %{attrs.qux}"
+      'cmd1 %{download_files.foo} %{download_files.bar} %{attrs.baz} %{uploads_dir} %{attrs.qux}'
     end
-    let(:downloads_dir){ '/tmp/workspace/downloads' }
-    let(:uploads_dir){ '/tmp/workspace/uploads' }
+    let(:downloads_dir) { '/tmp/workspace/downloads' }
+    let(:uploads_dir) { '/tmp/workspace/uploads' }
 
     let(:download_file_paths) do
       {
-        'foo' => "path/to/foo",
-        'bar' => "path/to/bar",
+        'foo' => 'path/to/foo',
+        'bar' => 'path/to/bar'
       }
     end
     let(:download_files) do
-      download_file_paths.each_with_object({}){|(k,v), d| d[k] = "gs://#{bucket_name}/#{v}"}
+      download_file_paths.each_with_object({}) { |(k, v), d| d[k] = "gs://#{bucket_name}/#{v}" }
     end
     let(:local_download_files) do
-      download_file_paths.each_with_object({}){|(k,v), d| d[k] = "#{downloads_dir}/#{v}"}
+      download_file_paths.each_with_object({}) { |(k, v), d| d[k] = "#{downloads_dir}/#{v}" }
     end
-    let(:bucket_name){ 'bucket1' }
+    let(:bucket_name) { 'bucket1' }
     let(:upload_files) do
       [
         "gs://#{bucket_name}/path/to/file1",
         "gs://#{bucket_name}/path/to/file2",
-        "gs://#{bucket_name}/path/to/file3",
+        "gs://#{bucket_name}/path/to/file3"
       ]
     end
 
-    let(:message_id){ '1234567890' }
+    let(:message_id) { '1234567890' }
     let(:msg) do
       attrs = {
         'download_files' => download_files.to_json,
         'baz' => 60,
         'qux' => 'data1 data2 data3',
-        'upload_files' => upload_files,
+        'upload_files' => upload_files
       }
       double(:msg, message_id: message_id, attributes: attrs)
     end
@@ -81,20 +81,20 @@ describe Magellan::Gcs::Proxy::Cli do
       'cmd1 /tmp/workspace/downloads/path/to/foo /tmp/workspace/downloads/path/to/bar 60 /tmp/workspace/uploads data1 data2 data3'
     end
 
-    subject{ Magellan::Gcs::Proxy::Cli.new(template) }
+    subject { Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
       r = subject.build_command(msg, context)
       expect(r).to eq cmd1_by_msg
     end
 
     describe :process do
-      let(:bucket){ double(:bucket) }
+      let(:bucket) { double(:bucket) }
       let(:notification_topic) do
         double(:notification_topic).tap do |t|
           allow(t).to receive(:publish).with(any_args)
         end
       end
-      let(:upload_file_path1){ 'path/to/upload_file1' }
+      let(:upload_file_path1) { 'path/to/upload_file1' }
       before do
         # Context
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
@@ -103,9 +103,9 @@ describe Magellan::Gcs::Proxy::Cli do
         allow(pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
 
         # Download
-        expect(storage).to receive(:bucket).with(bucket_name).
-                             and_return(bucket).exactly(download_files.length).times
-        download_file_paths.each_with_index do |(key, path), idx|
+        expect(storage).to receive(:bucket).with(bucket_name)
+          .and_return(bucket).exactly(download_files.length).times
+        download_file_paths.each_with_index do |(_key, path), idx|
           gcs_file = double(:"gcs_file_#{idx}")
           expect(bucket).to receive(:file).with(path).and_return(gcs_file)
           expect(gcs_file).to receive(:download).with("#{downloads_dir}/#{path}")
@@ -123,7 +123,7 @@ describe Magellan::Gcs::Proxy::Cli do
         # Ack
         expect(msg).to receive(:acknowledge!)
       end
-      context "normal" do
+      context 'normal' do
         it do
           subject.process(msg)
         end
@@ -133,10 +133,10 @@ describe Magellan::Gcs::Proxy::Cli do
 
   context :case2 do
     let(:template) do
-      "cmd2 %{attrs.foo} %{download_files.bar} %{uploads_dir} %{download_files.baz} %{download_files.qux}"
+      'cmd2 %{attrs.foo} %{download_files.bar} %{uploads_dir} %{download_files.baz} %{download_files.qux}'
     end
-    let(:downloads_dir){ '/tmp/workspace/downloads' }
-    let(:uploads_dir){ '/tmp/workspace/uploads' }
+    let(:downloads_dir) { '/tmp/workspace/downloads' }
+    let(:uploads_dir) { '/tmp/workspace/uploads' }
 
     let(:download_files) do
       {
@@ -144,15 +144,15 @@ describe Magellan::Gcs::Proxy::Cli do
         'baz' => 'gs://bucket2/path/to/baz',
         'qux' => [
           'gs://bucket2/path/to/qux1',
-          'gs://bucket2/path/to/qux2',
-        ],
+          'gs://bucket2/path/to/qux2'
+        ]
       }
     end
     let(:upload_files) do
       [
         'gs://bucket2/path/to/file1',
         'gs://bucket2/path/to/file2',
-        'gs://bucket2/path/to/file3',
+        'gs://bucket2/path/to/file3'
       ]
     end
 
@@ -160,7 +160,7 @@ describe Magellan::Gcs::Proxy::Cli do
       attrs = {
         'foo' => 123,
         'download_files' => download_files.to_json,
-        'upload_files' => upload_files,
+        'upload_files' => upload_files
       }
       double(:msg, attributes: attrs)
     end
@@ -171,12 +171,11 @@ describe Magellan::Gcs::Proxy::Cli do
       end
     end
 
-    subject{ Magellan::Gcs::Proxy::Cli.new(template) }
+    subject { Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
       r = subject.build_command(msg, context)
       expected = 'cmd2 123 /tmp/workspace/downloads/path/to/bar /tmp/workspace/uploads /tmp/workspace/downloads/path/to/baz /tmp/workspace/downloads/path/to/qux1 /tmp/workspace/downloads/path/to/qux2'
       expect(r).to eq expected
     end
   end
-
 end

@@ -1,7 +1,7 @@
 require 'dotenv'
 Dotenv.load
 
-require "magellan/gcs/proxy/version"
+require 'magellan/gcs/proxy/version'
 require 'magellan/gcs/proxy/expand_variable'
 require 'magellan/gcs/proxy/config'
 require 'magellan/gcs/proxy/log'
@@ -19,13 +19,11 @@ require 'magellan/gcs/proxy/cli'
 module Magellan
   module Gcs
     module Proxy
-
       class << self
         def config
           @config ||= Config.new
         end
       end
-
     end
   end
 end

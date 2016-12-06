@@ -1,4 +1,4 @@
-require "magellan/gcs/proxy"
+require 'magellan/gcs/proxy'
 
 module Magellan
   module Gcs
@@ -49,7 +49,6 @@ module Magellan
             end
           end
         end
-
       end
     end
   end
