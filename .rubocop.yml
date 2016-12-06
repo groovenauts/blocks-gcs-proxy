@@ -1,0 +1,12 @@
+Style/Documentation:
+  Enabled: false
+
+LineLength:
+  Max: 130
+
+Metrics/MethodLength:
+  Max: 15
+
+Lint/AssignmentInCondition:
+  Enabled: false
+
