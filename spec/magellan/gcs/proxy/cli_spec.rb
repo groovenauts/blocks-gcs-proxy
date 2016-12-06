@@ -119,6 +119,9 @@ describe Magellan::Gcs::Proxy::Cli do
         expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both)
 
         # Upload
+        expect(Dir).to receive(:chdir).with(uploads_dir).and_yield
+        expect(Dir).to receive(:glob).with('*').and_yield(bucket_name)
+        expect(Dir).to receive(:chdir).with(bucket_name).and_yield
         expect(Dir).to receive(:glob).with('**/*').and_yield(upload_file_path1)
         expect(context).to receive(:directory?).with(upload_file_path1).and_return(false)
         expect(storage).to receive(:bucket).with(bucket_name).and_return(bucket)
