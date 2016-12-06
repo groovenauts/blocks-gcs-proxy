@@ -11,7 +11,7 @@ module Magellan
 
         def dig_variables(variable_ref, data)
           vars = variable_ref.split('.').map { |i| /\A\d+\z/ =~ i ? i.to_i : i }
-          value = vars.inject(data) do |tmp, v|
+          vars.inject(data) do |tmp, v|
             dig_variable(tmp, v, variable_ref)
           end
         end
