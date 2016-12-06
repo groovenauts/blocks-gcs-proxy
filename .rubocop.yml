@@ -10,3 +10,5 @@ Metrics/MethodLength:
 Lint/AssignmentInCondition:
   Enabled: false
 
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
