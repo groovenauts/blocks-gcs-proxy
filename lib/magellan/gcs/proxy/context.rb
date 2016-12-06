@@ -27,23 +27,6 @@ module Magellan
           end
         end
 
-        def process_with_notification(start_no, complete_no, error_no, total, base_message, main = nil)
-          notify(start_no, total, "#{base_message} starting")
-          begin
-            main ? main.call(self) : yield(self)
-          rescue => e
-            notify(error_no, total, "#{base_message} error: [#{e.class}] #{e.message}", severity: :error)
-            raise e unless main
-          else
-            notify(complete_no, total, "#{base_message} completed")
-            yield(self) if main
-          end
-        end
-
-        def notify(progress, total, data, severity: :info)
-          notifier.notify(severity, message, data, progress: progress, total: total)
-        end
-
         def ltsv(hash)
           hash.map { |k, v| "#{k}:#{v}" }.join("\t")
         end
