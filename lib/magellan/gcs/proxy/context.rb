@@ -55,7 +55,7 @@ module Magellan
             uri = parse_uri(url)
             @last_bucket_name = uri.host
             bucket = GCP.storage.bucket(@last_bucket_name)
-            file = bucket.file uri.path.sub(/\A\//, '')
+            file = bucket.file uri.path.sub(%r{\A/}, '')
             file.download(path)
             logger.info("Download OK: #{url} to #{path}")
           end
