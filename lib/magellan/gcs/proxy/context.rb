@@ -31,24 +31,6 @@ module Magellan
           hash.map { |k, v| "#{k}:#{v}" }.join("\t")
         end
 
-        KEYS = [
-          :workspace,
-          :downloads_dir, :uploads_dir,
-          :download_files,
-          :local_download_files,
-          :remote_download_files
-        ].freeze
-
-        def [](key)
-          case key.to_sym
-          when *KEYS then send(key)
-          end
-        end
-
-        def include?(key)
-          KEYS.include?(key)
-        end
-
         def downloads_dir
           File.join(workspace, 'downloads')
         end

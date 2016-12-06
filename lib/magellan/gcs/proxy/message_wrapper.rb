@@ -7,7 +7,7 @@ module Magellan
         attr_reader :msg, :context
         def initialize(context)
           @msg = context.message
-          @context = context
+          @context = ContextAccessor.new(context)
         end
 
         def [](key)
@@ -25,6 +25,31 @@ module Magellan
 
         def attributes
           Attrs.new(msg.attributes)
+        end
+
+        class ContextAccessor
+          attr_accessor :context
+          def initialize(context)
+            @context = context
+          end
+
+          KEYS = [
+            :workspace,
+            :downloads_dir, :uploads_dir,
+            :download_files,
+            :local_download_files,
+            :remote_download_files
+          ].freeze
+
+          def [](key)
+            case key.to_sym
+            when *KEYS then context.send(key)
+            end
+          end
+
+          def include?(key)
+            KEYS.include?(key)
+          end
         end
 
         class Attrs
