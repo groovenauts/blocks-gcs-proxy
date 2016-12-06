@@ -7,6 +7,10 @@ module Magellan
       module Log
         module_function
 
+        def verbose(msg)
+          logger.debug(msg) if GCP.config.verbose?
+        end
+
         def logger
           @logger ||= build_logger(loggers)
         end

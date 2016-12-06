@@ -24,9 +24,7 @@ module Magellan
               process(msg)
             rescue => e
               logger.error("[#{e.class.name}] #{e.message}")
-              if ENV['VERBOSE'] =~ /true|yes|on|1/i
-                logger.debug("Backtrace\n  " << e.backtrace.join("\n  "))
-              end
+              verbose("Backtrace\n  " << e.backtrace.join("\n  "))
             end
           end
         rescue => e

@@ -30,6 +30,10 @@ module Magellan
         def [](key)
           data[key.to_s]
         end
+
+        def verbose?
+          ENV['VERBOSE'] =~ /true|yes|on|1/i
+        end
       end
     end
   end
