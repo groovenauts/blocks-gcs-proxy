@@ -20,16 +20,18 @@ module Magellan
         def run
           logger.info('Start listening')
           GCP.subscription.listen do |msg|
-            begin
-              process(msg)
-            rescue => e
-              logger.error("[#{e.class.name}] #{e.message}")
-              verbose("Backtrace\n  " << e.backtrace.join("\n  "))
-            end
+            process_with_error_handling(msg)
           end
         rescue => e
           logger.error("[#{e.class.name}] #{e.message}")
           raise e
+        end
+
+        def process_with_error_handling(msg)
+          process(msg)
+        rescue => e
+          logger.error("[#{e.class.name}] #{e.message}")
+          verbose("Backtrace\n  " << e.backtrace.join("\n  "))
         end
 
         TOTAL = 12
