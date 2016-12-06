@@ -112,7 +112,8 @@ describe Magellan::Gcs::Proxy::Cli do
         end
 
         # Execute
-        expect(LoggerPipe).to receive(:run).with(an_instance_of(Magellan::Gcs::Proxy::CompositeLogger), cmd1_by_msg, returns: :none, logging: :both)
+        any_composite_logger = an_instance_of(Magellan::Gcs::Proxy::CompositeLogger)
+        expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both)
 
         # Upload
         expect(Dir).to receive(:glob).with('**/*').and_yield(upload_file_path1)
@@ -174,7 +175,12 @@ describe Magellan::Gcs::Proxy::Cli do
     subject { Magellan::Gcs::Proxy::Cli.new(template) }
     it :build_command do
       r = subject.build_command(context)
-      expected = 'cmd2 123 /tmp/workspace/downloads/path/to/bar /tmp/workspace/uploads /tmp/workspace/downloads/path/to/baz /tmp/workspace/downloads/path/to/qux1 /tmp/workspace/downloads/path/to/qux2'
+      expected = 'cmd2 123'\
+                 ' /tmp/workspace/downloads/path/to/bar'\
+                 ' /tmp/workspace/uploads'\
+                 ' /tmp/workspace/downloads/path/to/baz'\
+                 ' /tmp/workspace/downloads/path/to/qux1'\
+                 ' /tmp/workspace/downloads/path/to/qux2'
       expect(r).to eq expected
     end
   end
