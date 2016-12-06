@@ -6,7 +6,8 @@ module Magellan
       module ProgressNotification
         include Log
 
-        def process_with_notification(start_no, complete_no, error_no, total, base_message, main = nil)
+        def process_with_notification(numbers, total, base_message, main = nil)
+          start_no, complete_no, error_no = *numbers
           notify(start_no, total, "#{base_message} starting")
           begin
             main ? main.call(self) : yield(self)
