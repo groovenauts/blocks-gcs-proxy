@@ -85,7 +85,7 @@ module Magellan
         def build_mapping(base_dir, obj)
           flatten_values(obj).flatten.each_with_object({}) do |url, d|
             uri = parse_uri(url)
-            d[url] = File.join(base_dir, uri.path)
+            d[url] = File.join(base_dir, uri.host, uri.path)
           end
         end
 
