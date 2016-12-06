@@ -4,6 +4,9 @@ Style/Documentation:
 LineLength:
   Max: 130
 
+Metrics/AbcSize:
+  Max: 20
+
 Metrics/MethodLength:
   Max: 15
 
