@@ -1,0 +1,20 @@
+Style/Documentation:
+  Enabled: false
+
+LineLength:
+  Max: 130
+
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/CyclomaticComplexity:
+  Max: 8
+
+Metrics/MethodLength:
+  Max: 15
+
+Lint/AssignmentInCondition:
+  Enabled: false
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma

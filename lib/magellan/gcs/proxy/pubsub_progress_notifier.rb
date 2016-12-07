@@ -1,4 +1,4 @@
-require "magellan/gcs/proxy"
+require 'magellan/gcs/proxy'
 
 require 'logger'
 require 'json'
@@ -17,9 +17,8 @@ module Magellan
         end
 
         def notify(severity, job_message, data, attrs)
-          topic.publish data, {level: severity, job_message_id: job_message.message_id}.merge(attrs)
+          topic.publish data, { level: severity, job_message_id: job_message.message_id }.merge(attrs)
         end
-
       end
     end
   end

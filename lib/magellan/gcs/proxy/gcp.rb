@@ -3,8 +3,8 @@ require 'magellan/gcs/proxy'
 
 require 'google/cloud/logging'
 require 'google/cloud/logging/version'
-require "google/cloud/pubsub"
-require "google/cloud/storage"
+require 'google/cloud/pubsub'
+require 'google/cloud/storage'
 require 'net/http'
 
 module Magellan
@@ -26,7 +26,7 @@ module Magellan
 
         METADATA_HOST = 'metadata.google.internal'.freeze
         METADATA_PATH_BASE = '/computeMetadata/v1/'.freeze
-        METADATA_HEADER = {"Metadata-Flavor" => "Google"}.freeze
+        METADATA_HEADER = { 'Metadata-Flavor' => 'Google' }.freeze
 
         def retrieve_metadata(key)
           http = Net::HTTP.new(METADATA_HOST)
@@ -58,7 +58,7 @@ module Magellan
         end
 
         def reset
-          instance_variables.each {|ivar| instance_variable_set(ivar, nil)}
+          instance_variables.each { |ivar| instance_variable_set(ivar, nil) }
         end
       end
     end

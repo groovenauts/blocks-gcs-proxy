@@ -1,13 +1,14 @@
-require "spec_helper"
+require 'spec_helper'
 
 describe Magellan::Gcs::Proxy::GCP do
   describe :project_id do
-    let(:project_id){ 'dummy-project-id' }
+    let(:project_id) { 'dummy-project-id' }
 
-    before{ Magellan::Gcs::Proxy::GCP.reset }
+    before { Magellan::Gcs::Proxy::GCP.reset }
     context 'local' do
       it 'with $BLOCKS_BATCH_PROJECT_ID' do
-        ENV['BLOCKS_BATCH_PROJECT_ID'], backup = project_id, ENV['BLOCKS_BATCH_PROJECT_ID']
+        backup = ENV['BLOCKS_BATCH_PROJECT_ID']
+        ENV['BLOCKS_BATCH_PROJECT_ID'] = project_id
         begin
           expect(Magellan::Gcs::Proxy::GCP.project_id).to eq project_id
         ensure
@@ -16,11 +17,12 @@ describe Magellan::Gcs::Proxy::GCP do
       end
 
       it 'without $BLOCKS_BATCH_PROJECT_ID' do
-        ENV['BLOCKS_BATCH_PROJECT_ID'], backup = nil, ENV['BLOCKS_BATCH_PROJECT_ID']
+        backup = ENV['BLOCKS_BATCH_PROJECT_ID']
+        ENV['BLOCKS_BATCH_PROJECT_ID'] = nil
         begin
-          expect {
+          expect do
             Magellan::Gcs::Proxy::GCP.project_id
-          }.to raise_error(SocketError)
+          end.to raise_error(SocketError)
         ensure
           ENV['BLOCKS_BATCH_PROJECT_ID'] = backup
         end
@@ -28,9 +30,10 @@ describe Magellan::Gcs::Proxy::GCP do
     end
 
     context 'on GKE or GCE' do
-      let(:header){ {"Metadata-Flavor" => "Google"}.freeze }
+      let(:header) { { 'Metadata-Flavor' => 'Google' }.freeze }
       around do |example|
-        ENV['BLOCKS_BATCH_PROJECT_ID'], backup = nil, ENV['BLOCKS_BATCH_PROJECT_ID']
+        backup = ENV['BLOCKS_BATCH_PROJECT_ID']
+        ENV['BLOCKS_BATCH_PROJECT_ID'] = nil
         begin
           example.run
         ensure
@@ -38,25 +41,24 @@ describe Magellan::Gcs::Proxy::GCP do
         end
       end
 
-      let(:res){ double(:res) }
-      it "valid" do
+      let(:res) { double(:res) }
+      it 'valid' do
         require 'net/http'
         expect(res).to receive(:code).and_return('200')
         expect(res).to receive(:body).and_return(project_id)
-        expect_any_instance_of(Net::HTTP).to receive(:get).with("/computeMetadata/v1/project/project-id", header).and_return(res)
+        expect_any_instance_of(Net::HTTP).to receive(:get).with('/computeMetadata/v1/project/project-id', header).and_return(res)
         expect(Magellan::Gcs::Proxy::GCP.project_id).to eq project_id
       end
 
-      it "invalid" do
+      it 'invalid' do
         require 'net/http'
         expect(res).to receive(:code).and_return('400').twice
-        expect(res).to receive(:body).and_return("Something wrong!")
-        expect_any_instance_of(Net::HTTP).to receive(:get).with("/computeMetadata/v1/project/project-id", header).and_return(res)
-        expect {
+        expect(res).to receive(:body).and_return('Something wrong!')
+        expect_any_instance_of(Net::HTTP).to receive(:get).with('/computeMetadata/v1/project/project-id', header).and_return(res)
+        expect do
           Magellan::Gcs::Proxy::GCP.project_id
-        }.to raise_error "[400] Something wrong!"
+        end.to raise_error '[400] Something wrong!'
       end
     end
   end
-
 end

@@ -8,7 +8,6 @@ module Magellan
   module Gcs
     module Proxy
       class Config
-
         attr_reader :path
         def initialize(path = './config.yml')
           @path = path
@@ -22,9 +21,9 @@ module Magellan
           erb = ERB.new(File.read(path), nil, '-')
           erb.filename = path
           t = erb.result
-          puts "=" * 100
+          puts '=' * 100
           puts t
-          puts "-" * 100
+          puts '-' * 100
           YAML.load(t)
         end
 
@@ -32,6 +31,9 @@ module Magellan
           data[key.to_s]
         end
 
+        def verbose?
+          ENV['VERBOSE'] =~ /true|yes|on|1/i
+        end
       end
     end
   end

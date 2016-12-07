@@ -1,4 +1,4 @@
-require "magellan/gcs/proxy"
+require 'magellan/gcs/proxy'
 
 module Magellan
   module Gcs
@@ -31,7 +31,6 @@ module Magellan
             end
           INSTANCE_METHODS
         end
-
       end
     end
   end

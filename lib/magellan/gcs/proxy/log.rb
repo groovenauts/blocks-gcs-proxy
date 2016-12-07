@@ -7,6 +7,10 @@ module Magellan
       module Log
         module_function
 
+        def verbose(msg)
+          logger.debug(msg) if GCP.config.verbose?
+        end
+
         def logger
           @logger ||= build_logger(loggers)
         end
@@ -38,12 +42,12 @@ module Magellan
 
         CLOUD_LOGGING_RESOURCE_KEYS = [
           :project_id,
-					:cluster_name,
-					:namespace_id,
-					:instance_id,
-					:pod_id,
-					:container_name,
-					:zone,
+          :cluster_name,
+          :namespace_id,
+          :instance_id,
+          :pod_id,
+          :container_name,
+          :zone,
         ].freeze
 
         def build_cloud_logging_logger(config)
@@ -64,9 +68,9 @@ module Magellan
               d[key] = v
             end
           end
-          resource = GCP.logging.resource "container", options
+          resource = GCP.logging.resource 'container', options
           Google::Cloud::Logging::Logger.new GCP.logging, log_name, resource,
-                                             {magellan_gcs_proxy: Magellan::Gcs::Proxy::VERSION}
+                                             magellan_gcs_proxy: Magellan::Gcs::Proxy::VERSION
         end
       end
     end
