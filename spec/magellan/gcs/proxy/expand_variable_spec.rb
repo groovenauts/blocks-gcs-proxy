@@ -27,18 +27,20 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
       ]
     end
 
-    let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
-    end
-
     let(:msg) do
       attrs = {
-        'download_files' => download_files,
+        'download_files' => download_files.to_json,
         'baz' => 60,
         'qux' => 'data1 data2 data3',
         'upload_files' => upload_files,
       }
       double(:msg, attributes: attrs)
+    end
+
+    let(:context) do
+      Magellan::Gcs::Proxy::Context.new(msg).tap do |c|
+        allow(c).to receive(:workspace).and_return('/tmp/workspace')
+      end
     end
 
     let(:data){ Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }
@@ -84,17 +86,20 @@ describe Magellan::Gcs::Proxy::MessageWrapper do
         'gs://bucket2/path/to/file3',
       ]
     end
-    let(:context) do
-      Magellan::Gcs::Proxy::Context.new('/tmp/workspace', download_files)
-    end
 
     let(:msg) do
       attrs = {
         'foo' => 123,
-        'download_files' => download_files,
+        'download_files' => download_files.to_json,
         'upload_files' => upload_files
       }
       double(:msg, attributes: attrs)
+    end
+
+    let(:context) do
+      Magellan::Gcs::Proxy::Context.new(msg).tap do |c|
+        allow(c).to receive(:workspace).and_return('/tmp/workspace')
+      end
     end
 
     let(:data){ Magellan::Gcs::Proxy::MessageWrapper.new(msg, context) }

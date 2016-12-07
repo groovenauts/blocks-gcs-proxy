@@ -1,0 +1,53 @@
+#!/bin/bash
+
+usage() {
+  echo usage: `basename $0` GCP_PROJECT_ID
+}
+
+if [ $# -ne 1 ]; then
+  echo `basename $0`: missing operand 1>&2
+  usage
+  exit 1
+fi
+
+project_id=$1
+export job_topic=projects/${project_id}/topics/test-job-topic-${USER}
+export job_sub=projects/${project_id}/subscriptions/test-job-topic-${USER}-sub
+
+export progress_topic=projects/${project_id}/topics/test-progress-topic-${USER}
+export progress_sub=projects/${project_id}/subscriptions/test-progress-topic-${USER}-sub
+
+gcloud beta pubsub topics create ${job_topic}
+gcloud beta pubsub subscriptions create ${job_sub} --topic ${job_topic}
+
+gcloud beta pubsub topics create ${progress_topic}
+gcloud beta pubsub subscriptions create ${progress_sub} --topic ${progress_topic}
+
+gcloud beta pubsub topics list >/dev/null 2>&1
+gcloud beta pubsub subscriptions list >/dev/null 2>&1
+
+echo "# Steps to run example"
+echo "#"
+echo "# At Terminal 1: Listen to progress subscription"
+echo "#"
+echo "cd $PWD"
+echo "export BLOCKS_BATCH_PROJECT_ID=${project_id}"
+echo "export BLOCKS_BATCH_PROGRESS_SUBSCRIPTION=${progress_sub}"
+echo "magellan-gcs-proxy-dev-progress-listener \$BLOCKS_BATCH_PROGRESS_SUBSCRIPTION"
+echo ""
+echo "#"
+echo "# At Terminal 2: Run application"
+echo "#"
+echo "cd $PWD"
+echo "export BLOCKS_BATCH_PROJECT_ID=${project_id}"
+echo "export BLOCKS_BATCH_PUBSUB_SUBSCRIPTION=${job_sub}"
+echo "export BLOCKS_BATCH_PROGRESS_TOPIC=${progress_topic}"
+echo "export BLOCKS_BATCH_CLOUD_LOGGING_LOG_NAME=magellan-gcs-proxy-example-logging"
+echo "bundle exec magellan-gcs-proxy ./app.sh %{download_files.0} %{uploads_dir}"
+echo ""
+echo "#"
+echo "# At Terminal 3: Publish message"
+echo "#"
+echo "cd $PWD"
+echo "export BLOCKS_BATCH_PUBSUB_TOPIC=${job_topic}"
+echo "gcloud beta pubsub topics publish \$BLOCKS_BATCH_PUBSUB_TOPIC \"\" --attribute='download_files=[\"gs://bucket1/path/to/file\"]'"

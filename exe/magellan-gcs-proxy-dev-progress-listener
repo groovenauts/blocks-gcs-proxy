@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require "magellan/gcs/proxy"
+require 'json'
+
+subname = ARGV.first
+puts "Listening to #{subname}"
+Magellan::Gcs::Proxy::GCP.pubsub.subscription(subname).tap do |sub|
+  sub.listen do |msg|
+    puts (msg.attributes.map{|k,v| "#{k}:#{v}"} + [msg.data]).join("\t")
+    msg.ack!
+  end
+end

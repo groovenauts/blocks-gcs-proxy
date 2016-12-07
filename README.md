@@ -37,27 +37,46 @@ magellan-gcs-proxy COMMAND ARGS...
 ### Setup
 
 ```
-export PROJECT_ID=[Project ID]
-export TOPIC=projects/$PROJECT_ID/topics/[Topic name]
-export SUB=projects/$PROJECT_ID/subscriptions/[Subscription name of topic]
-$ gcloud beta pubsub topics create projects/$PROJECT_ID/topics/$TOPIC
-$ gcloud beta pubsub topics list
-$ gcloud beta pubsub subscriptions create $SUB --topic $TOPIC
-$ gcloud beta pubsub subscriptions list
+magellan-gcs-proxy-dev-setup [Project ID]
 ```
 
-### Publish message
+
+### Listen to progress subscription
 
 ```
-$ gcloud beta pubsub topics publish $TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
+$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
+$ magellan-gcs-proxy-dev-progress-listener [Progress subscription name]
 ```
 
+`Progress subscription name` is the name of `Progress subscription`.
+It created by `magellan-gcs-proxy-dev-setup`.
+You can see it by `gcloud beta pubsub subscriptions list`.
+It starts with `test-progress-` and ends with '-sub'.
 
 ### Run application
 
 ```
+$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
+$ export BLOCKS_BATCH_PUBSUB_SUBSCRIPTION=[Job subscription name]
 $ magellan-gcs-proxy COMMAND ARGS...
 ```
+
+`Job subscription name` is the name of `Job subscription`.
+It created by `magellan-gcs-proxy-dev-setup`.
+You can see it by `gcloud beta pubsub subscriptions list`.
+It starts with `test-job-` and ends with '-sub'.
+
+### Publish message
+
+```
+$ export JOB_TOPIC=[Job topic name]
+$ gcloud beta pubsub topics publish $JOB_TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
+```
+
+`Job topic name` is the name of `Job topic`.
+It created by `magellan-gcs-proxy-dev-setup`.
+You can see it by `gcloud beta pubsub topics list`.
+It starts with `test-job-` and ends with your user name.
 
 
 ## Development
@@ -74,4 +93,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-

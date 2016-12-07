@@ -10,11 +10,42 @@ module Magellan
     module Proxy
       class Context
         include Log
+        include Proxy::ProgressNotification
 
-        attr_reader :workspace, :remote_download_files
-        def initialize(workspace, remote_download_files)
-          @workspace = workspace
-          @remote_download_files = remote_download_files
+        attr_reader :message, :workspace, :remote_download_files
+        def initialize(message)
+          @message = message
+          @remote_download_files = parse_json(message.attributes['download_files'])
+          @workspace = nil
+        end
+
+        def setup
+          Dir.mktmpdir 'workspace' do |dir|
+            @workspace = dir
+            setup_dirs
+            yield
+          end
+        end
+
+        def process_with_notification(start_no, complete_no, error_no, total, base_message, main = nil)
+          notify(start_no, total, "#{base_message} starting")
+          begin
+            main ? main.call(self) : yield(self)
+          rescue => e
+            notify(error_no, total, "#{base_message} error: [#{e.class}] #{e.message}", severity: :error)
+            raise e unless main
+          else
+            notify(complete_no, total, "#{base_message} completed")
+            yield(self) if main
+          end
+        end
+
+        def notify(progress, total, data, severity: :info)
+          notifier.notify(severity, message, data, {progress: progress, total: total})
+        end
+
+        def ltsv(hash)
+          hash.map{|k,v| "#{k}:#{v}"}.join("\t")
         end
 
         KEYS = [
@@ -53,10 +84,6 @@ module Magellan
           File.join(workspace, 'uploads')
         end
 
-        def setup
-          setup_dirs
-        end
-
         def download
           download_mapping.each do |url, path|
             FileUtils.mkdir_p File.dirname(path)
@@ -73,7 +100,7 @@ module Magellan
         def upload
           Dir.chdir(uploads_dir) do
             Dir.glob('**/*') do |path|
-              next if File.directory?(path)
+              next if directory?(path)
               url = "gs://#{@last_bucket_name}/#{path}"
               logger.info("Uploading: #{path} to #{url}")
               bucket = GCP.storage.bucket(@last_bucket_name)
@@ -83,8 +110,12 @@ module Magellan
           end
         end
 
+        def directory?(path)
+          File.directory?(path)
+        end
+
         def setup_dirs
-          [:downloads_dir, :uploads_dir].each{|k| Dir.mkdir(send(k))}
+          [:downloads_dir, :uploads_dir].each{|k| FileUtils.mkdir_p(send(k))}
         end
 
         def build_mapping(base_dir, obj)
@@ -101,6 +132,11 @@ module Magellan
           when Array then obj.map{|i| flatten_values(i) }
           else obj
           end
+        end
+
+        def parse_json(str)
+          return nil if str.nil? || str.empty?
+          JSON.parse(str)
         end
 
         def parse_uri(str)
