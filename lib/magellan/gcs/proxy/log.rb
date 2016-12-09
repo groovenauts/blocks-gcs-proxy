@@ -8,7 +8,7 @@ module Magellan
         module_function
 
         def verbose(msg)
-          logger.debug(msg) if GCP.config.verbose?
+          logger.debug(msg) if Proxy.config.verbose?
         end
 
         def logger
