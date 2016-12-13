@@ -17,6 +17,10 @@ module Magellan
           @data ||= load_file
         end
 
+        def reset
+          @data = nil
+        end
+
         def load_file
           erb = ERB.new(File.read(path), nil, '-')
           erb.filename = path

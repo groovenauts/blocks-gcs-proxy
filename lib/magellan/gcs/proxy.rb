@@ -10,6 +10,7 @@ require 'magellan/gcs/proxy/gcp'
 require 'magellan/gcs/proxy/composite_logger'
 require 'magellan/gcs/proxy/progress_notifier_adapter'
 require 'magellan/gcs/proxy/pubsub_progress_notifier'
+require 'magellan/gcs/proxy/pubsub_sustainer'
 require 'magellan/gcs/proxy/progress_notification'
 
 require 'magellan/gcs/proxy/message_wrapper'
