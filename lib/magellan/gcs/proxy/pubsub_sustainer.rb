@@ -7,6 +7,8 @@ module Magellan
   module Gcs
     module Proxy
       class PubsubSustainer
+        include Log
+
         class << self
           def run(message)
             raise "#{name}.run requires block" unless block_given?
@@ -38,7 +40,12 @@ module Magellan
           loop do
             sleep(interval)
             break unless Thread.current[:processing_message]
-            message.delay! delay
+            begin
+              message.delay! delay
+            rescue => e
+              logger.error(e)
+              break
+            end
           end
         end
       end
