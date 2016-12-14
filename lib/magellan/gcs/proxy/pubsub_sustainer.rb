@@ -39,9 +39,10 @@ module Magellan
         def run
           loop do
             logger.debug("#{self.class.name} is sleeping #{interval} sec.")
-            sleep(interval)
-            logger.debug("#{self.class.name} Thread.current[:processing_message]: #{Thread.current[:processing_message].inspect}")
-            break unless Thread.current[:processing_message]
+            unless wait_while_processing(interval)
+              logger.debug("#{self.class.name} is stopping.")
+              break
+            end
             begin
               logger.debug("#{self.class.name} Sending delay!(#{delay})")
               message.delay! delay
@@ -51,6 +52,16 @@ module Magellan
               break
             end
           end
+          logger.debug("#{self.class.name} stopped.")
+        end
+
+        def wait_while_processing(seconds)
+          limit = Time.now.to_f + seconds
+          while Time.now.to_f < limit
+            return false unless Thread.current[:processing_message]
+            sleep(0.1)
+          end
+          true
         end
       end
     end
