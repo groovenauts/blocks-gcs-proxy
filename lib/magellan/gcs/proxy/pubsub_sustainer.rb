@@ -43,16 +43,13 @@ module Magellan
               logger.debug("#{self.class.name} is stopping.")
               break
             end
-            begin
               logger.debug("#{self.class.name} Sending delay!(#{delay})")
               message.delay! delay
               logger.debug("#{self.class.name} Sent delay!(#{delay}) successfully")
-            rescue => e
-              logger.error(e)
-              break
-            end
           end
           logger.debug("#{self.class.name} stopped.")
+      rescue => e
+        logger.error(e)
         end
 
         def wait_while_processing(seconds)
