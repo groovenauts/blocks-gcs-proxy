@@ -18,6 +18,7 @@ module Magellan
         end
 
         def run
+          logger.info("#{$PROGRAM_NAME}-#{VERSION} is running")
           logger.info('Start listening')
           GCP.subscription.listen do |msg|
             process_with_error_handling(msg)
