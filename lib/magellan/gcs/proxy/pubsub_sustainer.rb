@@ -38,18 +38,22 @@ module Magellan
 
         def run
           loop do
-            logger.debug("#{self.class.name} is sleeping #{interval} sec.")
+            debug("is sleeping #{interval} sec.")
             unless wait_while_processing(interval)
-              logger.debug("#{self.class.name} is stopping.")
+              debug('is stopping.')
               break
             end
-            logger.debug("#{self.class.name} Sending delay!(#{delay})")
+            debug("is sending delay!(#{delay})")
             message.delay! delay
-            logger.debug("#{self.class.name} Sent delay!(#{delay}) successfully")
+            debug("sent delay!(#{delay}) successfully")
           end
-          logger.debug("#{self.class.name} stopped.")
+          debug('stopped.')
         rescue => e
           logger.error(e)
+        end
+
+        def debug(msg)
+          logger.debug("#{self.class.name} #{msg}")
         end
 
         def wait_while_processing(seconds)
