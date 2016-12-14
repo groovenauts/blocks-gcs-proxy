@@ -38,10 +38,14 @@ module Magellan
 
         def run
           loop do
+            logger.debug("#{self.class.name} is sleeping #{interval} sec.")
             sleep(interval)
+            logger.debug("#{self.class.name} Thread.current[:processing_message]: #{Thread.current[:processing_message].inspect}")
             break unless Thread.current[:processing_message]
             begin
+              logger.debug("#{self.class.name} Sending delay!(#{delay})")
               message.delay! delay
+              logger.debug("#{self.class.name} Sent delay!(#{delay}) successfully")
             rescue => e
               logger.error(e)
               break
