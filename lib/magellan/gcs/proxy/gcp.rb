@@ -3,8 +3,8 @@ require 'magellan/gcs/proxy'
 
 require 'google/cloud/logging'
 require 'google/cloud/logging/version'
-require 'google/cloud/pubsub'
 require 'google/cloud/storage'
+require 'google/apis/pubsub_v1'
 require 'net/http'
 
 module Magellan
@@ -22,6 +22,19 @@ module Magellan
 
         def retrieve_project_id
           ENV['BLOCKS_BATCH_PROJECT_ID'] || retrieve_metadata('project/project-id')
+        end
+
+        SCOPES = [
+          'https://www.googleapis.com/auth/devstorage.full_control',
+          'https://www.googleapis.com/auth/pubsub'
+        ].freeze
+
+        def auth
+          unless @auth
+            @auth = ::Google::Auth.get_application_default(SCOPES)
+            @auth.fetch_access_token!
+          end
+          @auth
         end
 
         METADATA_HOST = 'metadata.google.internal'.freeze
@@ -42,12 +55,12 @@ module Magellan
         end
 
         def pubsub
-          @pubsub ||= Google::Cloud::Pubsub.new(project: project_id)
+          @pubsub ||= Google::Apis::PubsubV1::PubsubService.new.tap {|api| api.authorization = auth }
         end
 
         def subscription
           unless @subscription
-            @subscription = pubsub.subscription(ENV['BLOCKS_BATCH_PUBSUB_SUBSCRIPTION'] || 'test-subscription')
+            @subscription = PubsubSubscription.new(ENV['BLOCKS_BATCH_PUBSUB_SUBSCRIPTION'] || 'test-subscription')
             logger.info("subscription: #{@subscription.inspect}")
           end
           @subscription
