@@ -61,6 +61,13 @@ module Magellan
           debug("is sending delay!(#{delay})")
           message.delay! delay
           debug("sent delay!(#{delay}) successfully")
+        rescue Google::Cloud::UnavailableError => e
+          if Time.now.to_f < next_limit
+            sleep(1) # retry interval
+            debug("is retrying to send delay! cause of [#{e.class.name}] #{e.message}")
+            retry
+          end
+          raise e
         end
 
         def debug(msg)
