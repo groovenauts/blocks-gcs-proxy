@@ -17,9 +17,9 @@ sustainer:
   #   specified by BLOCKS_BATCH_PUBSUB_SUBSCRIPTION
   #   You can check ACK_DEADLINE by `gcloud beta pubsub subscriptions list`
   #   ACK_DEADLINE is set by `--ack-deadline` option for `gcloud beta pubsub subscriptions create`.
-  delay: 600
+  delay: <%= ENV['BLOCKS_BATCH_SUSTAINER_DELAY'] || 600  %>
 
   # interval
   #   The interval to send delay message. It must be lower than delay
   #   Default: 90% of delay
-  interval: 540
+  interval: <%= ENV['BLOCKS_BATCH_SUSTAINER_INTERVAL'] || 540 %>
