@@ -37,17 +37,24 @@ module Magellan
         end
 
         def run
+          reset_next_limit
           loop do
             debug("is sleeping #{interval} sec.")
-            unless wait_while_processing(interval)
+            unless wait_while_processing
               debug('is stopping.')
               break
             end
             send_delay
+            reset_next_limit
           end
           debug('stopped.')
         rescue => e
           logger.error(e)
+        end
+
+        attr_reader :next_limit
+        def reset_next_limit
+          @next_limit = Time.now.to_f + interval
         end
 
         def send_delay
@@ -60,9 +67,8 @@ module Magellan
           logger.debug("#{self.class.name} #{msg}")
         end
 
-        def wait_while_processing(seconds)
-          limit = Time.now.to_f + seconds
-          while Time.now.to_f < limit
+        def wait_while_processing
+          while Time.now.to_f < next_limit
             return false unless Thread.current[:processing_message]
             sleep(0.1)
           end
