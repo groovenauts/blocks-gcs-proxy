@@ -26,7 +26,7 @@ module Magellan
 
         SCOPES = [
           'https://www.googleapis.com/auth/devstorage.full_control',
-          'https://www.googleapis.com/auth/pubsub'
+          'https://www.googleapis.com/auth/pubsub',
         ].freeze
 
         def auth
@@ -55,7 +55,7 @@ module Magellan
         end
 
         def pubsub
-          @pubsub ||= Google::Apis::PubsubV1::PubsubService.new.tap {|api| api.authorization = auth }
+          @pubsub ||= Google::Apis::PubsubV1::PubsubService.new.tap { |api| api.authorization = auth }
         end
 
         def subscription
