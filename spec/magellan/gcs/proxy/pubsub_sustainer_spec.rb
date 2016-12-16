@@ -6,7 +6,6 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
       let(:delay) { 2 }
       let(:config_data) do
         {
-          'loggers' => [{ 'type' => 'stdout' }],
           'sustainer' => {
             'delay' => delay,
           },
@@ -44,16 +43,11 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
     end
 
     context 'without sustainer' do
-      let(:config_data) do
-        {
-          'loggers' => [{ 'type' => 'stdout' }],
-        }
-      end
       let(:msg) { double(:msg) }
 
       before do
         Magellan::Gcs::Proxy.config.reset
-        allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return(config_data)
+        allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return('')
       end
 
       it do
@@ -71,6 +65,11 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
     let(:delay) { 3 }
     let(:interval) { 2 }
     let(:msg) { double(:msg) }
+
+    before do
+      Magellan::Gcs::Proxy.config.reset
+      allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return('')
+    end
 
     subject { Magellan::Gcs::Proxy::PubsubSustainer.new(msg, delay: delay, interval: interval) }
 
