@@ -43,13 +43,17 @@ module Magellan
               debug('is stopping.')
               break
             end
-            debug("is sending delay!(#{delay})")
-            message.delay! delay
-            debug("sent delay!(#{delay}) successfully")
+            send_delay
           end
           debug('stopped.')
         rescue => e
           logger.error(e)
+        end
+
+        def send_delay
+          debug("is sending delay!(#{delay})")
+          message.delay! delay
+          debug("sent delay!(#{delay}) successfully")
         end
 
         def debug(msg)
