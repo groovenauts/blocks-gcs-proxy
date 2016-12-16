@@ -94,10 +94,9 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
       end
 
       it 'gives up retrying after the next_limit passes' do
-        expect(msg).to receive(:delay!) \
-                       .with(delay) \
-                       .and_raise(Google::Cloud::UnavailableError.new('{"description":"Secure read failed"}')) \
-                       .exactly(4).times
+        expect(msg).to receive(:delay!).with(delay) \
+          .and_raise(Google::Cloud::UnavailableError.new('{"description":"Secure read failed"}')) \
+          .exactly(4).times
         expect(subject).to receive(:next_limit).and_return(Time.now.to_f + delay).exactly(4).times
         expect { subject.send_delay }.to raise_error(Google::Cloud::UnavailableError)
       end
