@@ -72,6 +72,11 @@ module Magellan
             req = Google::Apis::PubsubV1::AcknowledgeRequest.new(ack_ids: [ack_id])
             GCP.pubsub.acknowledge_subscription(subscription.name, req, options: ack_options)
           end
+
+          def delay!(new_deadline)
+            req = Google::Apis::PubsubV1::ModifyAckDeadlineRequest.new(ack_deadline_seconds: new_deadline, ack_ids: [ack_id])
+            GCP.pubsub.modify_subscription_ack_deadline(subscription.name, req)
+          end
         end
       end
     end
