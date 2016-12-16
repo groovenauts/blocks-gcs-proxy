@@ -30,11 +30,12 @@ module Magellan
         ].freeze
 
         def auth
-          unless @auth
-            @auth = ::Google::Auth.get_application_default(SCOPES)
-            @auth.fetch_access_token!
-          end
-          @auth
+          @auth ||= new_auth
+        end
+
+        def new_auth
+          logger.debug("#{self.class.name}#new_auth")
+          Google::Auth.get_application_default(SCOPES).tap(&:fetch_access_token!)
         end
 
         METADATA_HOST = 'metadata.google.internal'.freeze
