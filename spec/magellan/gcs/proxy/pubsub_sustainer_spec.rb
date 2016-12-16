@@ -82,21 +82,21 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
       #          {"created":"@1481791891.380596379","description":"EOF","file":"src/core/lib/iomgr/tcp_posix.c","file_line":235}
       #        ]
       #      } (Google::Cloud::UnavailableError)
-      it 'retries until limit' do
+      it 'retries until the next_deadline' do
         cnt = 0
         expect(msg).to receive(:delay!) do
           cnt += 1
           raise Google::Cloud::UnavailableError, '{"description":"Secure read failed"}' if cnt < 3
         end.exactly(3).times
-        expect(subject).to receive(:next_limit).and_return(Time.now.to_f + delay).twice
+        subject.reset_next_limit
         subject.send_delay
       end
 
-      it 'gives up retrying after the next_limit passes' do
+      it 'gives up retrying after the next_deadline' do
         expect(msg).to receive(:delay!).with(delay) \
           .and_raise(Google::Cloud::UnavailableError.new('{"description":"Secure read failed"}')) \
           .exactly(4).times
-        expect(subject).to receive(:next_limit).and_return(Time.now.to_f + delay).exactly(4).times
+        subject.reset_next_limit
         expect { subject.send_delay }.to raise_error(Google::Cloud::UnavailableError)
       end
     end

@@ -52,9 +52,11 @@ module Magellan
           logger.error(e)
         end
 
-        attr_reader :next_limit
+        attr_reader :next_limit, :next_deadline
         def reset_next_limit
-          @next_limit = Time.now.to_f + interval
+          now = Time.now.to_f
+          @next_limit = now + interval
+          @next_deadline = now + delay
         end
 
         def send_delay
@@ -62,7 +64,7 @@ module Magellan
           message.delay! delay
           debug("sent delay!(#{delay}) successfully")
         rescue Google::Cloud::UnavailableError => e
-          if Time.now.to_f < next_limit
+          if Time.now.to_f < next_deadline
             sleep(1) # retry interval
             debug("is retrying to send delay! cause of [#{e.class.name}] #{e.message}")
             retry
