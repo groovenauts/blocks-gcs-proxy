@@ -65,7 +65,8 @@ module Magellan
           end
 
           def ack_options
-            @ack_options ||= Google::Apis::RequestOptions.new(retries: 5)
+            # https://github.com/google/google-api-ruby-client/blob/master/lib/google/apis/options.rb#L48
+            @ack_options ||= Google::Apis::RequestOptions.new(authorization: GCP.auth, retries: 5)
           end
 
           def acknowledge!
