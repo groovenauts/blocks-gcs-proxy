@@ -35,7 +35,7 @@ module Magellan
           verbose("Backtrace\n  " << e.backtrace.join("\n  "))
         end
 
-        TOTAL = 12
+        TOTAL = 14
         def process(msg)
           context = Context.new(msg)
           context.notify(1, TOTAL, "Processing message: #{msg.inspect}")
@@ -48,11 +48,12 @@ module Magellan
             context.process_with_notification([5, 6, 7], TOTAL, 'Command', exec) do
               context.process_with_notification([8, 9, 10], TOTAL, 'Upload', &:upload)
 
-              msg.acknowledge!
-              context.notify(11, TOTAL, 'Acknowledged')
+              context.process_with_notification([11, 12, 13], TOTAL, 'Acknowledge') do
+                msg.acknowledge!
+              end
             end
           end
-          context.notify(12, TOTAL, 'Cleanup')
+          context.notify(14, TOTAL, 'Cleanup')
         end
 
         def build_command(context)
