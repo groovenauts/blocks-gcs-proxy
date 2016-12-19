@@ -23,7 +23,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'dotenv'
   spec.add_runtime_dependency 'google-cloud-logging'
-  spec.add_runtime_dependency 'google-cloud-pubsub'
   spec.add_runtime_dependency 'google-cloud-storage'
   spec.add_runtime_dependency 'logger_pipe'
 

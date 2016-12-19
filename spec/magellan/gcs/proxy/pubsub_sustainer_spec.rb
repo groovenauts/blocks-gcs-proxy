@@ -73,20 +73,12 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
 
     subject { Magellan::Gcs::Proxy::PubsubSustainer.new(msg, delay: delay, interval: interval) }
 
-    context 'on Google::Cloud::UnavailableError' do
-      # E, [2016-12-15T08:51:31.381860 #1] ERROR -- : 14:
-      #      {
-      #        "created":"@1481791891.380648742","description":"Secure read failed",
-      #        "file":"src/core/lib/security/transport/secure_endpoint.c","file_line":157,"grpc_status":14,
-      #        "referenced_errors":[
-      #          {"created":"@1481791891.380596379","description":"EOF","file":"src/core/lib/iomgr/tcp_posix.c","file_line":235}
-      #        ]
-      #      } (Google::Cloud::UnavailableError)
+    context 'on Google::Apis::ServerError' do
       it 'retries until the next_deadline' do
         cnt = 0
         expect(msg).to receive(:delay!) do
           cnt += 1
-          raise Google::Cloud::UnavailableError, '{"description":"Secure read failed"}' if cnt < 3
+          raise Google::Apis::ServerError, '{"description":"Secure read failed"}' if cnt < 3
         end.exactly(3).times
         subject.reset_next_limit
         subject.send_delay
@@ -94,10 +86,10 @@ describe Magellan::Gcs::Proxy::PubsubSustainer do
 
       it 'gives up retrying after the next_deadline' do
         expect(msg).to receive(:delay!).with(delay) \
-          .and_raise(Google::Cloud::UnavailableError.new('{"description":"Secure read failed"}')) \
+          .and_raise(Google::Apis::ServerError.new('{"description":"Secure read failed"}')) \
           .exactly(4).times
         subject.reset_next_limit
-        expect { subject.send_delay }.to raise_error(Google::Cloud::UnavailableError)
+        expect { subject.send_delay }.to raise_error(Google::Apis::ServerError)
       end
     end
   end
