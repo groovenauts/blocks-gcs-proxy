@@ -15,4 +15,4 @@ COPY . $APP_HOME
 WORKDIR $APP_HOME
 RUN bundle install --without development
 
-CMD ["bundle", "exec", "magellan-gcs-proxy", "./app.sh", "%{download_files.0}", "%{uploads_dir}"]
+CMD ["bundle", "exec", "magellan-gcs-proxy", "./app.sh", "%{download_files.0}", "%{downloads_dir}", "%{uploads_dir}", "test"]

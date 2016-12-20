@@ -79,7 +79,10 @@ describe Magellan::Gcs::Proxy::Cli do
     end
 
     let(:cmd1_by_msg) do
-      'cmd1 /tmp/workspace/downloads/path/to/foo /tmp/workspace/downloads/path/to/bar 60 /tmp/workspace/uploads data1 data2 data3'
+      'cmd1'\
+      ' /tmp/workspace/downloads/bucket1/path/to/foo'\
+      ' /tmp/workspace/downloads/bucket1/path/to/bar'\
+      ' 60 /tmp/workspace/uploads data1 data2 data3'
     end
 
     subject { Magellan::Gcs::Proxy::Cli.new(template) }
@@ -109,7 +112,7 @@ describe Magellan::Gcs::Proxy::Cli do
         download_file_paths.each_with_index do |(_key, path), idx|
           gcs_file = double(:"gcs_file_#{idx}")
           expect(bucket).to receive(:file).with(path).and_return(gcs_file)
-          expect(gcs_file).to receive(:download).with("#{downloads_dir}/#{path}")
+          expect(gcs_file).to receive(:download).with("#{downloads_dir}/#{bucket_name}/#{path}")
         end
 
         # Execute
@@ -117,6 +120,9 @@ describe Magellan::Gcs::Proxy::Cli do
         expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both)
 
         # Upload
+        expect(Dir).to receive(:chdir).with(uploads_dir).and_yield
+        expect(Dir).to receive(:glob).with('*').and_yield(bucket_name)
+        expect(Dir).to receive(:chdir).with(bucket_name).and_yield
         expect(Dir).to receive(:glob).with('**/*').and_yield(upload_file_path1)
         expect(context).to receive(:directory?).with(upload_file_path1).and_return(false)
         expect(storage).to receive(:bucket).with(bucket_name).and_return(bucket)
@@ -177,11 +183,11 @@ describe Magellan::Gcs::Proxy::Cli do
     it :build_command do
       r = subject.build_command(context)
       expected = 'cmd2 123'\
-                 ' /tmp/workspace/downloads/path/to/bar'\
+                 ' /tmp/workspace/downloads/bucket2/path/to/bar'\
                  ' /tmp/workspace/uploads'\
-                 ' /tmp/workspace/downloads/path/to/baz'\
-                 ' /tmp/workspace/downloads/path/to/qux1'\
-                 ' /tmp/workspace/downloads/path/to/qux2'
+                 ' /tmp/workspace/downloads/bucket2/path/to/baz'\
+                 ' /tmp/workspace/downloads/bucket2/path/to/qux1'\
+                 ' /tmp/workspace/downloads/bucket2/path/to/qux2'
       expect(r).to eq expected
     end
   end
