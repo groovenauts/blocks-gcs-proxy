@@ -15,6 +15,7 @@ describe Magellan::Gcs::Proxy::Cli do
   end
   before do
     # GCP
+    Magellan::Gcs::Proxy.config.reset
     allow(Magellan::Gcs::Proxy.config).to receive(:load_file).and_return(config_data)
     allow(Magellan::Gcs::Proxy::GCP).to receive(:pubsub).and_return(pubsub)
     allow(Magellan::Gcs::Proxy::GCP).to receive(:storage).and_return(storage)

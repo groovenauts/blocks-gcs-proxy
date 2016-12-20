@@ -5,7 +5,7 @@ require 'json'
 
 subname = ARGV.first
 puts "Listening to #{subname}"
-Magellan::Gcs::Proxy::GCP.pubsub.subscription(subname).tap do |sub|
+Magellan::Gcs::Proxy::PubsubSubscription.new(subname).tap do |sub|
   sub.listen do |msg|
     attrs = { 'data' => msg.data }.update(msg.attributes)
     puts attrs.map { |k, v| "#{k}:#{v}" }.join("\t")

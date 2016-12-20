@@ -23,7 +23,9 @@ module Magellan
           Dir.mktmpdir 'workspace' do |dir|
             @workspace = dir
             setup_dirs
-            yield
+            PubsubSustainer.run(message) do
+              yield
+            end
           end
         end
 

@@ -1,9 +1,8 @@
 # [config] IMAGE_NAME: "groovenauts/batch_type_iot_example"
 # [config]
 # [config] WORKING_DIR: "."
-# [config] VERSION_FILE: VERSION
+# [config] VERSION_SCRIPT: "ruby -r ../lib/magellan/gcs/proxy/version.rb -e 'puts Magellan::Gcs::Proxy::VERSION'"
 # [config] GIT_TAG_PREFIX: 'example/'
-# [config]
 
 FROM ruby:2.3
 
