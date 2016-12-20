@@ -65,7 +65,7 @@ GEM
     logging (2.1.0)
       little-plugger (~> 1.1)
       multi_json (~> 1.10)
-    magellan-gcs-proxy (0.2.0)
+    magellan-gcs-proxy (0.3.0)
       dotenv
       google-cloud-logging
       google-cloud-storage
