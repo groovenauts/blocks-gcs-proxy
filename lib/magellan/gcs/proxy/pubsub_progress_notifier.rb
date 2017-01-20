@@ -22,7 +22,7 @@ module Magellan
         def notify(severity, job_message, data, attrs)
           attrs = { level: severity, job_message_id: job_message.message_id }.merge(attrs)
           # attrs must be an [Hash<String,String>]
-          attrs = attrs.each_with_object({}){|(k,v),d| d[k.to_s] = v.to_s}
+          attrs = attrs.each_with_object({}) { |(k, v), d| d[k.to_s] = v.to_s }
           logger.debug("Publishing progress: #{attrs.inspect}")
           msg = Google::Apis::PubsubV1::Message.new(data: data, attributes: attrs)
           req = Google::Apis::PubsubV1::PublishRequest.new(messages: [msg])
