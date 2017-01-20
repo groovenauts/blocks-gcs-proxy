@@ -72,7 +72,7 @@ module Magellan
                   next if directory?(path)
                   url = "gs://#{bucket_name}/#{path}"
                   logger.info("Uploading: #{path} to #{url}")
-                  return if Proxy.config[:dryrun]
+                  next if Proxy.config[:dryrun]
                   bucket = GCP.storage.bucket(bucket_name)
                   bucket.create_file path, path
                   logger.info("Upload OK: #{path} to #{url}")
