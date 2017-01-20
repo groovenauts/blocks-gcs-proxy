@@ -1,4 +1,5 @@
 require 'magellan/gcs/proxy'
+require 'magellan/gcs/proxy/log'
 
 require 'logger'
 require 'json'
@@ -7,6 +8,8 @@ module Magellan
   module Gcs
     module Proxy
       class PubsubProgressNotifier
+        include Log
+
         attr_reader :topic_name
         def initialize(topic_name)
           @topic_name = topic_name
@@ -17,7 +20,13 @@ module Magellan
         end
 
         def notify(severity, job_message, data, attrs)
-          topic.publish data, { level: severity, job_message_id: job_message.message_id }.merge(attrs)
+          attrs = { level: severity, job_message_id: job_message.message_id }.merge(attrs)
+          # attrs must be an [Hash<String,String>]
+          attrs = attrs.each_with_object({}){|(k,v),d| d[k.to_s] = v.to_s}
+          logger.debug("Publishing progress: #{attrs.inspect}")
+          msg = Google::Apis::PubsubV1::Message.new(data: data, attributes: attrs)
+          req = Google::Apis::PubsubV1::PublishRequest.new(messages: [msg])
+          GCP.pubsub.publish_topic(topic_name, req)
         end
       end
     end
