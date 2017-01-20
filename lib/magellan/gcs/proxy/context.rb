@@ -54,6 +54,7 @@ module Magellan
           download_mapping.each do |url, path|
             FileUtils.mkdir_p File.dirname(path)
             logger.debug("Downloading: #{url} to #{path}")
+            next if Proxy.config[:dryrun]
             uri = parse_uri(url)
             @last_bucket_name = uri.host
             bucket = GCP.storage.bucket(@last_bucket_name)
@@ -71,6 +72,7 @@ module Magellan
                   next if directory?(path)
                   url = "gs://#{bucket_name}/#{path}"
                   logger.info("Uploading: #{path} to #{url}")
+                  return if Proxy.config[:dryrun]
                   bucket = GCP.storage.bucket(bucket_name)
                   bucket.create_file path, path
                   logger.info("Upload OK: #{path} to #{url}")

@@ -23,3 +23,5 @@ sustainer:
   #   The interval to send delay message. It must be lower than delay
   #   Default: 90% of delay
   interval: <%= ENV['BLOCKS_BATCH_SUSTAINER_INTERVAL'] || 540 %>
+
+dryrun: <%= ENV['BLOCKS_BATCH_DRYRUN'] || false %>

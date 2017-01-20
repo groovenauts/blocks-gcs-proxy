@@ -116,7 +116,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
         # Execute
         any_composite_logger = an_instance_of(Magellan::Gcs::Proxy::CompositeLogger)
-        expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both)
+        expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both, dry_run: nil)
 
         # Upload
         expect(Dir).to receive(:chdir).with(uploads_dir).and_yield

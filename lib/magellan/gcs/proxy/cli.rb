@@ -44,7 +44,7 @@ module Magellan
 
             cmd = build_command(context)
 
-            exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both) }
+            exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both, dry_run: Proxy.config[:dryrun]) }
             context.process_with_notification([5, 6, 7], TOTAL, 'Command', exec) do
               context.process_with_notification([8, 9, 10], TOTAL, 'Upload', &:upload)
 
