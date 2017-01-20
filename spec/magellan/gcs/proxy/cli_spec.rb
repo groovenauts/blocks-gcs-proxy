@@ -93,18 +93,17 @@ describe Magellan::Gcs::Proxy::Cli do
 
     describe :process do
       let(:bucket) { double(:bucket) }
-      let(:notification_topic) do
-        double(:notification_topic).tap do |t|
-          allow(t).to receive(:publish).with(any_args)
-        end
-      end
       let(:upload_file_path1) { 'path/to/upload_file1' }
       before do
         # Context
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
 
         # Notification Topic
-        allow(pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
+        allow(pubsub).to receive(:publish_topic).with(notification_topic_name, an_instance_of(Google::Apis::PubsubV1::PublishRequest)) do |topic, req|
+          expect(req.messages.length).to eq 1
+          msg = req.messages.first
+          expect(msg.attributes).to be_an(Hash)
+        end
 
         # Download
         expect(storage).to receive(:bucket).with(bucket_name)
