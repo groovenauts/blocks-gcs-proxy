@@ -99,7 +99,11 @@ describe Magellan::Gcs::Proxy::Cli do
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
 
         # Notification Topic
-        allow(pubsub).to receive(:publish_topic).with(notification_topic_name, an_instance_of(Google::Apis::PubsubV1::PublishRequest)) do |_topic, req|
+        expected_args = [
+          notification_topic_name,
+          an_instance_of(Google::Apis::PubsubV1::PublishRequest),
+        ]
+        allow(pubsub).to receive(:publish_topic).with(*expected_args) do |_topic, req|
           expect(req.messages.length).to eq 1
           msg = req.messages.first
           expect(msg.attributes).to be_an(Hash)
