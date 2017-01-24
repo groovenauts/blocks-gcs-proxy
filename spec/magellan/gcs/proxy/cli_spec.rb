@@ -93,18 +93,21 @@ describe Magellan::Gcs::Proxy::Cli do
 
     describe :process do
       let(:bucket) { double(:bucket) }
-      let(:notification_topic) do
-        double(:notification_topic).tap do |t|
-          allow(t).to receive(:publish).with(any_args)
-        end
-      end
       let(:upload_file_path1) { 'path/to/upload_file1' }
       before do
         # Context
         expect(Magellan::Gcs::Proxy::Context).to receive(:new).with(msg).and_return(context)
 
         # Notification Topic
-        allow(pubsub).to receive(:topic).with(notification_topic_name).and_return(notification_topic)
+        expected_args = [
+          notification_topic_name,
+          an_instance_of(Google::Apis::PubsubV1::PublishRequest),
+        ]
+        allow(pubsub).to receive(:publish_topic).with(*expected_args) do |_topic, req|
+          expect(req.messages.length).to eq 1
+          msg = req.messages.first
+          expect(msg.attributes).to be_an(Hash)
+        end
 
         # Download
         expect(storage).to receive(:bucket).with(bucket_name)
@@ -117,7 +120,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
         # Execute
         any_composite_logger = an_instance_of(Magellan::Gcs::Proxy::CompositeLogger)
-        expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both)
+        expect(LoggerPipe).to receive(:run).with(any_composite_logger, cmd1_by_msg, returns: :none, logging: :both, dry_run: nil)
 
         # Upload
         expect(Dir).to receive(:chdir).with(uploads_dir).and_yield
