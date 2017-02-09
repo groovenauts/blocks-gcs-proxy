@@ -131,10 +131,21 @@ describe Magellan::Gcs::Proxy::Cli do
         end
       end
 
-      it do
+      it :build_command do
         expect do
           subject.build_command(context)
         end.to raise_error(Magellan::Gcs::Proxy::BuildError)
+      end
+
+      it :build_command_with_error do
+        expect(msg).to receive(:acknowledge!)
+        expect(context).to receive(:notify).with(
+          Magellan::Gcs::Proxy::Cli::EXECUTE_ERROR,
+          Magellan::Gcs::Proxy::Cli::TOTAL,
+          an_instance_of(String)
+        )
+        cmd = subject.build_command_with_error(context)
+        expect(cmd).to be_nil
       end
     end
   end

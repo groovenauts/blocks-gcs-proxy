@@ -61,7 +61,8 @@ module Magellan
           context.setup do
             context.process_with_notification([DOWNLOADING, DOWNLOAD_OK, DOWNLOAD_ERROR], TOTAL, 'Download', &:download)
 
-            cmd = build_command(context)
+            cmd = build_command_with_error(context)
+            return unless cmd
 
             exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both, dry_run: Proxy.config[:dryrun]) }
             context.process_with_notification([EXECUTING, EXECUTE_OK, EXECUTE_ERROR], TOTAL, 'Command', exec) do
@@ -73,6 +74,16 @@ module Magellan
             end
           end
           context.notify(CLEANUP, TOTAL, 'Cleanup')
+        end
+
+        def build_command_with_error(context)
+          return build_command(context)
+        rescue BuildError => e
+          err = "[#{e.class.name}] #{e.message} with message: #{context.message.inspect}, the message will be acknowledged"
+          context.notify(EXECUTE_ERROR, TOTAL, e.message)
+          logger.error(err)
+          context.message.acknowledge! # Send ACK not to process this message again
+          return nil
         end
 
         def build_command(context)
