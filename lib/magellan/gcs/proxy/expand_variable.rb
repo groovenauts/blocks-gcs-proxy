@@ -52,7 +52,7 @@ module Magellan
 
         def flatten(obj)
           case obj
-          when Array then obj.map{|i| flatten(i)}
+          when Array then obj.map { |i| flatten(i) }
           when Hash then flatten(obj.values)
           else obj
           end

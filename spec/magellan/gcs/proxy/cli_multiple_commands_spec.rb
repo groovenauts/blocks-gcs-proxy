@@ -14,7 +14,7 @@ describe Magellan::Gcs::Proxy::Cli do
       'commands' => {
         'key1' => 'cmd1 %{download_files}',
         'key2' => 'cmd2 %{download_files.bar} %{uploads_dir} %{download_files.baz}',
-      }
+      },
     }
   end
   before do
@@ -38,7 +38,7 @@ describe Magellan::Gcs::Proxy::Cli do
   let(:logging_resource) { double(:logging_resource) }
 
   context :with_commands do
-    let(:template){ '%{attrs.foo}' }
+    let(:template) { '%{attrs.foo}' }
     let(:downloads_dir) { '/tmp/workspace/downloads' }
     let(:uploads_dir) { '/tmp/workspace/uploads' }
 
@@ -62,7 +62,7 @@ describe Magellan::Gcs::Proxy::Cli do
 
     subject { Magellan::Gcs::Proxy::Cli.new(template) }
 
-    context "key1" do
+    context 'key1' do
       let(:msg) do
         attrs = {
           'foo' => 'key1',
@@ -89,7 +89,7 @@ describe Magellan::Gcs::Proxy::Cli do
       end
     end
 
-    context "key2" do
+    context 'key2' do
       let(:msg) do
         attrs = {
           'foo' => 'key2',
@@ -115,7 +115,7 @@ describe Magellan::Gcs::Proxy::Cli do
       end
     end
 
-    context "invalid key" do
+    context 'invalid key' do
       let(:msg) do
         attrs = {
           'foo' => 'invalid-key',
@@ -132,11 +132,10 @@ describe Magellan::Gcs::Proxy::Cli do
       end
 
       it do
-        expect{
+        expect do
           subject.build_command(context)
-        }.to raise_error(Magellan::Gcs::Proxy::BuildError)
+        end.to raise_error(Magellan::Gcs::Proxy::BuildError)
       end
     end
   end
-
 end
