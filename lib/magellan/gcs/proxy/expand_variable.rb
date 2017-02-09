@@ -44,9 +44,17 @@ module Magellan
 
             case value
             when String then quote_string ? value.to_s : value
-            when Array then value.flatten.join(' ')
+            when Array, Hash then flatten(value).join(' ')
             else value.to_s
             end
+          end
+        end
+
+        def flatten(obj)
+          case obj
+          when Array then obj.map{|i| flatten(i)}
+          when Hash then flatten(obj.values)
+          else obj
           end
         end
       end

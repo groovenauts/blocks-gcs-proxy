@@ -9,6 +9,9 @@ require 'logger_pipe'
 module Magellan
   module Gcs
     module Proxy
+      class BuildError < StandardError
+      end
+
       class Cli
         include Log
 
@@ -58,7 +61,17 @@ module Magellan
 
         def build_command(context)
           msg_wrapper = MessageWrapper.new(context)
-          ExpandVariable.expand_variables(cmd_template, msg_wrapper)
+          r = ExpandVariable.expand_variables(cmd_template, msg_wrapper)
+          if commands = Proxy.config[:commands]
+            if template = commands[r]
+              msg_wrapper = MessageWrapper.new(context)
+              return ExpandVariable.expand_variables(template, msg_wrapper)
+            else
+              raise BuildError, "Invalid command key #{r.inspect} was given"
+            end
+          else
+            return r
+          end
         end
       end
     end
