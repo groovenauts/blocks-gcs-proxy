@@ -38,25 +38,41 @@ module Magellan
           verbose("Backtrace\n  " << e.backtrace.join("\n  "))
         end
 
-        TOTAL = 14
+        PROCESSING     =  1
+        DOWNLOADING    =  2
+        DOWNLOAD_OK    =  3
+        DOWNLOAD_ERROR =  4
+        EXECUTING      =  5
+        EXECUTE_OK     =  6
+        EXECUTE_ERROR  =  7
+        UPLOADING      =  8
+        UPLOAD_OK      =  9
+        UPLOAD_ERROR   = 10
+        ACKSENDING     = 11
+        ACKSEND_OK     = 12
+        ACKSEND_ERROR  = 13
+        CLEANUP        = 14
+
+        TOTAL = CLEANUP
+
         def process(msg)
           context = Context.new(msg)
-          context.notify(1, TOTAL, "Processing message: #{msg.inspect}")
+          context.notify(PROCESSING, TOTAL, "Processing message: #{msg.inspect}")
           context.setup do
-            context.process_with_notification([2, 3, 4], TOTAL, 'Download', &:download)
+            context.process_with_notification([DOWNLOADING, DOWNLOAD_OK, DOWNLOAD_ERROR], TOTAL, 'Download', &:download)
 
             cmd = build_command(context)
 
             exec = ->(*) { LoggerPipe.run(logger, cmd, returns: :none, logging: :both, dry_run: Proxy.config[:dryrun]) }
-            context.process_with_notification([5, 6, 7], TOTAL, 'Command', exec) do
-              context.process_with_notification([8, 9, 10], TOTAL, 'Upload', &:upload)
+            context.process_with_notification([EXECUTING, EXECUTE_OK, EXECUTE_ERROR], TOTAL, 'Command', exec) do
+              context.process_with_notification([UPLOADING, UPLOAD_OK, UPLOAD_ERROR], TOTAL, 'Upload', &:upload)
 
-              context.process_with_notification([11, 12, 13], TOTAL, 'Acknowledge') do
+              context.process_with_notification([ACKSENDING, ACKSEND_OK, ACKSEND_ERROR], TOTAL, 'Acknowledge') do
                 msg.acknowledge!
               end
             end
           end
-          context.notify(14, TOTAL, 'Cleanup')
+          context.notify(CLEANUP, TOTAL, 'Cleanup')
         end
 
         def build_command(context)
