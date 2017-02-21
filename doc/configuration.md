@@ -45,6 +45,8 @@ progress_notification:
   topic: topic_name
 ```
 
+See [How it works/Progress notification](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#progress-notification) also.
+
 
 ## sustainer
 

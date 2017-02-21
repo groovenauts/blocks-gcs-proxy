@@ -191,3 +191,38 @@ If your application takes a long time over [acknowledgement deadline](https://cl
 `magellan-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
 
 For more detail, see [config.yml/sustainer](./configuration.md#sustainer) also.
+
+
+## Progress notification
+
+`magellan-gcs-proxy` sends a message for each progress to the topic if given.
+
+To set the topic, see [config.yml/progress_notification](./configuration.md#progress_notification) also.
+
+The message has the following attributes:
+
+| Attribute name | Value  |
+|----------------|--------|
+| progress       | number from 1 to 14 |
+| total          | 14                  |
+| job_message_id | Job message ID      |
+| level          | "INFO"              |
+
+### Progresses
+
+| Value | data of message |
+|------:|-----------------|
+|     1 | "Processing message: <message inspect>" |
+|     2 | "Download starting"  |
+|     3 | "Download completed" |
+|     4 | "Download error: <error detail>"
+|     5 | "Command starting"  |
+|     6 | "Command completed" |
+|     7 | "Command error: <error detail>"
+|     8 | "Upload starting"  |
+|     9 | "Upload completed" |
+|    10 | "Upload error: <error detail>"
+|    11 | "Acknowledge starting"  |
+|    12 | "Acknowledge completed" |
+|    13 | "Acknowledge error: <error detail>"
+|    14 | "Cleanup" |
