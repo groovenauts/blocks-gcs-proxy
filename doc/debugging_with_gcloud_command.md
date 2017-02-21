@@ -1,13 +1,13 @@
-## Debugging with gcloud
+# Debugging with gcloud
 
-### Setup
+## Setup
 
 ```
 magellan-gcs-proxy-dev-setup [Project ID]
 ```
 
 
-### Listen to progress subscription
+## Listen to progress subscription
 
 Download [pubsub-devsub](https://github.com/akm/pubsub-devsub/releases) and put it into the directory on PATH.
 
@@ -20,7 +20,7 @@ It created by `magellan-gcs-proxy-dev-setup`.
 You can see it by `gcloud beta pubsub subscriptions list`.
 It starts with `test-progress-` and ends with '-sub'.
 
-### Run application
+## Run application
 
 ```
 $ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
@@ -33,7 +33,7 @@ It created by `magellan-gcs-proxy-dev-setup`.
 You can see it by `gcloud beta pubsub subscriptions list`.
 It starts with `test-job-` and ends with '-sub'.
 
-### Publish message
+## Publish message
 
 ```
 $ export JOB_TOPIC=[Job topic name]

@@ -1,6 +1,6 @@
-## How it works
+# How it works
 
-### Overview
+## Overview
 
 1. Receive a job message from job subscription of cloud pub/sub
 2. Make temporary `workspace` directory to process the job
@@ -13,12 +13,12 @@
 5. If your application returns exit code not `0`...
     1. Clean up `workspace` directory
 
-### Build command
+## Build command
 
 magellan-gcs-proxy builds command to run you application from job message by extending
 parameters in `%{...}`.
 
-#### Parameters
+### Parameters
 
 | Parameter     | Type          | Description |
 |---------------|---------------|-------------|
@@ -30,7 +30,7 @@ parameters in `%{...}`.
 | attrs/attributes | map    | The attributes of the job message |
 | data             | string | The data of the job message |
 
-#### Array Parameter
+### Array Parameter
 
 When the job message has an attribute named `array_data`:
 
@@ -57,7 +57,7 @@ If you can use `attrs.array_data` also. It extends the data joined with spaces.
 | `attrs.array_data` | "foo bar baz" |
 
 
-#### Map Parameter
+### Map Parameter
 
 When the job message has an attribute named `map_data` :
 
@@ -84,7 +84,7 @@ If you can use `attrs.map_data` also. It extends the values joined with spaces.
 | `attrs.map_data` | "foo bar baz" |
 
 
-#### Recognizing attribute as array or hash
+### Recognizing attribute as array or hash
 
 If the value match `/\A\[.*\]\z/` or `/\A\{.*\}\z/`, magellan-gcs-proxy tries to parse as JSON.
 When it succeeds magellan-gcs-proxy use it as an array or a map. When it fails magellan-gcs-proxy
