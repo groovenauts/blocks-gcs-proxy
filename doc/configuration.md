@@ -11,6 +11,8 @@ commands:
   key2: "cmd2 %{download_files.bar}" %{uploads_dir}
 ```
 
+See [How it works/Run one of multiple commands](./how_it_works.md#run-one-of-multiple-commands) also.
+
 ## dryrun
 
 `magellan-gcs-proxy` doesn't run command if dryrun given.
@@ -56,3 +58,5 @@ sustainer:
 
 Every `interval` seconds, `magellan-gcs-proxy` sends modify `modifyAckDeadline` to the subscription.
 The new deadline will be `delay` seconds later at the time.
+
+See [How it works/Long time job support](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#long-time-job-support) also.

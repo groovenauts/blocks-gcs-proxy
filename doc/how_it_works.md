@@ -140,6 +140,8 @@ download_files:
 cmd1 path/to/workspace/downloads/file2 path/to/workspace/uploads
 ```
 
+For more detail, see [config.yml/commands](./configuration.md#commands) also.
+
 
 ## Directories
 
@@ -188,3 +190,4 @@ and `workspace/uploads/bucket2/path/to/file-b` to `gs://bucket2/path/to/file-b`.
 If your application takes a long time over [acknowledgement deadline](https://cloud.google.com/pubsub/docs/subscriber#ack_deadline),
 `magellan-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
 
+For more detail, see [config.yml/sustainer](./configuration.md#sustainer) also.
