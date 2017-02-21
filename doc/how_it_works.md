@@ -102,7 +102,7 @@ You have `config.yml`:
 ```yaml
 commands:
   key1: "cmd1 %{uploads_dir} %{download_files}"
-  key2: "cmd2 %{download_files.bar}" %{uploads_dir}
+  key2: "cmd2 %{download_files.b}" %{uploads_dir}"
 ```
 
 And run `magellan-gcs-proxy` like this:
@@ -117,12 +117,13 @@ foo: key1
 download_files:
 - gs://bucket1/file1
 - gs://bucket1/file2
+- gs://bucket1/file3
 ```
 
-`magellan-gcs-proxy` call `cmd1`:
+When `magellan-gcs-proxy` gets the message above, it calls `cmd1`:
 
 ```
-cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspace/downloads/file2
+cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspace/downloads/file2 path/to/workspace/downloads/file3
 ```
 
 #### Case 2. foo is key2
@@ -130,14 +131,15 @@ cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspa
 ```yaml
 foo: key2
 download_files:
-  foo: gs://bucket1/file1
-  bar: gs://bucket1/file1
+  a: gs://bucket1/file1
+  b: gs://bucket1/file2
+  c: gs://bucket1/file3
 ```
 
-`magellan-gcs-proxy` call `cmd2`:
+When `magellan-gcs-proxy` gets the message above, it calls `cmd2`:
 
 ```
-cmd1 path/to/workspace/downloads/file2 path/to/workspace/uploads
+cmd2 path/to/workspace/downloads/file2 path/to/workspace/uploads
 ```
 
 For more detail, see [config.yml/commands](./configuration.md#commands) also.
