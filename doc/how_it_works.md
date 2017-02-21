@@ -140,3 +140,46 @@ download_files:
 cmd1 path/to/workspace/downloads/file2 path/to/workspace/uploads
 ```
 
+
+## Directories
+
+`magellan-gcs-proxy` makes temporary `workspace` directory.
+
+When a message which has the following attribute:
+
+```
+download_files: ["gs://bucket1/path/to/file1"]
+```
+
+`magellan-gcs-proxy` makes the following directories and download the file before calling user application.
+
+```
+workspace/
+workspace/downloads/
+workspace/downloads/bucket1/
+workspace/downloads/bucket1/path/
+workspace/downloads/bucket1/path/to/
+workspace/downloads/bucket1/path/to/file1
+workspace/uploads/
+```
+
+If user application makes the following directories and files:
+
+```
+workspace/
+workspace/downloads/
+(snip)
+workspace/uploads/
+workspace/uploads/bucket1/
+workspace/uploads/bucket1/path/
+workspace/uploads/bucket1/path/to/
+workspace/uploads/bucket1/path/to/file-a
+workspace/uploads/bucket2/
+workspace/uploads/bucket2/path/
+workspace/uploads/bucket2/path/to/
+workspace/uploads/bucket2/path/to/file-b
+```
+
+`magellan-gcs-proxy` uploads `workspace/uploads/bucket1/path/to/file-a` to `gs://bucket1/path/to/file-a`
+and `workspace/uploads/bucket2/path/to/file-b` to `gs://bucket2/path/to/file-b`.
+
