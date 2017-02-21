@@ -89,3 +89,54 @@ If you can use `attrs.map_data` also. It extends the values joined with spaces.
 If the value match `/\A\[.*\]\z/` or `/\A\{.*\}\z/`, magellan-gcs-proxy tries to parse as JSON.
 When it succeeds magellan-gcs-proxy use it as an array or a map. When it fails magellan-gcs-proxy
 use it as a string.
+
+
+### Run one of multiple commands
+
+If you have to run some commands in a docker container image, you can use `commands` in your `config.yml`.
+
+#### Precondition
+
+You have `config.yml`:
+
+```yaml
+commands:
+  key1: "cmd1 %{uploads_dir} %{download_files}"
+  key2: "cmd2 %{download_files.bar}" %{uploads_dir}
+```
+
+And run `magellan-gcs-proxy` like this:
+```
+magellan-gcs-proxy %{attrs.foo}
+```
+
+#### Case 1. foo is key1
+
+```
+foo: key1
+download_files:
+- gs://bucket1/file1
+- gs://bucket1/file2
+```
+
+`magellan-gcs-proxy` call `cmd1`:
+
+```
+cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspace/downloads/file2
+```
+
+#### Case 2. foo is key2
+
+```
+foo: key2
+download_files:
+  foo: gs://bucket1/file1
+  bar: gs://bucket1/file1
+```
+
+`magellan-gcs-proxy` call `cmd2`:
+
+```
+cmd1 path/to/workspace/downloads/file2 path/to/workspace/uploads
+```
+
