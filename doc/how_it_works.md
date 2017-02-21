@@ -112,7 +112,7 @@ magellan-gcs-proxy %{attrs.foo}
 
 #### Case 1. foo is key1
 
-```
+```yaml
 foo: key1
 download_files:
 - gs://bucket1/file1
@@ -127,7 +127,7 @@ cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspa
 
 #### Case 2. foo is key2
 
-```
+```yaml
 foo: key2
 download_files:
   foo: gs://bucket1/file1
@@ -182,4 +182,9 @@ workspace/uploads/bucket2/path/to/file-b
 
 `magellan-gcs-proxy` uploads `workspace/uploads/bucket1/path/to/file-a` to `gs://bucket1/path/to/file-a`
 and `workspace/uploads/bucket2/path/to/file-b` to `gs://bucket2/path/to/file-b`.
+
+## Long time job support
+
+If your application takes a long time over [acknowledgement deadline](https://cloud.google.com/pubsub/docs/subscriber#ack_deadline),
+`magellan-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
 
