@@ -29,6 +29,9 @@ magellan-gcs-proxy COMMAND ARGS...
 
 ### TODO How it works
 
+### Overview
+
+
 ### TODO Expanding variables
 
 
@@ -43,9 +46,10 @@ magellan-gcs-proxy-dev-setup [Project ID]
 
 ### Listen to progress subscription
 
+Download [pubsub-devsub](https://github.com/akm/pubsub-devsub/releases) and put it into the directory on PATH.
+
 ```
-$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
-$ magellan-gcs-proxy-dev-progress-listener [Progress subscription name]
+$ pubsub-devsub --project [Project ID] --subscription [Progress subscription name]
 ```
 
 `Progress subscription name` is the name of `Progress subscription`.
