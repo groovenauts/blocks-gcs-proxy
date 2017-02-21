@@ -27,10 +27,11 @@ Or install it yourself as:
 magellan-gcs-proxy COMMAND ARGS...
 ```
 
-## Documents
+## Links
 
 - [example](example)
 - [How it works](doc/how_it_works.md)
+- [config.yml](doc/configuration.md)
 - [Debugging with gcloud command](doc/debugging_with_gcloud_command.md)
 
 
