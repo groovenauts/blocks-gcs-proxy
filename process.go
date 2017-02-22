@@ -7,6 +7,7 @@ import (
 	"golang.org/x/oauth2/google"
 
 	pubsub "google.golang.org/api/pubsub/v1"
+	storage "google.golang.org/api/storage/v1"
 )
 
 type (
@@ -35,7 +36,8 @@ type (
 
 func (p *Process) setup(ctx context.Context) error {
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
-	client, err := google.DefaultClient(ctx, pubsub.PubsubScope)
+	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope)
+
 	if err != nil {
 		log.Printf("Failed to create DefaultClient\n")
 		return err
