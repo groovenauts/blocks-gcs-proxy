@@ -1,0 +1,21 @@
+hash: 0bb89b6862bb586f7705b12e4085e2606db2a0c1bee946c8b252e7a93f35eb03
+updated: 2017-02-22T10:48:37.307699435+09:00
+imports:
+- name: github.com/urfave/cli
+  version: 347a9884a87374d000eec7e6445a34487c1f4a2b
+- name: golang.org/x/net
+  version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: google.golang.org/api
+  version: b9d03e6e091e36f9a089515bc84cf14c2d199c4c
+  subpackages:
+  - iterator
+  - pubsub
+  - pubsub/v1
+testImports:
+- name: github.com/stretchr/testify
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  subpackages:
+  - assert
