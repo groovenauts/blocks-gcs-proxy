@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/magellan-gcs-proxy.png)](https://rubygems.org/gems/magellan-gcs-proxy) [![Build Status](https://secure.travis-ci.org/groovenauts/magellan-gcs-proxy.png)](https://travis-ci.org/groovenauts/magellan-gcs-proxy)
 
-magellan-gcs-proxy is a gem for MAGELLAN BLOCKS "Batch type" IoT board.
+magellan-gcs-proxy is a gem for MAGELLAN BLOCKS `concurrent batch board`.
 
 
 ## Installation
@@ -27,56 +27,12 @@ Or install it yourself as:
 magellan-gcs-proxy COMMAND ARGS...
 ```
 
-### TODO How it works
+## Links
 
-### TODO Expanding variables
-
-
-## Debugging with gcloud
-
-### Setup
-
-```
-magellan-gcs-proxy-dev-setup [Project ID]
-```
-
-
-### Listen to progress subscription
-
-```
-$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
-$ magellan-gcs-proxy-dev-progress-listener [Progress subscription name]
-```
-
-`Progress subscription name` is the name of `Progress subscription`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub subscriptions list`.
-It starts with `test-progress-` and ends with '-sub'.
-
-### Run application
-
-```
-$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
-$ export BLOCKS_BATCH_PUBSUB_SUBSCRIPTION=[Job subscription name]
-$ magellan-gcs-proxy COMMAND ARGS...
-```
-
-`Job subscription name` is the name of `Job subscription`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub subscriptions list`.
-It starts with `test-job-` and ends with '-sub'.
-
-### Publish message
-
-```
-$ export JOB_TOPIC=[Job topic name]
-$ gcloud beta pubsub topics publish $JOB_TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
-```
-
-`Job topic name` is the name of `Job topic`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub topics list`.
-It starts with `test-job-` and ends with your user name.
+- [example](example)
+- [How it works](doc/how_it_works.md)
+- [config.yml](doc/configuration.md)
+- [Debugging with gcloud command](doc/debugging_with_gcloud_command.md)
 
 
 ## Development
