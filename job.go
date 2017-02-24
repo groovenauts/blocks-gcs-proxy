@@ -148,7 +148,7 @@ func (job *Job) flatten(obj interface{}) []interface{} {
 	switch obj.(type) {
 	case []interface{}:
 		res := []interface{}{}
-		for _, i := range obj {
+		for _, i := range obj.([]interface{}) {
 			switch i.(type) {
 			case bool, float64, string, nil:
 				res = append(res, i)
@@ -160,8 +160,8 @@ func (job *Job) flatten(obj interface{}) []interface{} {
 		}
 		return res
 	case map[string]interface{}:
-		values := []interface{}
-		for _, val := range obj {
+		values := []interface{}{}
+		for _, val := range obj.(map[string]interface{}) {
 			values = append(values, val)
 		}
 		return job.flatten(values)
