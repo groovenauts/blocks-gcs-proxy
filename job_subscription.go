@@ -2,6 +2,7 @@ package gcsproxy
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -53,15 +54,21 @@ type (
 		Sustainer *JobSustainerConfig
 	}
 
+	JobSubStatus uint8
+
 	JobSubscription struct {
 		config *JobSubscriptionConfig
 		puller Puller
+		status JobSubStatus
+		mux sync.Mutex
 	}
+)
 
-	JobSustainer struct {
-		config *JobSustainerConfig
-		service *pubsub.Service
-	}
+const (
+	initial JobSubStatus = iota
+	running
+	done
+	acked
 )
 
 func (s *JobSubscription)listen(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
@@ -80,16 +87,76 @@ func (s *JobSubscription)process(ctx context.Context, f func(msg *pubsub.Receive
 	if err != nil {
 		return err
 	}
-	if msg != nil {
-		err = f(msg)
-		if err != nil {
-			return err
-		}
+	if msg == nil {
+		return nil
 	}
+
+	s.status = running
+
+	go s.sendMADPeriodically(msg.AckId)
+
+	err = f(msg)
+	s.status = done
+
+	if err != nil {
+		return err
+	}
+
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	_, err = s.puller.Acknowledge(s.config.Subscription, msg.AckId)
 	if err != nil {
 		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", msg, err)
 		return err
+	}
+
+	s.status = acked
+
+	return nil
+}
+
+func (s *JobSubscription) running() bool {
+	return s.status == running
+}
+
+func (s *JobSubscription) sendMADPeriodically(ackId string) error {
+	for {
+		nextLimit := time.Now().Add(time.Duration(s.config.Sustainer.Interval) * time.Second)
+		err := s.waitAndSendMAD(nextLimit, ackId)
+		if err != nil {
+			return err
+		}
+		if !s.running() {
+			return nil
+		}
+	}
+	// return nil
+}
+
+func (s *JobSubscription) waitAndSendMAD(nextLimit time.Time, ackId string) error {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	for now := range ticker.C {
+		if !s.running() {
+			ticker.Stop()
+			return nil
+		}
+		if now.After(nextLimit) {
+			ticker.Stop()
+		}
+	}
+
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	// Don't send MAD after sending ACK
+	if s.status == acked {
+		return nil
+	}
+
+	_, err := s.puller.ModifyAckDeadline(s.config.Subscription, []string{ackId}, int64(s.config.Sustainer.Delay))
+	if err != nil {
+		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.config.Subscription, ackId, s.config.Sustainer.Delay, err)
 	}
 	return nil
 }
