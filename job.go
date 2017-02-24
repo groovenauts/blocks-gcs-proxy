@@ -125,7 +125,7 @@ func (job *Job) uploadFiles(dir string) error {
 	return nil
 }
 
-func (job *Job) parseJson(source string) interface{} {
+func (job *Job) parseJson(str string) interface{} {
 	matched, err := regexp.MatchString(`\A\[.*\]\z|\A\{.*\}\z|`, str)
 	if err != nil {
 		return str
