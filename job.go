@@ -2,6 +2,7 @@ package gcsproxy
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"url"
+	"net/url"
 
 	"golang.org/x/net/context"
 
@@ -138,7 +139,42 @@ func (job *Job) downloadFiles(dir string) (map[string]string, error) {
 }
 
 func (job *Job) uploadFiles(dir string) error {
+	localPaths, err := job.listFiles(dir)
+	if err != nil {
+		return err
+	}
+	for _, localPath := range localPaths {
+		relPath, err := filepath.Rel(dir, localPath)
+		if err != nil {
+			log.Fatalf("Error getting relative path of %v: %v\n", localPath, err)
+			return err
+		}
+		sep := string([]rune{os.PathSeparator})
+		parts := strings.Split(relPath, sep)
+		bucket := parts[0]
+		object := strings.Join(parts[1:], sep)
+		err = job.storage.Upload(bucket, object, localPath)
+		if err != nil {
+			log.Fatalf("Error uploading %v to gs://%v/%v: %v\n", localPath, bucket, object, err)
+			return err
+		}
+	}
 	return nil
+}
+
+func (job *Job) listFiles(dir string) ([]string, error) {
+	result := []string{}
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			result = append(result, path)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("Error listing upload files: %v\n", err)
+		return nil, err
+	}
+	return result, nil
 }
 
 func (job *Job) parseJson(str string) interface{} {
