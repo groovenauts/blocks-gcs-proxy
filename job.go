@@ -107,8 +107,8 @@ func (job *Job) extract(ctx context.Context, values []string) ([]string, error) 
 
 func (job *Job) downloadFiles(dir string) (map[string]string, error) {
 	result := map[string]string{}
-	objects := job.flatten(job.parseJson(job.Message.Attributes["download_files"]))
 	remote_files := []string{}
+	objects := job.flatten(job.parseJson(job.message.Message.Attributes["download_files"]))
 	for _, obj := range objects {
 		switch obj.(type) {
 		case string:
