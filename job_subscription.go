@@ -13,6 +13,7 @@ type (
 	Puller interface {
 		Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error)
 		Acknowledge(subscription, ackId string) (*pubsub.Empty, error)
+		ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error)
 	}
 
 	pubsubPuller struct {
@@ -29,6 +30,14 @@ func (pp *pubsubPuller) Acknowledge(subscription, ackId string) (*pubsub.Empty, 
 		AckIds: []string{ackId},
 	}
 	return pp.subscriptionsService.Acknowledge(subscription, ackRequest).Do()
+}
+
+func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error) {
+	req := &pubsub.ModifyAckDeadlineRequest{
+		AckDeadlineSeconds: ackDeadlineSeconds,
+		AckIds: ackIds,
+	}
+	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
 }
 
 
