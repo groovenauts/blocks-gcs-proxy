@@ -31,6 +31,7 @@ type (
 		config *ProcessConfig
 		subscription *JobSubscription
 		notification *ProgressNotification
+		storage *CloudStorage
 	}
 )
 
@@ -43,21 +44,28 @@ func (p *Process) setup(ctx context.Context) error {
 		return err
 	}
 
-	// Creates a pubsubClient
-	service, err := pubsub.New(client)
+	// Create a storageService
+	storageService, err := storage.New(client)
+	if err != nil {
+		log.Printf("Failed to create storage.Service with %v: %v\n", client, err)
+		return err
+	}
+	p.storage = &CloudStorage{storageService.Objects}
+
+	// Creates a pubsubService
+	pubsubService, err := pubsub.New(client)
 	if err != nil {
 		log.Printf("Failed to create pubsub.Service with %v: %v\n", client, err)
 		return err
 	}
 
-	
 	p.subscription = &JobSubscription{
 		config: p.config.JobSubscription,
-		puller: &pubsubPuller{service.Projects.Subscriptions},
+		puller: &pubsubPuller{pubsubService.Projects.Subscriptions},
 	}
 	p.notification = &ProgressNotification{
 		config: p.config.ProgressNotification,
-		publisher: &pubsubPublisher{service.Projects.Topics},
+		publisher: &pubsubPublisher{pubsubService.Projects.Topics},
 	}
 	return nil
 }
@@ -68,6 +76,7 @@ func (p *Process) run(ctx context.Context) error{
 			config: p.config.Job,
 			message: msg,
 			notification: p.notification,
+			storage: p.storage,
 		}
 		err := job.execute(ctx)
 		if err != nil {
