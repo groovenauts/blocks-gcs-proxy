@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"url"
 
 	"golang.org/x/net/context"
 
@@ -25,6 +27,7 @@ type (
 		config *JobConfig
 		message *pubsub.ReceivedMessage
 		notification *ProgressNotification
+		storage Storage
 	}
 )
 
@@ -107,17 +110,30 @@ func (job *Job) extract(ctx context.Context, values []string) ([]string, error) 
 
 func (job *Job) downloadFiles(dir string) (map[string]string, error) {
 	result := map[string]string{}
-	remote_files := []string{}
 	objects := job.flatten(job.parseJson(job.message.Message.Attributes["download_files"]))
+	remote_urls := []string{}
 	for _, obj := range objects {
 		switch obj.(type) {
 		case string:
-			remote_files = append(remote_files, obj.(string))
+			remote_urls = append(remote_urls, obj.(string))
 		default:
 			log.Printf("Invalid download file URL: %v [%T]", obj, obj)
 		}
 	}
-
+	for _, remote_url := range remote_urls {
+		url, err := url.Parse(remote_url)
+		if err != nil {
+			log.Fatalf("Invalid URL: %v because of %v\n", remote_url, err)
+			return nil, err
+		}
+		urlstr := fmt.Sprintf("gs://%v/%v", url.Host, url.Path)
+		destPath := filepath.Join(dir, url.Host, url.Path)
+		err = job.storage.Download(url.Host, url.Path, destPath)
+		if err != nil {
+			return nil, err
+		}
+		result[urlstr] = destPath
+	}
 	return result, nil
 }
 
