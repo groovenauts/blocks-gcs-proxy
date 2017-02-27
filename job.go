@@ -78,10 +78,10 @@ func (job *Job) withNotify(progress int, f func() error) func() error {
 		job.notification.notify(progress, msg_id, "info")
 		err := f()
 		if err != nil {
-			job.notification.notify(progress + 2, msg_id, "error")
+			job.notification.notify(progress+2, msg_id, "error")
 			return err
 		}
-		job.notification.notify(progress + 1, msg_id, "info")
+		job.notification.notify(progress+1, msg_id, "info")
 		return nil
 	}
 }
@@ -227,7 +227,6 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	}
 	return result, nil
 }
-
 
 func (job *Job) execute() error {
 	cmd, err := job.build()
