@@ -9,6 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func assertDig(t *testing.T, v *Variable, expected, tmp interface{}, name, expr string) {
+	res, err := v.dig(tmp, name, expr)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
+
 
 func assertExpand(t *testing.T, v *Variable, expected, expr string) {
 	res, err := v.expand(expr)
@@ -48,6 +54,10 @@ func TestVariableExpandCase1(t *testing.T) {
 	}
 
 	v := &Variable{data: seed}
+	assertDig(t, v, local_download_files, seed, "download_files", "download_files")
+	assertDig(t, v, local_download_files["foo"], local_download_files, "foo", "foo")
+	assertDig(t, v, local_download_files["bar"], local_download_files, "bar", "bar")
+
 	assertExpand(t, v, local_download_files["foo"], "%{download_files.foo}")
 	assertExpand(t, v, local_download_files["bar"], "%{download_files.bar}")
 	assertExpand(t, v, download_files["foo"], "%{attrs.download_files.foo}")
