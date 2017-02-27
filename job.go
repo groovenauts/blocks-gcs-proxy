@@ -178,8 +178,22 @@ func (job *Job) build() (*exec.Cmd, error) {
 
 func (job *Job) extract(values []string) ([]string, error) {
 	result := []string{}
+	v := Variable{
+		data: map[string]interface{}{
+			"workspace": job.workspace,
+			"downloads_dir": job.downloads_dir,
+			"uploads_dir": job.uploads_dir,
+			"download_files": job.localDownloadFiles,
+			"local_download_files": job.localDownloadFiles,
+			"remote_download_files": job.remoteDownloadFiles,
+			"attrs": job.message.Message.Attributes,
+			"attributes": job.message.Message.Attributes,
+			"data": job.message.Message.Data,
+		},
+	}
 	for _, src := range values {
-		extracted := src
+		extracted, err := v.expand(src)
+		if err != nil {return nil, err}
 		result = append(result, extracted)
 	}
 	return result, nil
