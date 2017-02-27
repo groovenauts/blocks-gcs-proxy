@@ -26,6 +26,7 @@ type (
 
 	Job struct {
 		config *JobConfig
+		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 		message *pubsub.ReceivedMessage
 		notification *ProgressNotification
 		storage Storage
@@ -114,7 +115,7 @@ func (job *Job) setupDownloadFiles() error {
 			log.Fatalf("Invalid URL: %v because of %v\n", remote_url, err)
 			return err
 		}
-		urlstr := fmt.Sprintf("gs://%v/%v", url.Host, url.Path)
+		urlstr := fmt.Sprintf("gs://%v%v", url.Host, url.Path)
 		destPath := filepath.Join(job.downloads_dir, url.Host, url.Path)
 		job.downloadFileMap[urlstr] = destPath
 	}
@@ -136,6 +137,8 @@ func (job *Job) copyWithFileMap(obj interface{}) interface{} {
 			result = append(result, job.copyWithFileMap(v))
 		}
 		return result
+	case string:
+		return job.downloadFileMap[obj.(string)]
 	default:
 		return obj
 	}
