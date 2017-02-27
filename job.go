@@ -159,8 +159,9 @@ func (job *Job) downloadFiles() error {
 	return nil
 }
 
-func (job *Job) build() (*exec.Cmd, error) {
-	v := &Variable{
+
+func (job *Job) buildVariable() *Variable {
+	return &Variable{
 		data: map[string]interface{}{
 			"workspace": job.workspace,
 			"downloads_dir": job.downloads_dir,
@@ -173,6 +174,10 @@ func (job *Job) build() (*exec.Cmd, error) {
 			"data": job.message.Message.Data,
 		},
 	}
+}
+
+func (job *Job) build() (*exec.Cmd, error) {
+	v := job.buildVariable()
 
 	values, err := job.extract(v, job.config.Template)
 	if err != nil {

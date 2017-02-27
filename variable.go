@@ -3,6 +3,7 @@ package gcsproxy
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,6 +32,7 @@ func (v *Variable)expand(str string) (string, error) {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
 		value, err := v.dive(expr)
 		if err != nil {
+			log.Printf("Error to dive: %v: %v\n", expr, err)
 			// return err
 			value = ""
 		}
@@ -39,6 +41,8 @@ func (v *Variable)expand(str string) (string, error) {
 		case []interface{}:
 			return v.flatten(value)
 		case map[string]interface{}:
+			return v.flatten(value)
+		case map[string]string:
 			return v.flatten(value)
 		default:
 			return fmt.Sprintf("%v", value)
@@ -96,6 +100,8 @@ func (v *Variable)digIn(tmp interface{}, name, expr string) (interface{}, error)
 		return tmp.([]interface{})[idx], nil
 	case map[string]interface{}:
 		return tmp.(map[string]interface{})[name], nil
+	case map[string]string:
+		return tmp.(map[string]string)[name], nil
 	default:
 		return nil, fmt.Errorf("Unsupported Object type: [%T]%v", tmp, tmp)
 	}
@@ -108,7 +114,10 @@ func (v *Variable) parseIndex(str string) (int, error) {
 		return 0, fmt.Errorf("Invalid Reference: %v", str)
 	}
 	idx, err := strconv.Atoi(str)
-	if err != nil { return 0, err }
+	if err != nil {
+		log.Printf("Error to Atoi(%v): %v\n", str, err)
+		return 0, err
+	}
 	return idx, nil
 }
 
@@ -145,6 +154,12 @@ func (v *Variable)flatten(obj interface{}) string {
 	case map[string]interface{}:
 		res := []string{}
 		for _, i := range obj.(map[string]interface{}) {
+			res = append(res, v.flatten(i))
+		}
+		return strings.Join(res, v.separator)
+	case map[string]string:
+		res := []string{}
+		for _, i := range obj.(map[string]string) {
 			res = append(res, v.flatten(i))
 		}
 		return strings.Join(res, v.separator)
