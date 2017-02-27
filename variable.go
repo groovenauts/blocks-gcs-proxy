@@ -20,7 +20,7 @@ func (v *Variable)expand(str string) (string, error) {
 	re2 := regexp.MustCompile(`\s*\}\z`)
 	res := re0.ReplaceAllStringFunc("A/%{  foo  }/B/%{bar}/D", func(raw string) string{
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
-		value, err := v.dig_variables(expr)
+		value, err := v.dive(expr)
 		if err != nil {
 			// return err
 			value = ""
@@ -38,10 +38,10 @@ func (v *Variable)expand(str string) (string, error) {
 	return res, nil
 }
 
-func (v *Variable)dig_variables(expr string) (interface{}, error) {
+func (v *Variable)dive(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
 	res, err := v.inject(var_names, v.data, func(tmp interface{}, name string) (interface{}, error) {
-		res, err := v.dig_variable(tmp, name, expr)
+		res, err := v.dig(tmp, name, expr)
 		if err != nil { return nil, err }
 		return res, nil
 	})
@@ -49,7 +49,7 @@ func (v *Variable)dig_variables(expr string) (interface{}, error) {
 	return res, nil
 }
 
-func (v *Variable)dig_variable(tmp interface{}, name, expr string) (interface{}, error) {
+func (v *Variable)dig(tmp interface{}, name, expr string) (interface{}, error) {
 	matched, err := regexp.MatchString(`\A\d+\z`, name)
 	if err != nil {
 		return nil, err
