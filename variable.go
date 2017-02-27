@@ -12,10 +12,18 @@ type (
 	Variable struct {
 		data map[string]interface{}
 		// quoteString boolean
+		separator string
 	}
 )
 
+const (
+	DefaultExpandedArraySeparator = "[[GCSPROXY:SEP]]"
+)
+
 func (v *Variable)expand(str string) (string, error) {
+	if (v.separator == "") {
+		v.separator = DefaultExpandedArraySeparator
+	}
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
 	re2 := regexp.MustCompile(`\s*\}\z`)
@@ -118,11 +126,8 @@ func (v *Variable) inject(var_names []string, tmp interface{}, f func(interface{
 	}
 }
 
-
-
 const (
 	expr_separator = "."
-	variable_separator = " "
 )
 
 func (v *Variable)flatten(obj interface{}) string {
@@ -130,19 +135,19 @@ func (v *Variable)flatten(obj interface{}) string {
 	case string:
 		return obj.(string)
 	case []string:
-		return strings.Join(obj.([]string), variable_separator)
+		return strings.Join(obj.([]string), v.separator)
 	case []interface{}:
 		res := []string{}
 		for _, i := range obj.([]interface{}) {
 			res = append(res, v.flatten(i))
 		}
-		return strings.Join(res, variable_separator)
+		return strings.Join(res, v.separator)
 	case map[string]interface{}:
 		res := []string{}
 		for _, i := range obj.(map[string]interface{}) {
 			res = append(res, v.flatten(i))
 		}
-		return strings.Join(res, variable_separator)
+		return strings.Join(res, v.separator)
 	default:
 		return fmt.Sprintf("%v", obj)
 	}

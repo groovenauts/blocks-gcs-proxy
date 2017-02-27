@@ -53,7 +53,7 @@ func TestVariableExpandCase1(t *testing.T) {
 		"data": "",
 	}
 
-	v := &Variable{data: seed}
+	v := &Variable{data: seed, separator: " "}
 	assertDig(t, v, local_download_files, seed, "download_files", "download_files")
 	assertDig(t, v, local_download_files["foo"].(string), local_download_files, "foo", "foo")
 	assertDig(t, v, local_download_files["bar"].(string), local_download_files, "bar", "bar")
@@ -105,7 +105,7 @@ func TestVariableExpandCase2(t *testing.T) {
 		"data": "",
 	}
 
-	v := &Variable{data: seed}
+	v := &Variable{data: seed, separator: " "}
 	assertExpand(t, v, "123", "%{attrs.foo}")
 	assertExpand(t, v, strings.Join(local_qux, " "), "%{download_files.qux}")
 	assertExpand(t, v, strings.Join(remote_qux, " "), "%{attrs.download_files.qux}")

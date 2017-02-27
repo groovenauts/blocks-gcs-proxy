@@ -160,28 +160,7 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) build() (*exec.Cmd, error) {
-	values, err := job.extract(job.config.Template)
-	if err != nil {
-		return nil, err
-	}
-	if len(job.config.Commands) > 0 {
-		key := strings.Join(values, " ")
-		t := job.config.Commands[key]
-		if t == nil { t = job.config.Commands["default"] }
-		if t != nil {
-			values, err = job.extract(t)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	cmd := exec.Command(values[0], values[1:]...)
-	return cmd, nil
-}
-
-func (job *Job) extract(values []string) ([]string, error) {
-	result := []string{}
-	v := Variable{
+	v := &Variable{
 		data: map[string]interface{}{
 			"workspace": job.workspace,
 			"downloads_dir": job.downloads_dir,
@@ -194,10 +173,35 @@ func (job *Job) extract(values []string) ([]string, error) {
 			"data": job.message.Message.Data,
 		},
 	}
+
+	values, err := job.extract(v, job.config.Template)
+	if err != nil {
+		return nil, err
+	}
+	if len(job.config.Commands) > 0 {
+		key := strings.Join(values, " ")
+		t := job.config.Commands[key]
+		if t == nil { t = job.config.Commands["default"] }
+		if t != nil {
+			values, err = job.extract(v, t)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	cmd := exec.Command(values[0], values[1:]...)
+	return cmd, nil
+}
+
+func (job *Job) extract(v *Variable, values []string) ([]string, error) {
+	result := []string{}
 	for _, src := range values {
 		extracted, err := v.expand(src)
 		if err != nil {return nil, err}
-		result = append(result, extracted)
+		vals := strings.Split(extracted, v.separator)
+		for _, val := range vals {
+			result = append(result, val)
+		}
 	}
 	return result, nil
 }
