@@ -29,17 +29,29 @@ type (
 		message *pubsub.ReceivedMessage
 		notification *ProgressNotification
 		storage Storage
+
+		// These are set at at setupWorkspace
+		workspace string
+		downloads_dir string
+		uploads_dir string
+
+		// These are set at setupDownloadFiles
+		downloadFileMap map[string]string
+		remoteDownloadFiles interface{}
+		localDownloadFiles interface{}
 	}
 )
 
-func (job *Job) execute(ctx context.Context) error {
-	return job.setupWorkspace(ctx, func(workspace, downloads_dir, uploads_dir string) error {
-		_, err := job.downloadFiles(downloads_dir)
-		if err != nil {
-			return err
-		}
 
-		cmd, err := job.build(ctx)
+func (job *Job) execute(ctx context.Context) error {
+	return job.setupWorkspace(ctx, func() error {
+		err := job.setupDownloadFiles()
+		if err != nil { return err }
+
+		err = job.downloadFiles()
+		if err != nil { return err }
+
+		cmd, err := job.build()
 		if err != nil {
 			log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 			return err
@@ -50,16 +62,15 @@ func (job *Job) execute(ctx context.Context) error {
 			// return err // Don't return this err
 		}
 
-		err = job.uploadFiles(uploads_dir)
-		if err != nil {
-			return err
-		}
+		err = job.uploadFiles()
+		if err != nil { return err }
 
 		return nil
 	})
 }
 
-func (job *Job) setupWorkspace(ctx  context.Context, f func(workspace, downloads_dir, uploads_dir string) error) error {
+
+func (job *Job) setupWorkspace(ctx  context.Context, f func() error) error {
 	dir, err := ioutil.TempDir("", "workspace")
 	if err != nil {
 		log.Fatal(err)
@@ -77,11 +88,76 @@ func (job *Job) setupWorkspace(ctx  context.Context, f func(workspace, downloads
 			return err
 		}
 	}
-	return f(dir, subdirs[0], subdirs[1])
+	job.workspace = dir
+	job.downloads_dir = subdirs[0]
+	job.uploads_dir = subdirs[1]
+	return f()
 }
 
-func (job *Job) build(ctx context.Context) (*exec.Cmd, error) {
-	values, err := job.extract(ctx, job.config.Template)
+
+func (job *Job) setupDownloadFiles() error {
+	job.downloadFileMap = map[string]string{}
+	job.remoteDownloadFiles = job.parseJson(job.message.Message.Attributes["download_files"])
+	objects := job.flatten(job.remoteDownloadFiles)
+	remoteUrls := []string{}
+	for _, obj := range objects {
+		switch obj.(type) {
+		case string:
+			remoteUrls = append(remoteUrls, obj.(string))
+		default:
+			log.Printf("Invalid download file URL: %v [%T]", obj, obj)
+		}
+	}
+	for _, remote_url := range remoteUrls {
+		url, err := url.Parse(remote_url)
+		if err != nil {
+			log.Fatalf("Invalid URL: %v because of %v\n", remote_url, err)
+			return err
+		}
+		urlstr := fmt.Sprintf("gs://%v/%v", url.Host, url.Path)
+		destPath := filepath.Join(job.downloads_dir, url.Host, url.Path)
+		job.downloadFileMap[urlstr] = destPath
+	}
+	job.localDownloadFiles = job.copyWithFileMap(job.remoteDownloadFiles)
+	return nil
+}
+
+func (job *Job) copyWithFileMap(obj interface{}) interface{} {
+	switch obj.(type) {
+	case map[string]interface{}:
+		result := map[string]interface{}{}
+		for k, v := range obj.(map[string]interface{}) {
+			result[k] = job.copyWithFileMap(v)
+		}
+		return result
+	case []interface{}:
+		result := []interface{}{}
+		for _, v := range obj.([]interface{}) {
+			result = append(result, job.copyWithFileMap(v))
+		}
+		return result
+	default:
+		return obj
+	}
+}
+
+func (job *Job) downloadFiles() error {
+	for remoteURL, destPath := range job.downloadFileMap {
+		url, err := url.Parse(remoteURL)
+		if err != nil {
+			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
+			return err
+		}
+		err = job.storage.Download(url.Host, url.Path, destPath)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (job *Job) build() (*exec.Cmd, error) {
+	values, err := job.extract(job.config.Template)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +166,7 @@ func (job *Job) build(ctx context.Context) (*exec.Cmd, error) {
 		t := job.config.Commands[key]
 		if t == nil { t = job.config.Commands["default"] }
 		if t != nil {
-			values, err = job.extract(ctx, t)
+			values, err = job.extract(t)
 			if err != nil {
 				return nil, err
 			}
@@ -100,7 +176,7 @@ func (job *Job) build(ctx context.Context) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func (job *Job) extract(ctx context.Context, values []string) ([]string, error) {
+func (job *Job) extract(values []string) ([]string, error) {
 	result := []string{}
 	for _, src := range values {
 		extracted := src
@@ -109,42 +185,13 @@ func (job *Job) extract(ctx context.Context, values []string) ([]string, error) 
 	return result, nil
 }
 
-func (job *Job) downloadFiles(dir string) (map[string]string, error) {
-	result := map[string]string{}
-	objects := job.flatten(job.parseJson(job.message.Message.Attributes["download_files"]))
-	remote_urls := []string{}
-	for _, obj := range objects {
-		switch obj.(type) {
-		case string:
-			remote_urls = append(remote_urls, obj.(string))
-		default:
-			log.Printf("Invalid download file URL: %v [%T]", obj, obj)
-		}
-	}
-	for _, remote_url := range remote_urls {
-		url, err := url.Parse(remote_url)
-		if err != nil {
-			log.Fatalf("Invalid URL: %v because of %v\n", remote_url, err)
-			return nil, err
-		}
-		urlstr := fmt.Sprintf("gs://%v/%v", url.Host, url.Path)
-		destPath := filepath.Join(dir, url.Host, url.Path)
-		err = job.storage.Download(url.Host, url.Path, destPath)
-		if err != nil {
-			return nil, err
-		}
-		result[urlstr] = destPath
-	}
-	return result, nil
-}
-
-func (job *Job) uploadFiles(dir string) error {
-	localPaths, err := job.listFiles(dir)
+func (job *Job) uploadFiles() error {
+	localPaths, err := job.listFiles(job.uploads_dir)
 	if err != nil {
 		return err
 	}
 	for _, localPath := range localPaths {
-		relPath, err := filepath.Rel(dir, localPath)
+		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
 			log.Fatalf("Error getting relative path of %v: %v\n", localPath, err)
 			return err
