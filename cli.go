@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error to run cause of %v\n", err)
 		os.Exit(1)
-	}	
+	}
 }
 
 func LoadConfig(path string) (*ProcessConfig, error) {

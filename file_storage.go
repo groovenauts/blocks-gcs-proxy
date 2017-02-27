@@ -9,14 +9,14 @@ import (
 )
 
 type (
-  Storage interface {
+	Storage interface {
 		Download(bucket, object, destPath string) error
 		Upload(bucket, object, srcPath string) error
-  }
+	}
 
-  CloudStorage struct {
+	CloudStorage struct {
 		service *storage.ObjectsService
-  }
+	}
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {

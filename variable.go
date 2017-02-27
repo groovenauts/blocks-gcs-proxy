@@ -21,14 +21,14 @@ const (
 	DefaultExpandedArraySeparator = "[[GCSPROXY:SEP]]"
 )
 
-func (v *Variable)expand(str string) (string, error) {
-	if (v.separator == "") {
+func (v *Variable) expand(str string) (string, error) {
+	if v.separator == "" {
 		v.separator = DefaultExpandedArraySeparator
 	}
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
 	re2 := regexp.MustCompile(`\s*\}\z`)
-	res := re0.ReplaceAllStringFunc(str, func(raw string) string{
+	res := re0.ReplaceAllStringFunc(str, func(raw string) string {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
 		value, err := v.dive(expr)
 		if err != nil {
@@ -37,7 +37,8 @@ func (v *Variable)expand(str string) (string, error) {
 			value = ""
 		}
 		switch value.(type) {
-		case string: return value.(string)
+		case string:
+			return value.(string)
 		case []interface{}:
 			return v.flatten(value)
 		case map[string]interface{}:
@@ -51,22 +52,28 @@ func (v *Variable)expand(str string) (string, error) {
 	return res, nil
 }
 
-func (v *Variable)dive(expr string) (interface{}, error) {
+func (v *Variable) dive(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
 	// fmt.Printf("var_names: %v\n", var_names)
 	res, err := v.inject(var_names, v.data, func(tmp interface{}, name string) (interface{}, error) {
 		res, err := v.dig(tmp, name, expr)
 		// fmt.Printf("res: %v err: %v\n", res, err)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		return res, nil
 	})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
-func (v *Variable)dig(tmp interface{}, name, expr string) (interface{}, error) {
+func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) {
 	result, err := v.digIn(tmp, name, expr)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	// fmt.Printf("name: %v, result: %v\n", name, result)
 	switch result.(type) {
 	case string:
@@ -88,15 +95,19 @@ func (v *Variable)dig(tmp interface{}, name, expr string) (interface{}, error) {
 	}
 }
 
-func (v *Variable)digIn(tmp interface{}, name, expr string) (interface{}, error) {
+func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error) {
 	switch tmp.(type) {
 	case []string:
 		idx, err := v.parseIndex(name)
-		if err != nil {return nil, err}
+		if err != nil {
+			return nil, err
+		}
 		return tmp.([]string)[idx], nil
 	case []interface{}:
 		idx, err := v.parseIndex(name)
-		if err != nil {return nil, err}
+		if err != nil {
+			return nil, err
+		}
 		return tmp.([]interface{})[idx], nil
 	case map[string]interface{}:
 		return tmp.(map[string]interface{})[name], nil
@@ -139,7 +150,7 @@ const (
 	expr_separator = "."
 )
 
-func (v *Variable)flatten(obj interface{}) string {
+func (v *Variable) flatten(obj interface{}) string {
 	switch obj.(type) {
 	case string:
 		return obj.(string)

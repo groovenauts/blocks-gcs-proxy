@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	Publisher interface{
+	Publisher interface {
 		Publish(topic string, publishrequest *pubsub.PublishRequest) (*pubsub.PublishResponse, error)
 	}
 
@@ -20,14 +20,13 @@ func (pp *pubsubPublisher) Publish(topic string, publishrequest *pubsub.PublishR
 	return pp.topicsService.Publish(topic, publishrequest).Do()
 }
 
-
 type (
 	ProgressNotificationConfig struct {
 		Topic string
 	}
 
 	ProgressNotification struct {
-		config *ProgressNotificationConfig
+		config    *ProgressNotificationConfig
 		publisher Publisher
 	}
 )

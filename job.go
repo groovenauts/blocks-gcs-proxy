@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"net/url"
 
 	"golang.org/x/net/context"
 
@@ -21,36 +21,39 @@ type (
 	JobConfig struct {
 		Template []string
 		Commands map[string][]string
-		Dryrun bool
+		Dryrun   bool
 	}
 
 	Job struct {
 		config *JobConfig
 		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
-		message *pubsub.ReceivedMessage
+		message      *pubsub.ReceivedMessage
 		notification *ProgressNotification
-		storage Storage
+		storage      Storage
 
 		// These are set at at setupWorkspace
-		workspace string
+		workspace     string
 		downloads_dir string
-		uploads_dir string
+		uploads_dir   string
 
 		// These are set at setupDownloadFiles
-		downloadFileMap map[string]string
+		downloadFileMap     map[string]string
 		remoteDownloadFiles interface{}
-		localDownloadFiles interface{}
+		localDownloadFiles  interface{}
 	}
 )
-
 
 func (job *Job) execute(ctx context.Context) error {
 	return job.setupWorkspace(ctx, func() error {
 		err := job.setupDownloadFiles()
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 
 		err = job.downloadFiles()
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 
 		cmd, err := job.build()
 		if err != nil {
@@ -64,14 +67,15 @@ func (job *Job) execute(ctx context.Context) error {
 		}
 
 		err = job.uploadFiles()
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
 }
 
-
-func (job *Job) setupWorkspace(ctx  context.Context, f func() error) error {
+func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 	dir, err := ioutil.TempDir("", "workspace")
 	if err != nil {
 		log.Fatal(err)
@@ -94,7 +98,6 @@ func (job *Job) setupWorkspace(ctx  context.Context, f func() error) error {
 	job.uploads_dir = subdirs[1]
 	return f()
 }
-
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
@@ -159,19 +162,18 @@ func (job *Job) downloadFiles() error {
 	return nil
 }
 
-
 func (job *Job) buildVariable() *Variable {
 	return &Variable{
 		data: map[string]interface{}{
-			"workspace": job.workspace,
-			"downloads_dir": job.downloads_dir,
-			"uploads_dir": job.uploads_dir,
-			"download_files": job.localDownloadFiles,
-			"local_download_files": job.localDownloadFiles,
+			"workspace":             job.workspace,
+			"downloads_dir":         job.downloads_dir,
+			"uploads_dir":           job.uploads_dir,
+			"download_files":        job.localDownloadFiles,
+			"local_download_files":  job.localDownloadFiles,
 			"remote_download_files": job.remoteDownloadFiles,
-			"attrs": job.message.Message.Attributes,
-			"attributes": job.message.Message.Attributes,
-			"data": job.message.Message.Data,
+			"attrs":                 job.message.Message.Attributes,
+			"attributes":            job.message.Message.Attributes,
+			"data":                  job.message.Message.Data,
 		},
 	}
 }
@@ -186,7 +188,9 @@ func (job *Job) build() (*exec.Cmd, error) {
 	if len(job.config.Commands) > 0 {
 		key := strings.Join(values, " ")
 		t := job.config.Commands[key]
-		if t == nil { t = job.config.Commands["default"] }
+		if t == nil {
+			t = job.config.Commands["default"]
+		}
 		if t != nil {
 			values, err = job.extract(v, t)
 			if err != nil {
@@ -202,7 +206,9 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	result := []string{}
 	for _, src := range values {
 		extracted, err := v.expand(src)
-		if err != nil {return nil, err}
+		if err != nil {
+			return nil, err
+		}
 		vals := strings.Split(extracted, v.separator)
 		for _, val := range vals {
 			result = append(result, val)
@@ -265,7 +271,6 @@ func (job *Job) parseJson(str string) interface{} {
 	}
 	return dest
 }
-
 
 func (job *Job) flatten(obj interface{}) []interface{} {
 	// Support only unmarshalled object from JSON

@@ -36,22 +36,21 @@ func (pp *pubsubPuller) Acknowledge(subscription, ackId string) (*pubsub.Empty, 
 func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error) {
 	req := &pubsub.ModifyAckDeadlineRequest{
 		AckDeadlineSeconds: ackDeadlineSeconds,
-		AckIds: ackIds,
+		AckIds:             ackIds,
 	}
 	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
 }
 
-
 type (
 	JobSustainerConfig struct {
-		Delay float64
+		Delay    float64
 		Interval float64
 	}
 
 	JobSubscriptionConfig struct {
 		Subscription string
 		PullInterval int
-		Sustainer *JobSustainerConfig
+		Sustainer    *JobSustainerConfig
 	}
 
 	JobSubStatus uint8
@@ -60,7 +59,7 @@ type (
 		config *JobSubscriptionConfig
 		puller Puller
 		status JobSubStatus
-		mux sync.Mutex
+		mux    sync.Mutex
 	}
 )
 
@@ -71,7 +70,7 @@ const (
 	acked
 )
 
-func (s *JobSubscription)listen(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
+func (s *JobSubscription) listen(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
 	for {
 		err := s.process(ctx, f)
 		if err != nil {
@@ -82,7 +81,7 @@ func (s *JobSubscription)listen(ctx context.Context, f func(msg *pubsub.Received
 	return nil
 }
 
-func (s *JobSubscription)process(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
+func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
 	msg, err := s.waitForMessage(ctx)
 	if err != nil {
 		return err
@@ -161,10 +160,10 @@ func (s *JobSubscription) waitAndSendMAD(nextLimit time.Time, ackId string) erro
 	return nil
 }
 
-func (s *JobSubscription)waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
+func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
 	pullRequest := &pubsub.PullRequest{
 		ReturnImmediately: false,
-		MaxMessages: 1,
+		MaxMessages:       1,
 	}
 	res, err := s.puller.Pull(s.config.Subscription, pullRequest)
 	if err != nil {

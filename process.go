@@ -12,8 +12,8 @@ import (
 
 type (
 	ProcessConfig struct {
-		Job *JobConfig
-		JobSubscription *JobSubscriptionConfig
+		Job                  *JobConfig
+		JobSubscription      *JobSubscriptionConfig
 		ProgressNotification *ProgressNotificationConfig
 	}
 )
@@ -28,10 +28,10 @@ func (c *ProcessConfig) setup(ctx context.Context, args []string) error {
 
 type (
 	Process struct {
-		config *ProcessConfig
+		config       *ProcessConfig
 		subscription *JobSubscription
 		notification *ProgressNotification
-		storage *CloudStorage
+		storage      *CloudStorage
 	}
 )
 
@@ -64,19 +64,19 @@ func (p *Process) setup(ctx context.Context) error {
 		puller: &pubsubPuller{pubsubService.Projects.Subscriptions},
 	}
 	p.notification = &ProgressNotification{
-		config: p.config.ProgressNotification,
+		config:    p.config.ProgressNotification,
 		publisher: &pubsubPublisher{pubsubService.Projects.Topics},
 	}
 	return nil
 }
 
-func (p *Process) run(ctx context.Context) error{
-	err := p.subscription.listen(ctx, func(msg *pubsub.ReceivedMessage) error{
+func (p *Process) run(ctx context.Context) error {
+	err := p.subscription.listen(ctx, func(msg *pubsub.ReceivedMessage) error {
 		job := &Job{
-			config: p.config.Job,
-			message: msg,
+			config:       p.config.Job,
+			message:      msg,
 			notification: p.notification,
-			storage: p.storage,
+			storage:      p.storage,
 		}
 		err := job.execute(ctx)
 		if err != nil {
