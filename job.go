@@ -43,36 +43,47 @@ type (
 	}
 )
 
-func (job *Job) execute(ctx context.Context) error {
-	return job.setupWorkspace(ctx, func() error {
-		err := job.setupDownloadFiles()
+func (job *Job) run(ctx context.Context) error {
+	job.notification.notify(PROCESSING, job.message.Message.MessageId, "info")
+	err := job.setupWorkspace(ctx, func() error {
+		err := job.withNotify(DOWNLOADING, job.setupDownloadFiles)()
 		if err != nil {
 			return err
 		}
 
-		err = job.downloadFiles()
+		err = job.withNotify(DOWNLOADING, job.downloadFiles)()
 		if err != nil {
 			return err
 		}
 
-		cmd, err := job.build()
+		err = job.withNotify(EXECUTING, job.execute)()
 		if err != nil {
-			log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 			return err
 		}
-		err = cmd.Run()
-		if err != nil {
-			log.Printf("Command Error: cmd: %v cause of %v\n", cmd, err)
-			// return err // Don't return this err
-		}
 
-		err = job.uploadFiles()
+		err = job.withNotify(UPLOADING, job.uploadFiles)()
 		if err != nil {
 			return err
 		}
 
 		return nil
 	})
+	job.notification.notify(CLEANUP, job.message.Message.MessageId, "info")
+	return err
+}
+
+func (job *Job) withNotify(progress int, f func() error) func() error {
+	msg_id := job.message.Message.MessageId
+	return func() error {
+		job.notification.notify(progress, msg_id, "info")
+		err := f()
+		if err != nil {
+			job.notification.notify(progress + 2, msg_id, "error")
+			return err
+		}
+		job.notification.notify(progress + 1, msg_id, "info")
+		return nil
+	}
 }
 
 func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
@@ -215,6 +226,21 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 		}
 	}
 	return result, nil
+}
+
+
+func (job *Job) execute() error {
+	cmd, err := job.build()
+	if err != nil {
+		log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		return err
+	}
+	err = job.withNotify(EXECUTING, cmd.Run)()
+	if err != nil {
+		log.Printf("Command Error: cmd: %v cause of %v\n", cmd, err)
+		// return err // Don't return this err
+	}
+	return nil
 }
 
 func (job *Job) uploadFiles() error {

@@ -78,7 +78,7 @@ func (p *Process) run(ctx context.Context) error {
 			notification: p.notification,
 			storage:      p.storage,
 		}
-		err := job.execute(ctx)
+		err := job.run(ctx)
 		if err != nil {
 			log.Printf("Job Error %v cause of %v\n", msg, err)
 			return err
