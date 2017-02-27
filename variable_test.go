@@ -25,11 +25,11 @@ func assertExpand(t *testing.T, v *Variable, expected, expr string) {
 func TestVariableExpandCase1(t *testing.T) {
 	bucket := "bucket1"
 	downloads_dir := "/tmp/workspace/downloads"
-	download_files := map[string]string {
+	download_files := map[string]interface{} {
 		"foo": fmt.Sprintf("gs://%v/path/to/foo", bucket),
 		"bar": fmt.Sprintf("gs://%v/path/to/bar", bucket),
 	}
-	local_download_files := map[string]string {
+	local_download_files := map[string]interface{}{
 		"foo": fmt.Sprintf("%v/%v/path/to/foo", downloads_dir, bucket),
 		"bar": fmt.Sprintf("%v/%v/path/to/bar", downloads_dir, bucket),
 	}
@@ -39,7 +39,7 @@ func TestVariableExpandCase1(t *testing.T) {
 	local_download_files_json, err := json.Marshal(local_download_files)
 	assert.NoError(t, err)
 
-	attrs := map[string]string{
+	attrs := map[string]interface{}{
 		"download_files": string(download_files_json),
 		"baz": "60",
 		"qux": "data1 data2 data3",
@@ -55,35 +55,36 @@ func TestVariableExpandCase1(t *testing.T) {
 
 	v := &Variable{data: seed}
 	assertDig(t, v, local_download_files, seed, "download_files", "download_files")
-	assertDig(t, v, local_download_files["foo"], local_download_files, "foo", "foo")
-	assertDig(t, v, local_download_files["bar"], local_download_files, "bar", "bar")
+	assertDig(t, v, local_download_files["foo"].(string), local_download_files, "foo", "foo")
+	assertDig(t, v, local_download_files["bar"].(string), local_download_files, "bar", "bar")
 
-	assertExpand(t, v, local_download_files["foo"], "%{download_files.foo}")
-	assertExpand(t, v, local_download_files["bar"], "%{download_files.bar}")
-	assertExpand(t, v, download_files["foo"], "%{attrs.download_files.foo}")
-	assertExpand(t, v, download_files["bar"], "%{attrs.download_files.bar}")
+	assertExpand(t, v, local_download_files["foo"].(string), "%{download_files.foo}")
+	assertExpand(t, v, local_download_files["bar"].(string), "%{download_files.bar}")
+	assertExpand(t, v, download_files["foo"].(string), "%{attrs.download_files.foo}")
+	assertExpand(t, v, download_files["bar"].(string), "%{attrs.download_files.bar}")
 }
 
 
 func TestVariableExpandCase2(t *testing.T) {
 	bucket := "bucket1"
+	remote_qux := []string{
+		fmt.Sprintf("gs://%v/path/to/qux1", bucket),
+		fmt.Sprintf("gs://%v/path/to/qux2", bucket),
+	}
 	downloads_dir := "/tmp/workspace/downloads"
 	download_files := map[string]interface{} {
 		"bar": fmt.Sprintf("gs://%v/path/to/bar", bucket),
 		"baz": fmt.Sprintf("gs://%v/path/to/baz", bucket),
-		"qux": []string{
-			fmt.Sprintf("gs://%v/path/to/qux1", bucket),
-			fmt.Sprintf("gs://%v/path/to/qux2", bucket),
-		},
+		"qux": remote_qux,
 	}
-	qux := []string{
+	local_qux := []string{
 		fmt.Sprintf("%v/%v/path/to/qux1", downloads_dir, bucket),
 		fmt.Sprintf("%v/%v/path/to/qux2", downloads_dir, bucket),
 	}
 	local_download_files := map[string]interface{} {
 		"bar": fmt.Sprintf("%v/%v/path/to/bar", downloads_dir, bucket),
 		"baz": fmt.Sprintf("%v/%v/path/to/baz", downloads_dir, bucket),
-		"qux": qux,
+		"qux": local_qux,
 	}
 
 	download_files_json, err := json.Marshal(download_files)
@@ -91,7 +92,7 @@ func TestVariableExpandCase2(t *testing.T) {
 	local_download_files_json, err := json.Marshal(local_download_files)
 	assert.NoError(t, err)
 
-	attrs := map[string]string{
+	attrs := map[string]interface{}{
 		"download_files": string(download_files_json),
 		"foo": "123",
 	}
@@ -106,6 +107,6 @@ func TestVariableExpandCase2(t *testing.T) {
 
 	v := &Variable{data: seed}
 	assertExpand(t, v, "123", "%{attrs.foo}")
-	assertExpand(t, v, strings.Join(qux, " "), "%{download_files.qux}")
-	assertExpand(t, v, strings.Join(qux, " "), "%{attrs.download_files.qux}")
+	assertExpand(t, v, strings.Join(local_qux, " "), "%{download_files.qux}")
+	assertExpand(t, v, strings.Join(remote_qux, " "), "%{attrs.download_files.qux}")
 }
