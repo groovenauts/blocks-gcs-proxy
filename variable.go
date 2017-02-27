@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -19,12 +20,13 @@ func (v *Variable)expand(str string) (string, error) {
 	re2 := regexp.MustCompile(`\s*\}\z`)
 	res := re0.ReplaceAllStringFunc("A/%{  foo  }/B/%{bar}/D", func(raw string) string{
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
-		value, err := dig_variables(expr)
+		value, err := v.dig_variables(expr)
 		if err != nil {
-			return err
+			// return err
+			value = ""
 		}
 		switch value.(type) {
-		case string: return value
+		case string: return value.(string)
 		case []interface{}:
 			return v.flatten(value)
 		case map[string]interface{}:
@@ -36,42 +38,54 @@ func (v *Variable)expand(str string) (string, error) {
 	return res, nil
 }
 
-func (v *Variable)dig_variables(expr string) interface{} {
+func (v *Variable)dig_variables(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
-	return v.inject(var_names, v.data, func(tmp interface{}, name string) interface{}{
-		return v.dig_variable(tmp, name, expr)
+	res, err := v.inject(var_names, v.data, func(tmp interface{}, name string) (interface{}, error) {
+		res, err := v.dig_variable(tmp, name, expr)
+		if err != nil { return nil, err }
+		return res, nil
 	})
+	if err != nil { return nil, err }
+	return res, nil
 }
 
 func (v *Variable)dig_variable(tmp interface{}, name, expr string) (interface{}, error) {
-	if regexp.MatchString(`\A\d+\z`, name) {
-		idx := strconv.Atoi(name)
+	matched, err := regexp.MatchString(`\A\d+\z`, name)
+	if err != nil {
+		return nil, err
+	}
+	if matched {
+		idx, err := strconv.Atoi(name)
+		if err != nil { return nil, err }
 		switch tmp.(type) {
 		case []string:
-			return tmp.([]string)[idx]
+			return tmp.([]string)[idx], nil
 		case []interface{}:
-			return tmp.([]interface{})[idx]
+			return tmp.([]interface{})[idx], nil
 		case map[string]interface{}:
-			return tmp.(map[string]interface{})[name]
+			return tmp.(map[string]interface{})[name], nil
 		}
 	} else {
 		switch tmp.(type) {
 		case map[string]interface{}:
-			return tmp.(map[string]interface{})[name]
+			return tmp.(map[string]interface{})[name], nil
 		}
 	}
-	retur nil, fmt.Errorf("Invalid Reference")
+	return nil, fmt.Errorf("Invalid Reference")
 }
 
 
-func (v *Variable) inject(var_names []string, tmp interface{}, f func(interface{}, name string) interface{}) interface{} {
+func (v *Variable) inject(var_names []string, tmp interface{}, f func(interface{}, string) (interface{}, error)) (interface{}, error) {
 	name := var_names[0]
 	rest := var_names[1:]
-	res := f(tmp, name)
+	res, err := f(tmp, name)
+	if err != nil {
+		return nil, err
+	}
 	if len(rest) == 0 {
-		return res
+		return res, nil
 	} else {
-		return inject(rest, res, f)
+		return v.inject(rest, res, f)
 	}
 }
 
@@ -89,13 +103,13 @@ func (v *Variable)flatten(obj interface{}) string {
 	case []string:
 		return strings.Join(obj.([]string), variable_separator)
 	case []interface{}:
-		res := []string
+		res := []string{}
 		for _, i := range obj.([]interface{}) {
 			res = append(res, v.flatten(i))
 		}
 		return strings.Join(res, variable_separator)
 	case map[string]interface{}:
-		res := []string
+		res := []string{}
 		for _, i := range obj.(map[string]interface{}) {
 			res = append(res, v.flatten(i))
 		}
