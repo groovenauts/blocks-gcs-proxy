@@ -14,9 +14,9 @@ import (
 
 type (
 	ProcessConfig struct {
-		Job                  *JobConfig
-		JobSubscription      *JobSubscriptionConfig
-		ProgressNotification *ProgressNotificationConfig
+		Job                  *JobConfig                  `json:"job"`
+		JobSubscription      *JobSubscriptionConfig      `json:"job_subscription"`
+		ProgressNotification *ProgressNotificationConfig `json:"progress_notification"`
 	}
 )
 

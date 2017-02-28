@@ -19,9 +19,9 @@ import (
 
 type (
 	JobConfig struct {
-		Template []string
-		Commands map[string][]string
-		Dryrun   bool
+		Template []string            `json:"template"`
+		Commands map[string][]string `json:"commands"`
+		Dryrun   bool                `json:"dryrun"`
 	}
 
 	Job struct {
