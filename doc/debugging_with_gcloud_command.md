@@ -3,44 +3,44 @@
 ## Setup
 
 ```
-magellan-gcs-proxy-dev-setup [Project ID]
+$ export PIPELINE=pipeline01
+gcloud deployment-manager deployments create $PIPELINE --config test/pubsub.jinja
 ```
 
+### Cleanup
+
+```
+gcloud deployment-manager deployments list
+gcloud deployment-manager deployments delete $PIPELINE
+```
 
 ## Listen to progress subscription
 
 Download [pubsub-devsub](https://github.com/akm/pubsub-devsub/releases) and put it into the directory on PATH.
 
-```
-$ pubsub-devsub --project [Project ID] --subscription [Progress subscription name]
-```
+Open a new terminal:
 
-`Progress subscription name` is the name of `Progress subscription`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub subscriptions list`.
-It starts with `test-progress-` and ends with '-sub'.
+```
+export PIPELINE=pipeline01
+pubsub-devsub --project [Project ID] --subscription "${PIPELINE}-progress-subscription"
+```
 
 ## Run application
 
 ```
-$ export BLOCKS_BATCH_PROJECT_ID=[Project ID]
-$ export BLOCKS_BATCH_PUBSUB_SUBSCRIPTION=[Job subscription name]
-$ magellan-gcs-proxy COMMAND ARGS...
+export PROJECT=your-gcp-project
+export PIPELINE=pipeline01
+export JOB_SUB="projects/${PROJECT}/subscriptions/${PIPELINE}-job-subscription"
+export PROGRESS_TOPIC="projects/${PROJECT}/topics/${PIPELINE}-progress-topic"
+echo "{\"job\":{\"subscription\":\"${JOB_SUB}\"},\"progress\":{\"topic\":\"${PROGRESS_TOPIC}\"}}"
+magellan-gcs-proxy COMMAND ARGS...
 ```
-
-`Job subscription name` is the name of `Job subscription`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub subscriptions list`.
-It starts with `test-job-` and ends with '-sub'.
 
 ## Publish message
 
 ```
-$ export JOB_TOPIC=[Job topic name]
-$ gcloud beta pubsub topics publish $JOB_TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
+export PROJECT=your-gcp-project
+export PIPELINE=pipeline01
+export JOB_TOPIC="projects/${PROJECT}/topics/${PIPELINE}-job-topic"
+gcloud beta pubsub topics publish $JOB_TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
 ```
-
-`Job topic name` is the name of `Job topic`.
-It created by `magellan-gcs-proxy-dev-setup`.
-You can see it by `gcloud beta pubsub topics list`.
-It starts with `test-job-` and ends with your user name.
