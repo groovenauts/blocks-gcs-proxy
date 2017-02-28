@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
+	"text/template"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
@@ -29,13 +32,22 @@ func (c *ProcessConfig) setup(ctx context.Context, args []string) error {
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {
-	file, err := ioutil.ReadFile(path)
+	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
+	funcMap := template.FuncMap{"env": os.Getenv}
+	t, err := template.New("config").Funcs(funcMap).Parse(string(raw))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	t.Execute(buf, nil)
+
 	var res ProcessConfig
-	err = json.Unmarshal(file, &res)
+	err = json.Unmarshal(buf.Bytes(), &res)
 	if err != nil {
 		return nil, err
 	}
