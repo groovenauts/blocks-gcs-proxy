@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestLoadProcessConfigReal(t *testing.T) {
 	_, err := LoadProcessConfig("./test/config1.json")
 	assert.NoError(t, err)
@@ -89,7 +88,7 @@ func TestLoadProcessConfig2(t *testing.T) {
 	d := map[string]interface{}{
 		"command": map[string]interface{}{
 			"template": template,
-			"options": commands,
+			"options":  commands,
 		},
 		"job": map[string]interface{}{
 			"subscription":  job_sub,
