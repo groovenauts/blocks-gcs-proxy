@@ -158,21 +158,6 @@ func (job *Job) copyWithFileMap(obj interface{}) interface{} {
 	}
 }
 
-func (job *Job) downloadFiles() error {
-	for remoteURL, destPath := range job.downloadFileMap {
-		url, err := url.Parse(remoteURL)
-		if err != nil {
-			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
-			return err
-		}
-		err = job.storage.Download(url.Host, url.Path, destPath)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (job *Job) buildVariable() *Variable {
 	return &Variable{
 		data: map[string]interface{}{
@@ -226,6 +211,21 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 		}
 	}
 	return result, nil
+}
+
+func (job *Job) downloadFiles() error {
+	for remoteURL, destPath := range job.downloadFileMap {
+		url, err := url.Parse(remoteURL)
+		if err != nil {
+			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
+			return err
+		}
+		err = job.storage.Download(url.Host, url.Path, destPath)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (job *Job) execute() error {
