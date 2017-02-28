@@ -85,7 +85,7 @@ func TestLoadProcessConfig2(t *testing.T) {
 	d := map[string]interface{}{
 		"command": map[string]interface{}{
 			// "template": template,
-			"options":  commands,
+			"options": commands,
 		},
 		"job": map[string]interface{}{
 			"subscription":  job_sub,
