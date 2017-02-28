@@ -47,7 +47,7 @@ type (
 		Interval float64 `json:"interval"`
 	}
 
-	JobSubscriptionConfig struct {
+	JobConfig struct {
 		Subscription string              `json:"subscription"`
 		PullInterval int                 `json:"pull_interval"`
 		Sustainer    *JobSustainerConfig `json:"sustainer"`
@@ -56,7 +56,7 @@ type (
 	JobSubStatus uint8
 
 	JobSubscription struct {
-		config *JobSubscriptionConfig
+		config *JobConfig
 		puller Puller
 		status JobSubStatus
 		mux    sync.Mutex
