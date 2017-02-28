@@ -20,7 +20,7 @@ import (
 type (
 	CommandConfig struct {
 		Template []string            `json:"template"`
-		Commands map[string][]string `json:"commands"`
+		Options  map[string][]string `json:"options"`
 		Dryrun   bool                `json:"dryrun"`
 	}
 
@@ -181,11 +181,11 @@ func (job *Job) build() (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(job.config.Commands) > 0 {
+	if len(job.config.Options) > 0 {
 		key := strings.Join(values, " ")
-		t := job.config.Commands[key]
+		t := job.config.Options[key]
 		if t == nil {
-			t = job.config.Commands["default"]
+			t = job.config.Options["default"]
 		}
 		if t != nil {
 			values, err = job.extract(v, t)
