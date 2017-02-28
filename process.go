@@ -14,17 +14,17 @@ import (
 
 type (
 	ProcessConfig struct {
-		Job                  *JobConfig                  `json:"job"`
+		Command              *CommandConfig              `json:"command"`
 		JobSubscription      *JobSubscriptionConfig      `json:"job_subscription"`
 		ProgressNotification *ProgressNotificationConfig `json:"progress_notification"`
 	}
 )
 
 func (c *ProcessConfig) setup(ctx context.Context, args []string) error {
-	if c.Job == nil {
-		c.Job = &JobConfig{}
+	if c.Command == nil {
+		c.Command = &CommandConfig{}
 	}
-	c.Job.Template = args
+	c.Command.Template = args
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (p *Process) setup(ctx context.Context) error {
 func (p *Process) run(ctx context.Context) error {
 	err := p.subscription.listen(ctx, func(msg *pubsub.ReceivedMessage) error {
 		job := &Job{
-			config:       p.config.Job,
+			config:       p.config.Command,
 			message:      msg,
 			notification: p.notification,
 			storage:      p.storage,

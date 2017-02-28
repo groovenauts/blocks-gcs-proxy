@@ -18,14 +18,14 @@ import (
 )
 
 type (
-	JobConfig struct {
+	CommandConfig struct {
 		Template []string            `json:"template"`
 		Commands map[string][]string `json:"commands"`
 		Dryrun   bool                `json:"dryrun"`
 	}
 
 	Job struct {
-		config *JobConfig
+		config *CommandConfig
 		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 		message      *pubsub.ReceivedMessage
 		notification *ProgressNotification
