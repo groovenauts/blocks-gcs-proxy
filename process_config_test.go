@@ -68,6 +68,10 @@ func TestLoadProcessConfig1(t *testing.T) {
 			assert.Equal(t, job_sus_interval, config.Job.Sustainer.Interval)
 		}
 	}
+
+	if assert.NotNil(t, config.Progress) {
+		assert.Equal(t, prog_topic, config.Progress.Topic)
+	}
 }
 
 func TestLoadProcessConfig2(t *testing.T) {
@@ -126,5 +130,9 @@ func TestLoadProcessConfig2(t *testing.T) {
 			assert.Equal(t, job_sus_delay, config.Job.Sustainer.Delay)
 			assert.Equal(t, job_sus_interval, config.Job.Sustainer.Interval)
 		}
+	}
+
+	if assert.NotNil(t, config.Progress) {
+		assert.Equal(t, prog_topic, config.Progress.Topic)
 	}
 }
