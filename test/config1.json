@@ -1,12 +1,12 @@
 {
-  "job": {
+  "command": {
     "template": ["%{attrs.key}"],
-    "commands": {
+    "options": {
       "key1": ["./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"],
       "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]
     }
   },
-  "job_subscription": {
+  "job": {
     "subscription": "projects/dummy-gcp-proj/subscriptions/test-job-subscription",
     "pull_interval": 60,
     "sustainer": {
@@ -14,7 +14,7 @@
       "interval": 540
     }
   },
-  "progress_notification": {
+  "progress": {
     "topic": "projects/dummy-gcp-proj/topics/test-progress-topic"
   }
 }
