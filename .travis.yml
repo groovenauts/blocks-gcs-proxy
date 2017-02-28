@@ -9,7 +9,6 @@ addons:
     packages:
       - glide
 before_install:
-  ## Install glide
   - test -d $GOPATH/bin || mkdir -p $GOPATH/bin
 install:
   ## Install dependencies
