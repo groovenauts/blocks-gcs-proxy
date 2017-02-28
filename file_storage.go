@@ -1,4 +1,4 @@
-package gcsproxy
+package main
 
 import (
 	"io"
