@@ -22,7 +22,8 @@ Open a new terminal:
 
 ```
 export PIPELINE=pipeline01
-pubsub-devsub --project [Project ID] --subscription "${PIPELINE}-progress-subscription"
+export PROJECT=your-gcp-project
+pubsub-devsub --project $PROJECT --subscription "${PIPELINE}-progress-subscription"
 ```
 
 ## Run application
@@ -32,7 +33,7 @@ export PROJECT=your-gcp-project
 export PIPELINE=pipeline01
 export JOB_SUB="projects/${PROJECT}/subscriptions/${PIPELINE}-job-subscription"
 export PROGRESS_TOPIC="projects/${PROJECT}/topics/${PIPELINE}-progress-topic"
-echo "{\"job\":{\"subscription\":\"${JOB_SUB}\"},\"progress\":{\"topic\":\"${PROGRESS_TOPIC}\"}}"
+echo "{\"job\":{\"subscription\":\"${JOB_SUB}\"},\"progress\":{\"topic\":\"${PROGRESS_TOPIC}\"}}" > config.json
 magellan-gcs-proxy COMMAND ARGS...
 ```
 
