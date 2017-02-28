@@ -26,7 +26,7 @@ func (c *ProcessConfig) setup(ctx context.Context, args []string) error {
 	return nil
 }
 
-func LoadConfig(path string) (*ProcessConfig, error) {
+func LoadProcessConfig(path string) (*ProcessConfig, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,7 @@ func main() {
 	ctx := context.Background()
 
 	configPath := "./config.json"
-	config, err := LoadConfig(configPath)
+	config, err := LoadProcessConfig(configPath)
 	if err != nil {
 		fmt.Printf("Error to load %v cause of %v\n", configPath, err)
 		os.Exit(1)
