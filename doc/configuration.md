@@ -11,8 +11,8 @@ Use `command/options` config to choose a command from multiple commands at runti
 {
   "command": {
     "options" : {
-      key1: ["cmd1", "%{uploads_dir}", "%{download_files}"],
-      key2: ["cmd2", "%{download_files.bar}", "%{uploads_dir}"]
+      "key1": ["cmd1", "%{uploads_dir}", "%{download_files}"],
+      "key2": ["cmd2", "%{download_files.bar}", "%{uploads_dir}"]
     }
   }
 }
