@@ -27,12 +27,12 @@ func (pp *pubsubPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pu
 }
 
 type (
-	ProgressNotificationConfig struct {
+	ProgressConfig struct {
 		Topic string
 	}
 
 	ProgressNotification struct {
-		config    *ProgressNotificationConfig
+		config    *ProgressConfig
 		publisher Publisher
 	}
 )

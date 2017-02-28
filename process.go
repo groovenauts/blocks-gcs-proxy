@@ -16,7 +16,7 @@ type (
 	ProcessConfig struct {
 		Command              *CommandConfig              `json:"command"`
 		Job                  *JobConfig                  `json:"job"`
-		ProgressNotification *ProgressNotificationConfig `json:"progress_notification"`
+		Progress             *ProgressConfig             `json:"progress"`
 	}
 )
 
@@ -80,7 +80,7 @@ func (p *Process) setup(ctx context.Context) error {
 		puller: &pubsubPuller{pubsubService.Projects.Subscriptions},
 	}
 	p.notification = &ProgressNotification{
-		config:    p.config.ProgressNotification,
+		config:    p.config.Progress,
 		publisher: &pubsubPublisher{pubsubService.Projects.Topics},
 	}
 	return nil
