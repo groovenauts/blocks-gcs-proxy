@@ -145,7 +145,7 @@ cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspa
     "a": "gs://bucket1/file1",
     "b": "gs://bucket1/file2",
     "c": "gs://bucket1/file3"
-  ]
+  }
 }
 ```
 
