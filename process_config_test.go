@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,6 +15,31 @@ import (
 func TestLoadProcessConfigReal(t *testing.T) {
 	_, err := LoadProcessConfig("./test/config1.json")
 	assert.NoError(t, err)
+}
+
+func TestLoadProcessConfigWithEnv(t *testing.T) {
+	proj := "test-gcp-proj"
+	pipeline := "pipeline1"
+	pull_interval := 30
+	sustainer_delay := float64(300)
+	sustainer_interval := float64(270)
+	os.Setenv("GCP_PROJECT", proj)
+	os.Setenv("PIPELINE", pipeline)
+	os.Setenv("PULL_INTERVAL", strconv.Itoa(pull_interval))
+	os.Setenv("SUSTAINER_DELAY", fmt.Sprintf("%v", sustainer_delay))
+	os.Setenv("SUSTAINER_INTERVAL", fmt.Sprintf("%v", sustainer_interval))
+
+	config, err := LoadProcessConfig("./test/config_with_env.json")
+	if assert.NoError(t, err) {
+		assert.NotNil(t, config.Job)
+		assert.NotNil(t, config.Job.Sustainer)
+		assert.NotNil(t, config.Progress)
+		assert.Equal(t, fmt.Sprintf("projects/%v/subscriptions/%v-job-subscription", proj, pipeline), config.Job.Subscription)
+		assert.Equal(t, pull_interval, config.Job.PullInterval)
+		assert.Equal(t, sustainer_delay, config.Job.Sustainer.Delay)
+		assert.Equal(t, sustainer_interval, config.Job.Sustainer.Interval)
+		assert.Equal(t, fmt.Sprintf("projects/%v/topics/%v-progress-topic", proj, pipeline), config.Progress.Topic)
+	}
 }
 
 func TestLoadProcessConfig1(t *testing.T) {
