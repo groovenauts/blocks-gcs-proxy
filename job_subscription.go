@@ -43,14 +43,14 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 
 type (
 	JobSustainerConfig struct {
-		Delay    float64 `json:"delay"`
-		Interval float64 `json:"interval"`
+		Delay    float64 `json:"delay,omitempty"`
+		Interval float64 `json:"interval,omitempty"`
 	}
 
 	JobConfig struct {
-		Subscription string              `json:"subscription"`
-		PullInterval int                 `json:"pull_interval"`
-		Sustainer    *JobSustainerConfig `json:"sustainer"`
+		Subscription string              `json:"subscription,omitempty"`
+		PullInterval int                 `json:"pull_interval,omitempty"`
+		Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 	}
 
 	JobSubStatus uint8
