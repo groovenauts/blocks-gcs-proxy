@@ -1,6 +1,5 @@
 {
   "command": {
-    "template": ["%{attrs.key}"],
     "options": {
       "key1": ["./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"],
       "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]

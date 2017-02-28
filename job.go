@@ -19,9 +19,9 @@ import (
 
 type (
 	CommandConfig struct {
-		Template []string            `json:"template"`
-		Options  map[string][]string `json:"options"`
-		Dryrun   bool                `json:"dryrun"`
+		Template []string            `json:"-"`
+		Options  map[string][]string `json:"options,omitempty"`
+		Dryrun   bool                `json:"dryrun,omitempty"`
 	}
 
 	Job struct {

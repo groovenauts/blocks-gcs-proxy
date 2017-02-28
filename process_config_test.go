@@ -16,7 +16,7 @@ func TestLoadProcessConfigReal(t *testing.T) {
 }
 
 func TestLoadProcessConfig1(t *testing.T) {
-	template := []string{"./cmd1", "%{uploads_dir}", "%{download_files}"}
+	// template := []string{"./cmd1", "%{uploads_dir}", "%{download_files}"}
 	job_sub := "projects/dummy-gcp-proj/subscriptions/test-job-subscription"
 	job_pull_interval := 60
 	job_sus_delay := float64(600)
@@ -24,9 +24,9 @@ func TestLoadProcessConfig1(t *testing.T) {
 	prog_topic := "projects/dummy-gcp-proj/topics/test-progress-topic"
 
 	d := map[string]interface{}{
-		"command": map[string]interface{}{
-			"template": template,
-		},
+		// "command": map[string]interface{}{
+		// 	"template": template,
+		// },
 		"job": map[string]interface{}{
 			"subscription":  job_sub,
 			"pull_interval": job_pull_interval,
@@ -53,11 +53,8 @@ func TestLoadProcessConfig1(t *testing.T) {
 	config, err := LoadProcessConfig(fpath)
 	assert.NoError(t, err)
 
-	if assert.NotNil(t, config.Job) {
-		assert.Equal(t, template, config.Command.Template)
-		assert.Nil(t, config.Command.Options)
-		assert.Equal(t, false, config.Command.Dryrun)
-	}
+	// config.Command is nil
+	assert.Nil(t, config.Command)
 
 	if assert.NotNil(t, config.Job) {
 		assert.Equal(t, job_sub, config.Job.Subscription)
@@ -74,7 +71,7 @@ func TestLoadProcessConfig1(t *testing.T) {
 }
 
 func TestLoadProcessConfig2(t *testing.T) {
-	template := []string{"%{attrs.key}"}
+	// template := []string{"%{attrs.key}"}
 	commands := map[string][]string{
 		"key1": []string{"./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
 		"key2": []string{"./cmd2", "%{uploads_dir}", "%{download_files}"},
@@ -87,7 +84,7 @@ func TestLoadProcessConfig2(t *testing.T) {
 
 	d := map[string]interface{}{
 		"command": map[string]interface{}{
-			"template": template,
+			// "template": template,
 			"options":  commands,
 		},
 		"job": map[string]interface{}{
@@ -117,7 +114,7 @@ func TestLoadProcessConfig2(t *testing.T) {
 	assert.NoError(t, err)
 
 	if assert.NotNil(t, config.Job) {
-		assert.Equal(t, template, config.Command.Template)
+		// assert.Equal(t, template, config.Command.Template)
 		assert.Equal(t, commands, config.Command.Options)
 		assert.Equal(t, false, config.Command.Dryrun)
 	}
