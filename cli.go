@@ -33,17 +33,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-func LoadConfig(path string) (*ProcessConfig, error) {
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var res ProcessConfig
-	err = json.Unmarshal(file, &res)
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
