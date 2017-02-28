@@ -25,7 +25,7 @@ func TestJobSetupCase1(t *testing.T) {
 	local1 := downloads_dir + "/" + bucket + "/" + path1
 
 	job := &Job{
-		config: &JobConfig{
+		config: &CommandConfig{
 			Template: []string{"cmd1", "%{download_files}", "%{uploads_dir}"},
 		},
 		message: &pubsub.ReceivedMessage{
@@ -76,7 +76,7 @@ func TestJobSetupCase2(t *testing.T) {
 	local3 := downloads_dir + "/" + bucket + "/" + path3
 
 	job := &Job{
-		config: &JobConfig{
+		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
 		},
 		message: &pubsub.ReceivedMessage{
@@ -144,7 +144,7 @@ func TestJobSetupCase3(t *testing.T) {
 		"baz":            "HIJKL",
 	}
 	job := &Job{
-		config: &JobConfig{
+		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
 		},
 		message: &pubsub.ReceivedMessage{

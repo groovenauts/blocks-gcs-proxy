@@ -25,10 +25,10 @@ func TestLoadProcessConfig1(t *testing.T) {
 	prog_topic := "projects/dummy-gcp-proj/topics/test-progress-topic"
 
 	d := map[string]interface{}{
-		"job": map[string]interface{}{
+		"command": map[string]interface{}{
 			"template": template,
 		},
-		"job_subscription": map[string]interface{}{
+		"job": map[string]interface{}{
 			"subscription":  job_sub,
 			"pull_interval": job_pull_interval,
 			"sustainer": map[string]interface{}{
@@ -36,7 +36,7 @@ func TestLoadProcessConfig1(t *testing.T) {
 				"interval": job_sus_interval,
 			},
 		},
-		"progress_notification": map[string]interface{}{
+		"progress": map[string]interface{}{
 			"topic": prog_topic,
 		},
 	}
@@ -55,17 +55,17 @@ func TestLoadProcessConfig1(t *testing.T) {
 	assert.NoError(t, err)
 
 	if assert.NotNil(t, config.Job) {
-		assert.Equal(t, template, config.Job.Template)
-		assert.Nil(t, config.Job.Commands)
-		assert.Equal(t, false, config.Job.Dryrun)
+		assert.Equal(t, template, config.Command.Template)
+		assert.Nil(t, config.Command.Options)
+		assert.Equal(t, false, config.Command.Dryrun)
 	}
 
-	if assert.NotNil(t, config.JobSubscription) {
-		assert.Equal(t, job_sub, config.JobSubscription.Subscription)
-		assert.Equal(t, job_pull_interval, config.JobSubscription.PullInterval)
-		if assert.NotNil(t, config.JobSubscription.Sustainer) {
-			assert.Equal(t, job_sus_delay, config.JobSubscription.Sustainer.Delay)
-			assert.Equal(t, job_sus_interval, config.JobSubscription.Sustainer.Interval)
+	if assert.NotNil(t, config.Job) {
+		assert.Equal(t, job_sub, config.Job.Subscription)
+		assert.Equal(t, job_pull_interval, config.Job.PullInterval)
+		if assert.NotNil(t, config.Job.Sustainer) {
+			assert.Equal(t, job_sus_delay, config.Job.Sustainer.Delay)
+			assert.Equal(t, job_sus_interval, config.Job.Sustainer.Interval)
 		}
 	}
 }
@@ -83,11 +83,11 @@ func TestLoadProcessConfig2(t *testing.T) {
 	prog_topic := "projects/dummy-gcp-proj/topics/test-progress-topic"
 
 	d := map[string]interface{}{
-		"job": map[string]interface{}{
+		"command": map[string]interface{}{
 			"template": template,
-			"commands": commands,
+			"options": commands,
 		},
-		"job_subscription": map[string]interface{}{
+		"job": map[string]interface{}{
 			"subscription":  job_sub,
 			"pull_interval": job_pull_interval,
 			"sustainer": map[string]interface{}{
@@ -95,7 +95,7 @@ func TestLoadProcessConfig2(t *testing.T) {
 				"interval": job_sus_interval,
 			},
 		},
-		"progress_notification": map[string]interface{}{
+		"progress": map[string]interface{}{
 			"topic": prog_topic,
 		},
 	}
@@ -114,17 +114,17 @@ func TestLoadProcessConfig2(t *testing.T) {
 	assert.NoError(t, err)
 
 	if assert.NotNil(t, config.Job) {
-		assert.Equal(t, template, config.Job.Template)
-		assert.Equal(t, commands, config.Job.Commands)
-		assert.Equal(t, false, config.Job.Dryrun)
+		assert.Equal(t, template, config.Command.Template)
+		assert.Equal(t, commands, config.Command.Options)
+		assert.Equal(t, false, config.Command.Dryrun)
 	}
 
-	if assert.NotNil(t, config.JobSubscription) {
-		assert.Equal(t, job_sub, config.JobSubscription.Subscription)
-		assert.Equal(t, job_pull_interval, config.JobSubscription.PullInterval)
-		if assert.NotNil(t, config.JobSubscription.Sustainer) {
-			assert.Equal(t, job_sus_delay, config.JobSubscription.Sustainer.Delay)
-			assert.Equal(t, job_sus_interval, config.JobSubscription.Sustainer.Interval)
+	if assert.NotNil(t, config.Job) {
+		assert.Equal(t, job_sub, config.Job.Subscription)
+		assert.Equal(t, job_pull_interval, config.Job.PullInterval)
+		if assert.NotNil(t, config.Job.Sustainer) {
+			assert.Equal(t, job_sus_delay, config.Job.Sustainer.Delay)
+			assert.Equal(t, job_sus_interval, config.Job.Sustainer.Interval)
 		}
 	}
 }
