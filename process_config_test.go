@@ -10,6 +10,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
+func TestLoadProcessConfigReal(t *testing.T) {
+	_, err := LoadProcessConfig("./test/config1.json")
+	assert.NoError(t, err)
+}
+
 func TestLoadProcessConfig1(t *testing.T) {
 	template := []string{"./cmd1", "%{uploads_dir}", "%{download_files}"}
 	job_sub := "projects/dummy-gcp-proj/subscriptions/test-job-subscription"

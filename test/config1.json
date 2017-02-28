@@ -1,0 +1,20 @@
+{
+  "job": {
+    "template": ["%{attrs.key}"],
+    "commands": {
+      "key1": ["./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"],
+      "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]
+    }
+  },
+  "job_subscription": {
+    "subscription": "projects/dummy-gcp-proj/subscriptions/test-job-subscription",
+    "pull_interval": 60,
+    "sustainer": {
+      "delay": 600,
+      "interval": 540
+    }
+  },
+  "progress_notification": {
+    "topic": "projects/dummy-gcp-proj/topics/test-progress-topic"
+  }
+}
