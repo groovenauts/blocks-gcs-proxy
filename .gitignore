@@ -9,3 +9,4 @@
 /.env
 /config.yml
 /vendor
+/magellan-gcs-proxy
