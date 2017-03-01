@@ -81,15 +81,9 @@ func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error
 	}
 
 	go jobMsg.sendMADPeriodically()
+	defer jobMsg.Done()
 
-	err = f(jobMsg)
-	jobMsg.Done()
-
-	if err != nil {
-		return err
-	}
-
-	return jobMsg.Ack()
+	return f(jobMsg)
 }
 
 func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {

@@ -66,6 +66,11 @@ func (job *Job) run(ctx context.Context) error {
 			return err
 		}
 
+		err = job.withNotify(ACKSENDING, job.message.Ack)()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	job.notification.notify(CLEANUP, job.message.MessageId(), "info")

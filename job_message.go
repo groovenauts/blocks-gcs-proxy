@@ -57,7 +57,9 @@ func (s *JobMessage) Ack() error {
 }
 
 func (s *JobMessage) Done() {
-	s.status = done
+	if s.status == running {
+		s.status = done
+	}
 }
 
 func (s *JobMessage) running() bool {
