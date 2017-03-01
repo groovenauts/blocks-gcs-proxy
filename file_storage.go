@@ -50,7 +50,6 @@ func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
 		return err
 	}
 	obj, err := ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
-	log.Printf("Got storage.Object, err: %#v, %v", obj, err)
 	if err != nil {
 		log.Printf("Error uploading gs://%q/%q: %v", bucket, srcPath, err)
 		return err
