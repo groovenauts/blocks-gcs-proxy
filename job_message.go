@@ -18,7 +18,7 @@ type (
 
 	JobMessage struct {
 		sub    string
-		msg    *pubsub.ReceivedMessage
+		raw    *pubsub.ReceivedMessage
 		config *JobSustainerConfig
 		puller Puller
 		status JobMessageStatus
@@ -36,9 +36,9 @@ func (s *JobMessage) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	_, err := s.puller.Acknowledge(s.sub, s.msg.AckId)
+	_, err := s.puller.Acknowledge(s.sub, s.raw.AckId)
 	if err != nil {
-		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.msg, err)
+		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.raw, err)
 		return err
 	}
 
@@ -89,9 +89,9 @@ func (s *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 		return nil
 	}
 
-	_, err := s.puller.ModifyAckDeadline(s.sub, []string{s.msg.AckId}, int64(s.config.Delay))
+	_, err := s.puller.ModifyAckDeadline(s.sub, []string{s.raw.AckId}, int64(s.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, s.msg.AckId, s.config.Delay, err)
+		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, s.raw.AckId, s.config.Delay, err)
 	}
 	return nil
 }

@@ -74,7 +74,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 	}
 
 	sus := &JobMessage{
-		msg:    msg,
+		raw:    msg,
 		config: s.config.Sustainer,
 		puller: s.puller,
 		status: running,
