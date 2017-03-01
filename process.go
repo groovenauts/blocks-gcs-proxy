@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"text/template"
 
 	"golang.org/x/net/context"
@@ -43,8 +44,14 @@ func LoadProcessConfig(path string) (*ProcessConfig, error) {
 		return nil, err
 	}
 
+	env := map[string]string{}
+	for _, s := range os.Environ() {
+		parts := strings.SplitN(s, "=", 2)
+		env[parts[0]] = parts[1]
+	}
+
 	buf := new(bytes.Buffer)
-	t.Execute(buf, nil)
+	t.Execute(buf, env)
 
 	var res ProcessConfig
 	err = json.Unmarshal(buf.Bytes(), &res)
