@@ -128,8 +128,7 @@ type (
 )
 
 const (
-	initial JobSubStatus = iota
-	running
+	running JobSubStatus = iota
 	done
 	acked
 )
