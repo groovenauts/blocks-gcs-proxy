@@ -6,7 +6,7 @@
     }
   },
   "job": {
-    "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription",
+    "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ or .PIPELINE "pipeline01" }}-job-subscription",
     "pull_interval": {{ or .PULL_INTERVAL 60 }},
     "sustainer": {
       "delay": {{ or .SUSTAINER_DELAY 600}},
@@ -14,6 +14,6 @@
     }
   },
   "progress": {
-    "topic": "projects/{{ .GCP_PROJECT }}/topics/{{ .PIPELINE }}-progress-topic"
+    "topic": "projects/{{ .GCP_PROJECT }}/topics/{{ or .PIPELINE "pipeline01" }}-progress-topic"
   }
 }
