@@ -28,7 +28,8 @@ func TestJobSetupCase1(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{download_files}", "%{uploads_dir}"},
 		},
-		message: &pubsub.ReceivedMessage{
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
 			AckId: "test-ack1",
 			Message: &pubsub.PubsubMessage{
 				Data: "",
@@ -36,6 +37,7 @@ func TestJobSetupCase1(t *testing.T) {
 					"download_files": url1,
 				},
 				MessageId: "test-message1",
+			},
 			},
 		},
 		workspace:     workspace,
@@ -79,7 +81,8 @@ func TestJobSetupCase2(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
 		},
-		message: &pubsub.ReceivedMessage{
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
 			AckId: "test-ack1",
 			Message: &pubsub.PubsubMessage{
 				Data: "",
@@ -91,6 +94,7 @@ func TestJobSetupCase2(t *testing.T) {
 				},
 				MessageId: "test-message1",
 			},
+		},
 		},
 		workspace:     workspace,
 		downloads_dir: downloads_dir,
@@ -147,13 +151,15 @@ func TestJobSetupCase3(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
 		},
-		message: &pubsub.ReceivedMessage{
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
 			AckId: "test-ack1",
 			Message: &pubsub.PubsubMessage{
 				Data:       "",
 				Attributes: attrs,
 				MessageId:  "test-message1",
 			},
+		},
 		},
 		workspace:     workspace,
 		downloads_dir: downloads_dir,
