@@ -106,7 +106,7 @@ func (p *Process) setup(ctx context.Context) error {
 }
 
 func (p *Process) run(ctx context.Context) error {
-	err := p.subscription.listen(ctx, func(msg *pubsub.ReceivedMessage) error {
+	err := p.subscription.listen(ctx, func(msg *JobMessage) error {
 		job := &Job{
 			config:       p.config.Command,
 			message:      msg,

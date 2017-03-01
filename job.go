@@ -15,8 +15,6 @@ import (
 	"strings"
 
 	"golang.org/x/net/context"
-
-	pubsub "google.golang.org/api/pubsub/v1"
 )
 
 type (
@@ -29,7 +27,7 @@ type (
 	Job struct {
 		config *CommandConfig
 		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
-		message      *pubsub.ReceivedMessage
+		message      *JobMessage
 		notification *ProgressNotification
 		storage      Storage
 
@@ -46,7 +44,7 @@ type (
 )
 
 func (job *Job) run(ctx context.Context) error {
-	job.notification.notify(PROCESSING, job.message.Message.MessageId, "info")
+	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 	err := job.setupWorkspace(ctx, func() error {
 		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
 		if err != nil {
@@ -70,12 +68,12 @@ func (job *Job) run(ctx context.Context) error {
 
 		return nil
 	})
-	job.notification.notify(CLEANUP, job.message.Message.MessageId, "info")
+	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
 }
 
 func (job *Job) withNotify(progress int, f func() error) func() error {
-	msg_id := job.message.Message.MessageId
+	msg_id := job.message.MessageId()
 	return func() error {
 		job.notification.notify(progress, msg_id, "info")
 		err := f()
@@ -114,7 +112,7 @@ func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
-	job.remoteDownloadFiles = job.parseJson(job.message.Message.Attributes["download_files"])
+	job.remoteDownloadFiles = job.parseJson(job.message.Attribute("download_files"))
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
@@ -169,9 +167,9 @@ func (job *Job) buildVariable() *Variable {
 			"download_files":        job.localDownloadFiles,
 			"local_download_files":  job.localDownloadFiles,
 			"remote_download_files": job.remoteDownloadFiles,
-			"attrs":                 job.message.Message.Attributes,
-			"attributes":            job.message.Message.Attributes,
-			"data":                  job.message.Message.Data,
+			"attrs":                 job.message.raw.Message.Attributes,
+			"attributes":            job.message.raw.Message.Attributes,
+			"data":                  job.message.raw.Message.Data,
 		},
 	}
 }

@@ -53,7 +53,7 @@ type (
 	}
 )
 
-func (s *JobSubscription) listen(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
+func (s *JobSubscription) listen(ctx context.Context, f func(*JobMessage) error) error {
 	for {
 		err := s.process(ctx, f)
 		if err != nil {
@@ -64,7 +64,7 @@ func (s *JobSubscription) listen(ctx context.Context, f func(msg *pubsub.Receive
 	return nil
 }
 
-func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
+func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error) error {
 	msg, err := s.waitForMessage(ctx)
 	if err != nil {
 		return err
@@ -73,23 +73,23 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		return nil
 	}
 
-	sus := &JobMessage{
+	jobMsg := &JobMessage{
 		raw:    msg,
 		config: s.config.Sustainer,
 		puller: s.puller,
 		status: running,
 	}
 
-	go sus.sendMADPeriodically()
+	go jobMsg.sendMADPeriodically()
 
-	err = f(msg)
-	sus.Done()
+	err = f(jobMsg)
+	jobMsg.Done()
 
 	if err != nil {
 		return err
 	}
 
-	return sus.Ack()
+	return jobMsg.Ack()
 }
 
 func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {

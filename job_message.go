@@ -32,6 +32,15 @@ const (
 	acked
 )
 
+func (s *JobMessage) MessageId() string {
+	return s.raw.Message.MessageId
+}
+
+func (s *JobMessage) Attribute(key string) string {
+	return s.raw.Message.Attributes[key]
+}
+
+
 func (s *JobMessage) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
