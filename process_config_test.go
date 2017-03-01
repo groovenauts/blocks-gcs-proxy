@@ -54,7 +54,12 @@ func TestLoadProcessConfigWithEnv(t *testing.T) {
 		"SUSTAINER_INTERVAL": fmt.Sprintf("%v", sustainer_interval),
 	}, func() {
 
-		for _, path := range []string{"./test/config_with_env1.json", "./test/config_with_env2.json"} {
+		files := []string{
+			"./test/config_with_env1.json",
+			"./test/config_with_env2.json",
+			"test/config_with_env_and_default3.json",
+		}
+		for _, path := range files {
 		config, err := LoadProcessConfig(path)
 		if assert.NoError(t, err) {
 			assert.NotNil(t, config.Job)
