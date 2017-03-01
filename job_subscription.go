@@ -76,7 +76,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 
 	sus := &JobSustainer{
 		msg:    msg,
-		config: s.config,
+		config: s.config.Sustainer,
 		puller: s.puller,
 		status: running,
 	}
@@ -118,8 +118,9 @@ type (
 	JobSubStatus uint8
 
 	JobSustainer struct {
+		sub    string
 		msg    *pubsub.ReceivedMessage
-		config *JobConfig
+		config *JobSustainerConfig
 		puller Puller
 		status JobSubStatus
 		mux    sync.Mutex
@@ -137,7 +138,7 @@ func (s *JobSustainer) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	_, err := s.puller.Acknowledge(s.config.Subscription, s.msg.AckId)
+	_, err := s.puller.Acknowledge(s.sub, s.msg.AckId)
 	if err != nil {
 		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.msg, err)
 		return err
@@ -158,7 +159,7 @@ func (s *JobSustainer) running() bool {
 
 func (s *JobSustainer) sendMADPeriodically(ackId string) error {
 	for {
-		nextLimit := time.Now().Add(time.Duration(s.config.Sustainer.Interval) * time.Second)
+		nextLimit := time.Now().Add(time.Duration(s.config.Interval) * time.Second)
 		err := s.waitAndSendMAD(nextLimit, ackId)
 		if err != nil {
 			return err
@@ -190,9 +191,9 @@ func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time, ackId string) error {
 		return nil
 	}
 
-	_, err := s.puller.ModifyAckDeadline(s.config.Subscription, []string{ackId}, int64(s.config.Sustainer.Delay))
+	_, err := s.puller.ModifyAckDeadline(s.sub, []string{ackId}, int64(s.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.config.Subscription, ackId, s.config.Sustainer.Delay, err)
+		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, ackId, s.config.Delay, err)
 	}
 	return nil
 }
