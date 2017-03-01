@@ -20,6 +20,7 @@ type (
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {
+	log.Printf("Downloading gs://%v/%v to %v\n", bucket, object, destPath)
 	dest, err := os.Create(destPath)
 	if err != nil {
 		log.Fatalf("Error creating %q: %v", destPath, err)
@@ -39,20 +40,22 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 		log.Fatalf("Error copry bucket: %q object: %q to %q because of %v", bucket, object, destPath, err)
 		return err
 	}
-	log.Printf("Downloaded bucket: %q object: %q to %v (%d bytes)", bucket, object, destPath, n)
+	log.Printf("Downloaded bucket: gs://%v/%v to %v (%d bytes)", bucket, object, destPath, n)
 	return nil
 }
 
 func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
+	log.Printf("Uploading %v to gs://%v/%v\n", srcPath, bucket, object)
 	f, err := os.Open(srcPath)
 	if err != nil {
 		log.Fatalf("Error opening %q: %v", srcPath, err)
 		return err
 	}
-	obj, err := ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
+	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
 		log.Printf("Error uploading gs://%q/%q: %v", bucket, srcPath, err)
 		return err
 	}
+	log.Printf("Uploaded %v to gs://%v/%v\n", srcPath, bucket, object)
 	return nil
 }
