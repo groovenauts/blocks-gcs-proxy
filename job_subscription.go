@@ -74,6 +74,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error
 	}
 
 	jobMsg := &JobMessage{
+		sub:    s.config.Subscription,
 		raw:    msg,
 		config: s.config.Sustainer,
 		puller: s.puller,
