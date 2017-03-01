@@ -42,30 +42,16 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 }
 
 type (
-	JobSustainerConfig struct {
-		Delay    float64 `json:"delay,omitempty"`
-		Interval float64 `json:"interval,omitempty"`
-	}
-
 	JobConfig struct {
 		Subscription string              `json:"subscription,omitempty"`
 		PullInterval int                 `json:"pull_interval,omitempty"`
 		Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 	}
 
-	JobSubStatus uint8
-
 	JobSubscription struct {
 		config *JobConfig
 		puller Puller
 	}
-)
-
-const (
-	initial JobSubStatus = iota
-	running
-	done
-	acked
 )
 
 func (s *JobSubscription) listen(ctx context.Context, f func(msg *pubsub.ReceivedMessage) error) error {
@@ -124,6 +110,13 @@ func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedM
 }
 
 type (
+	JobSustainerConfig struct {
+		Delay    float64 `json:"delay,omitempty"`
+		Interval float64 `json:"interval,omitempty"`
+	}
+
+	JobSubStatus uint8
+
 	JobSustainer struct {
 		msg    *pubsub.ReceivedMessage
 		config *JobConfig
@@ -133,6 +126,12 @@ type (
 	}
 )
 
+const (
+	initial JobSubStatus = iota
+	running
+	done
+	acked
+)
 
 func (s *JobSustainer) Ack() error {
 	s.mux.Lock()
