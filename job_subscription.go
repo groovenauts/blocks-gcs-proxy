@@ -90,18 +90,22 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		return nil
 	}
 
-	s.status = running
+	sus := &JobSustainer{
+		config: s.config,
+		puller: s.puller,
+		status: running,
+	}
 
-	go s.sendMADPeriodically(msg.AckId)
+	go sus.sendMADPeriodically(msg.AckId)
 
 	err = f(msg)
-	s.status = done
+	sus.status = done
 
 	if err != nil {
 		return err
 	}
 
-	return s.Ack(msg)
+	return sus.Ack(msg)
 }
 
 func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
@@ -120,7 +124,17 @@ func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedM
 	return res.ReceivedMessages[0], nil
 }
 
-func (s *JobSubscription) Ack(msg *pubsub.ReceivedMessage) error {
+type (
+	JobSustainer struct {
+		config *JobConfig
+		puller Puller
+		status JobSubStatus
+		mux    sync.Mutex
+	}
+)
+
+
+func (s *JobSustainer) Ack(msg *pubsub.ReceivedMessage) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
@@ -135,11 +149,11 @@ func (s *JobSubscription) Ack(msg *pubsub.ReceivedMessage) error {
 	return nil
 }
 
-func (s *JobSubscription) running() bool {
+func (s *JobSustainer) running() bool {
 	return s.status == running
 }
 
-func (s *JobSubscription) sendMADPeriodically(ackId string) error {
+func (s *JobSustainer) sendMADPeriodically(ackId string) error {
 	for {
 		nextLimit := time.Now().Add(time.Duration(s.config.Sustainer.Interval) * time.Second)
 		err := s.waitAndSendMAD(nextLimit, ackId)
@@ -153,7 +167,7 @@ func (s *JobSubscription) sendMADPeriodically(ackId string) error {
 	// return nil
 }
 
-func (s *JobSubscription) waitAndSendMAD(nextLimit time.Time, ackId string) error {
+func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time, ackId string) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !s.running() {
