@@ -115,6 +115,22 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 	return nil
 }
 
+func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
+	pullRequest := &pubsub.PullRequest{
+		ReturnImmediately: false,
+		MaxMessages:       1,
+	}
+	res, err := s.puller.Pull(s.config.Subscription, pullRequest)
+	if err != nil {
+		log.Printf("Failed to pull %v cause of %v\n", s.config.Subscription, err)
+		return nil, err
+	}
+	if len(res.ReceivedMessages) == 0 {
+		return nil, nil
+	}
+	return res.ReceivedMessages[0], nil
+}
+
 func (s *JobSubscription) running() bool {
 	return s.status == running
 }
@@ -158,20 +174,4 @@ func (s *JobSubscription) waitAndSendMAD(nextLimit time.Time, ackId string) erro
 		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.config.Subscription, ackId, s.config.Sustainer.Delay, err)
 	}
 	return nil
-}
-
-func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
-	pullRequest := &pubsub.PullRequest{
-		ReturnImmediately: false,
-		MaxMessages:       1,
-	}
-	res, err := s.puller.Pull(s.config.Subscription, pullRequest)
-	if err != nil {
-		log.Printf("Failed to pull %v cause of %v\n", s.config.Subscription, err)
-		return nil, err
-	}
-	if len(res.ReceivedMessages) == 0 {
-		return nil, nil
-	}
-	return res.ReceivedMessages[0], nil
 }
