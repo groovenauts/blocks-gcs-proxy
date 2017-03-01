@@ -115,20 +115,20 @@ type (
 		Interval float64 `json:"interval,omitempty"`
 	}
 
-	JobSubStatus uint8
+	JobMessageStatus uint8
 
 	JobMessage struct {
 		sub    string
 		msg    *pubsub.ReceivedMessage
 		config *JobSustainerConfig
 		puller Puller
-		status JobSubStatus
+		status JobMessageStatus
 		mux    sync.Mutex
 	}
 )
 
 const (
-	running JobSubStatus = iota
+	running JobMessageStatus = iota
 	done
 	acked
 )
