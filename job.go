@@ -46,12 +46,12 @@ type (
 func (job *Job) run(ctx context.Context) error {
 	verr := job.message.Validate()
 	if verr != nil {
-		log.Fatalf("Invalid Message: AckId: %v, Message: %v, error: %v\n", job.message.raw.AckId, job.message.raw.Message, verr)
+		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
 		err := job.withNotify(CANCELLING, job.message.Ack)()
 		if err != nil {
 			return err
 		}
-		return verr
+		return nil
 	}
 
 	go job.message.sendMADPeriodically()
