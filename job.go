@@ -239,7 +239,7 @@ func (job *Job) downloadFiles() error {
 func (job *Job) execute() error {
 	cmd, err := job.build()
 	if err != nil {
-		log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
 	err = cmd.Run()
