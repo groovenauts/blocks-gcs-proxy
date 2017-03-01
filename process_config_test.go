@@ -54,7 +54,7 @@ func TestLoadProcessConfigWithEnv(t *testing.T) {
 		"SUSTAINER_INTERVAL": fmt.Sprintf("%v", sustainer_interval),
 	}, func() {
 
-		config, err := LoadProcessConfig("./test/config_with_env.json")
+		config, err := LoadProcessConfig("./test/config_with_env1.json")
 		if assert.NoError(t, err) {
 			assert.NotNil(t, config.Job)
 			assert.NotNil(t, config.Job.Sustainer)
