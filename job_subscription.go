@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -107,92 +106,4 @@ func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedM
 		return nil, nil
 	}
 	return res.ReceivedMessages[0], nil
-}
-
-type (
-	JobSustainerConfig struct {
-		Delay    float64 `json:"delay,omitempty"`
-		Interval float64 `json:"interval,omitempty"`
-	}
-
-	JobMessageStatus uint8
-
-	JobMessage struct {
-		sub    string
-		msg    *pubsub.ReceivedMessage
-		config *JobSustainerConfig
-		puller Puller
-		status JobMessageStatus
-		mux    sync.Mutex
-	}
-)
-
-const (
-	running JobMessageStatus = iota
-	done
-	acked
-)
-
-func (s *JobMessage) Ack() error {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	_, err := s.puller.Acknowledge(s.sub, s.msg.AckId)
-	if err != nil {
-		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.msg, err)
-		return err
-	}
-
-	s.status = acked
-
-	return nil
-}
-
-func (s *JobMessage) Done() {
-	s.status = done
-}
-
-func (s *JobMessage) running() bool {
-	return s.status == running
-}
-
-func (s *JobMessage) sendMADPeriodically() error {
-	for {
-		nextLimit := time.Now().Add(time.Duration(s.config.Interval) * time.Second)
-		err := s.waitAndSendMAD(nextLimit)
-		if err != nil {
-			return err
-		}
-		if !s.running() {
-			return nil
-		}
-	}
-	// return nil
-}
-
-func (s *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	for now := range ticker.C {
-		if !s.running() {
-			ticker.Stop()
-			return nil
-		}
-		if now.After(nextLimit) {
-			ticker.Stop()
-		}
-	}
-
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	// Don't send MAD after sending ACK
-	if s.status == acked {
-		return nil
-	}
-
-	_, err := s.puller.ModifyAckDeadline(s.sub, []string{s.msg.AckId}, int64(s.config.Delay))
-	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, s.msg.AckId, s.config.Delay, err)
-	}
-	return nil
 }
