@@ -3,10 +3,10 @@
     "dryrun": {{ or .BLOCKS_BATCH_DRYRUN "false" }}
   },
   "progress": {
-    "topic": "{{ .BLOCKS_BATCH_PROGRESS_TOPIC }}",
+    "topic": "projects/{{ .PROJECT }}/topics/{{ .PIPELINE }}-progress-topic"
   },
   "job": {
-    "subscription": "{{ .BLOCKS_BATCH_PUBSUB_SUBSCRIPTION }}",
+    "subscription": "projects/{{ .PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription",
     "pull_interval": {{ or .BLOCKS_BATCH_PULL_INTERVAL 60 }},
     "sustainer": {
       "delay": {{ or .BLOCKS_BATCH_SUSTAINER_DELAY 600 }},
