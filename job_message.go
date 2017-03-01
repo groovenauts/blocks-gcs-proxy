@@ -40,7 +40,6 @@ func (s *JobMessage) Attribute(key string) string {
 	return s.raw.Message.Attributes[key]
 }
 
-
 func (s *JobMessage) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()

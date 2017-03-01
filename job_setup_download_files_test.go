@@ -30,14 +30,14 @@ func TestJobSetupCase1(t *testing.T) {
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data: "",
-				Attributes: map[string]string{
-					"download_files": url1,
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data: "",
+					Attributes: map[string]string{
+						"download_files": url1,
+					},
+					MessageId: "test-message1",
 				},
-				MessageId: "test-message1",
-			},
 			},
 		},
 		workspace:     workspace,
@@ -83,18 +83,18 @@ func TestJobSetupCase2(t *testing.T) {
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data: "",
-				Attributes: map[string]string{
-					"download_files": generateJSON(t, map[string]interface{}{
-						"foo": url1,
-						"bar": []string{url2, url3},
-					}),
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data: "",
+					Attributes: map[string]string{
+						"download_files": generateJSON(t, map[string]interface{}{
+							"foo": url1,
+							"bar": []string{url2, url3},
+						}),
+					},
+					MessageId: "test-message1",
 				},
-				MessageId: "test-message1",
 			},
-		},
 		},
 		workspace:     workspace,
 		downloads_dir: downloads_dir,
@@ -153,13 +153,13 @@ func TestJobSetupCase3(t *testing.T) {
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data:       "",
-				Attributes: attrs,
-				MessageId:  "test-message1",
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data:       "",
+					Attributes: attrs,
+					MessageId:  "test-message1",
+				},
 			},
-		},
 		},
 		workspace:     workspace,
 		downloads_dir: downloads_dir,
