@@ -29,17 +29,17 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 
 	resp, err := ct.service.Get(bucket, object).Download()
 	if err != nil {
-		log.Printf("Error downloading gs://%q/%q: %v", bucket, object, err)
+		log.Printf("Error downloading bucket: %q object: %q because of %v", bucket, object, err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	n, err := io.Copy(dest, resp.Body)
 	if err != nil {
-		log.Fatalf("Error copry gs://%q/%q to %q: %v", bucket, object, destPath, err)
+		log.Fatalf("Error copry bucket: %q object: %q to %q because of %v", bucket, object, destPath, err)
 		return err
 	}
-	log.Printf("Downloaded gs://%q/%q: %d bytes", bucket, object, n)
+	log.Printf("Downloaded bucket: %q object: %q to %v (%d bytes)", bucket, object, destPath, n)
 	return nil
 }
 
