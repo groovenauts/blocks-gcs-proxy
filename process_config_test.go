@@ -54,7 +54,8 @@ func TestLoadProcessConfigWithEnv(t *testing.T) {
 		"SUSTAINER_INTERVAL": fmt.Sprintf("%v", sustainer_interval),
 	}, func() {
 
-		config, err := LoadProcessConfig("./test/config_with_env1.json")
+		for _, path := range []string{"./test/config_with_env1.json", "./test/config_with_env2.json"} {
+		config, err := LoadProcessConfig(path)
 		if assert.NoError(t, err) {
 			assert.NotNil(t, config.Job)
 			assert.NotNil(t, config.Job.Sustainer)
@@ -64,6 +65,7 @@ func TestLoadProcessConfigWithEnv(t *testing.T) {
 			assert.Equal(t, sustainer_delay, config.Job.Sustainer.Delay)
 			assert.Equal(t, sustainer_interval, config.Job.Sustainer.Interval)
 			assert.Equal(t, fmt.Sprintf("projects/%v/topics/%v-progress-topic", proj, pipeline), config.Progress.Topic)
+		}
 		}
 	})
 }
