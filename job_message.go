@@ -46,7 +46,6 @@ func (m *JobMessage) Validate() error {
 	return nil
 }
 
-
 func (m *JobMessage) MessageId() string {
 	return m.raw.Message.MessageId
 }
@@ -71,7 +70,6 @@ func (m *JobMessage) parseJson(str string) interface{} {
 	}
 	return dest
 }
-
 
 func (m *JobMessage) Ack() error {
 	m.mux.Lock()
