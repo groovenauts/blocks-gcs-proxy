@@ -101,7 +101,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		return err
 	}
 
-	return s.Ack()
+	return s.Ack(msg)
 }
 
 func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
@@ -120,11 +120,11 @@ func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedM
 	return res.ReceivedMessages[0], nil
 }
 
-func (s *JobSubscription) Ack() error {
+func (s *JobSubscription) Ack(msg *pubsub.ReceivedMessage) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	_, err = s.puller.Acknowledge(s.config.Subscription, msg.AckId)
+	_, err := s.puller.Acknowledge(s.config.Subscription, msg.AckId)
 	if err != nil {
 		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", msg, err)
 		return err
