@@ -44,8 +44,21 @@ type (
 )
 
 func (job *Job) run(ctx context.Context) error {
+	err := job.message.Validate()
+	if err != nil {
+		log.Fatalf("Invalid Message: AckId: %v, Message: %v, error: %v\n", job.message.raw.AckId, job.message.raw.Message, err)
+		err2 := job.message.Ack()
+		if err2 != nil {
+			log.Fatalf("Failed to ack AckId: %v, Message: %v, error: %v\n", job.message.raw.AckId, job.message.raw.Message, err2)
+		}
+		return err
+	}
+
+	go job.message.sendMADPeriodically()
+	defer job.message.Done()
+
 	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
-	err := job.setupWorkspace(ctx, func() error {
+	err = job.setupWorkspace(ctx, func() error {
 		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
 		if err != nil {
 			return err

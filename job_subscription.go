@@ -83,19 +83,6 @@ func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error
 		status: running,
 	}
 
-	err = jobMsg.Validate()
-	if err != nil {
-		log.Fatalf("Invalid Message: AckId: %v, Message: %v, error: %v\n", msg.AckId, msg.Message, err)
-		err2 := jobMsg.Ack()
-		if err2 != nil {
-			log.Fatalf("Failed to ack AckId: %v, Message: %v, error: %v\n", msg.AckId, msg.Message, err2)
-		}
-		return err
-	}
-
-	go jobMsg.sendMADPeriodically()
-	defer jobMsg.Done()
-
 	return f(jobMsg)
 }
 
