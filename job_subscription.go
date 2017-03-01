@@ -81,7 +81,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		status: running,
 	}
 
-	go sus.sendMADPeriodically(msg.AckId)
+	go sus.sendMADPeriodically()
 
 	err = f(msg)
 	sus.Done()
@@ -157,10 +157,10 @@ func (s *JobSustainer) running() bool {
 	return s.status == running
 }
 
-func (s *JobSustainer) sendMADPeriodically(ackId string) error {
+func (s *JobSustainer) sendMADPeriodically() error {
 	for {
 		nextLimit := time.Now().Add(time.Duration(s.config.Interval) * time.Second)
-		err := s.waitAndSendMAD(nextLimit, ackId)
+		err := s.waitAndSendMAD(nextLimit)
 		if err != nil {
 			return err
 		}
@@ -171,7 +171,7 @@ func (s *JobSustainer) sendMADPeriodically(ackId string) error {
 	// return nil
 }
 
-func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time, ackId string) error {
+func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !s.running() {
@@ -191,9 +191,9 @@ func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time, ackId string) error {
 		return nil
 	}
 
-	_, err := s.puller.ModifyAckDeadline(s.sub, []string{ackId}, int64(s.config.Delay))
+	_, err := s.puller.ModifyAckDeadline(s.sub, []string{s.msg.AckId}, int64(s.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, ackId, s.config.Delay, err)
+		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, s.msg.AckId, s.config.Delay, err)
 	}
 	return nil
 }
