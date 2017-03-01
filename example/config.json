@@ -1,16 +1,16 @@
 {
   "command": {
-    "dryrun": {{ env "BLOCKS_BATCH_DRYRUN" }}
+    "dryrun": {{ or .BLOCKS_BATCH_DRYRUN "false" }}
   },
   "progress": {
-    "topic": "{{ env "BLOCKS_BATCH_PROGRESS_TOPIC" }}",
+    "topic": "{{ .BLOCKS_BATCH_PROGRESS_TOPIC }}",
   },
   "job": {
-    "subscription": "{{ env "BLOCKS_BATCH_PUBSUB_SUBSCRIPTION" }}",
-    "pull_interval": 60,
+    "subscription": "{{ .BLOCKS_BATCH_PUBSUB_SUBSCRIPTION }}",
+    "pull_interval": {{ or .BLOCKS_BATCH_PULL_INTERVAL 60 }},
     "sustainer": {
-      "delay": {{ env "BLOCKS_BATCH_SUSTAINER_DELAY" }},
-      "interval": {{ env "BLOCKS_BATCH_SUSTAINER_INTERVAL" }}
+      "delay": {{ or .BLOCKS_BATCH_SUSTAINER_DELAY 600 }},
+      "interval": {{ or .BLOCKS_BATCH_SUSTAINER_INTERVAL 540 }}
     }
   }
 }
