@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"sync"
 	"time"
 
@@ -49,9 +51,27 @@ func (m *JobMessage) MessageId() string {
 	return m.raw.Message.MessageId
 }
 
-func (m *JobMessage) Attribute(key string) string {
-	return m.raw.Message.Attributes[key]
+func (m *JobMessage) DownloadFiles() interface{} {
+	str := m.raw.Message.Attributes["download_files"]
+	return m.parseJson(str)
 }
+
+func (m *JobMessage) parseJson(str string) interface{} {
+	matched, err := regexp.MatchString(`\A\[.*\]\z|\A\{.*\}\z|`, str)
+	if err != nil {
+		return str
+	}
+	if !matched {
+		return str
+	}
+	var dest interface{}
+	err = json.Unmarshal([]byte(str), &dest)
+	if err != nil {
+		return str
+	}
+	return dest
+}
+
 
 func (m *JobMessage) Ack() error {
 	m.mux.Lock()

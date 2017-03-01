@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,7 +10,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"golang.org/x/net/context"
@@ -130,7 +128,7 @@ func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
-	job.remoteDownloadFiles = job.parseJson(job.message.Attribute("download_files"))
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
@@ -308,22 +306,6 @@ func (job *Job) listFiles(dir string) ([]string, error) {
 		return nil, err
 	}
 	return result, nil
-}
-
-func (job *Job) parseJson(str string) interface{} {
-	matched, err := regexp.MatchString(`\A\[.*\]\z|\A\{.*\}\z|`, str)
-	if err != nil {
-		return str
-	}
-	if !matched {
-		return str
-	}
-	var dest interface{}
-	err = json.Unmarshal([]byte(str), &dest)
-	if err != nil {
-		return str
-	}
-	return dest
 }
 
 func (job *Job) flatten(obj interface{}) []interface{} {
