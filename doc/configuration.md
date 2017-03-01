@@ -22,7 +22,7 @@ See [How it works/Run one of multiple commands](./how_it_works.md#run-one-of-mul
 
 ### command/dryrun
 
-`magellan-gcs-proxy` doesn't run command if dryrun given.
+`blocks-gcs-proxy` doesn't run command if dryrun given.
 `true`, `yes`, `on` or `1` are true. The others are false.
 
 ### job
@@ -48,10 +48,10 @@ See [How it works/Run one of multiple commands](./how_it_works.md#run-one-of-mul
 
 There are two configurations `delay` and `interval` for sustainer to delay ack deadline for long time job support.
 
-Every `interval` seconds, `magellan-gcs-proxy` sends modify `modifyAckDeadline` to the subscription.
+Every `interval` seconds, `blocks-gcs-proxy` sends modify `modifyAckDeadline` to the subscription.
 The new deadline will be `delay` seconds later at the time.
 
-See [How it works/Long time job support](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#long-time-job-support) also.
+See [How it works/Long time job support](https://github.com/groovenauts/blocks-gcs-proxy/blob/features/documents/doc/how_it_works.md#long-time-job-support) also.
 
 
 ### progress
@@ -67,10 +67,10 @@ It must be a map which has `topic`.
 }
 ```
 
-See [How it works/Progress notification](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#progress-notification) also.
+See [How it works/Progress notification](https://github.com/groovenauts/blocks-gcs-proxy/blob/features/documents/doc/how_it_works.md#progress-notification) also.
 
 
 ## Environment Variables
 
 You can use environment variables in the `config.json` with `{{env "HOME"}}`.
-See [the file for test](https://github.com/groovenauts/magellan-gcs-proxy/blob/2104fb374544c78a6c240141bc131559a48fa382/test/config_with_env.json) if you need examples.
+See [the file for test](https://github.com/groovenauts/blocks-gcs-proxy/blob/2104fb374544c78a6c240141bc131559a48fa382/test/config_with_env.json) if you need examples.

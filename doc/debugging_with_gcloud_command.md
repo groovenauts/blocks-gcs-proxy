@@ -34,7 +34,7 @@ export PIPELINE=pipeline01
 export JOB_SUB="projects/${PROJECT}/subscriptions/${PIPELINE}-job-subscription"
 export PROGRESS_TOPIC="projects/${PROJECT}/topics/${PIPELINE}-progress-topic"
 echo "{\"job\":{\"subscription\":\"${JOB_SUB}\"},\"progress\":{\"topic\":\"${PROGRESS_TOPIC}\"}}" > config.json
-magellan-gcs-proxy COMMAND ARGS...
+blocks-gcs-proxy COMMAND ARGS...
 ```
 
 ## Publish message
