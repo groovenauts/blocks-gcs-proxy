@@ -17,29 +17,55 @@ func TestLoadProcessConfigReal(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func tempEnv(t *testing.T, env map[string]string, f func()) {
+	backup := map[string]string{}
+	for key, _ := range env {
+		backup[key] = os.Getenv(key)
+	}
+	cleanup := func() {
+		for key, val := range backup {
+			err := os.Setenv(key, val)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	defer cleanup()
+	for key, val := range env {
+		err := os.Setenv(key, val)
+		if err != nil {
+			assert.NoError(t, err)
+		}
+	}
+	f()
+}
+
 func TestLoadProcessConfigWithEnv(t *testing.T) {
 	proj := "test-gcp-proj"
 	pipeline := "pipeline1"
 	pull_interval := 30
 	sustainer_delay := float64(300)
 	sustainer_interval := float64(270)
-	os.Setenv("GCP_PROJECT", proj)
-	os.Setenv("PIPELINE", pipeline)
-	os.Setenv("PULL_INTERVAL", strconv.Itoa(pull_interval))
-	os.Setenv("SUSTAINER_DELAY", fmt.Sprintf("%v", sustainer_delay))
-	os.Setenv("SUSTAINER_INTERVAL", fmt.Sprintf("%v", sustainer_interval))
+	tempEnv(t, map[string]string{
+		"GCP_PROJECT":        proj,
+		"PIPELINE":           pipeline,
+		"PULL_INTERVAL":      strconv.Itoa(pull_interval),
+		"SUSTAINER_DELAY":    fmt.Sprintf("%v", sustainer_delay),
+		"SUSTAINER_INTERVAL": fmt.Sprintf("%v", sustainer_interval),
+	}, func() {
 
-	config, err := LoadProcessConfig("./test/config_with_env.json")
-	if assert.NoError(t, err) {
-		assert.NotNil(t, config.Job)
-		assert.NotNil(t, config.Job.Sustainer)
-		assert.NotNil(t, config.Progress)
-		assert.Equal(t, fmt.Sprintf("projects/%v/subscriptions/%v-job-subscription", proj, pipeline), config.Job.Subscription)
-		assert.Equal(t, pull_interval, config.Job.PullInterval)
-		assert.Equal(t, sustainer_delay, config.Job.Sustainer.Delay)
-		assert.Equal(t, sustainer_interval, config.Job.Sustainer.Interval)
-		assert.Equal(t, fmt.Sprintf("projects/%v/topics/%v-progress-topic", proj, pipeline), config.Progress.Topic)
-	}
+		config, err := LoadProcessConfig("./test/config_with_env.json")
+		if assert.NoError(t, err) {
+			assert.NotNil(t, config.Job)
+			assert.NotNil(t, config.Job.Sustainer)
+			assert.NotNil(t, config.Progress)
+			assert.Equal(t, fmt.Sprintf("projects/%v/subscriptions/%v-job-subscription", proj, pipeline), config.Job.Subscription)
+			assert.Equal(t, pull_interval, config.Job.PullInterval)
+			assert.Equal(t, sustainer_delay, config.Job.Sustainer.Delay)
+			assert.Equal(t, sustainer_interval, config.Job.Sustainer.Interval)
+			assert.Equal(t, fmt.Sprintf("projects/%v/topics/%v-progress-topic", proj, pipeline), config.Progress.Topic)
+		}
+	})
 }
 
 func TestLoadProcessConfig1(t *testing.T) {
