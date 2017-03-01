@@ -32,57 +32,57 @@ const (
 	acked
 )
 
-func (s *JobMessage) MessageId() string {
-	return s.raw.Message.MessageId
+func (m *JobMessage) MessageId() string {
+	return m.raw.Message.MessageId
 }
 
-func (s *JobMessage) Attribute(key string) string {
-	return s.raw.Message.Attributes[key]
+func (m *JobMessage) Attribute(key string) string {
+	return m.raw.Message.Attributes[key]
 }
 
-func (s *JobMessage) Ack() error {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+func (m *JobMessage) Ack() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
 
-	_, err := s.puller.Acknowledge(s.sub, s.raw.AckId)
+	_, err := m.puller.Acknowledge(m.sub, m.raw.AckId)
 	if err != nil {
-		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.raw, err)
+		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", m.raw, err)
 		return err
 	}
 
-	s.status = acked
+	m.status = acked
 
 	return nil
 }
 
-func (s *JobMessage) Done() {
-	if s.status == running {
-		s.status = done
+func (m *JobMessage) Done() {
+	if m.status == running {
+		m.status = done
 	}
 }
 
-func (s *JobMessage) running() bool {
-	return s.status == running
+func (m *JobMessage) running() bool {
+	return m.status == running
 }
 
-func (s *JobMessage) sendMADPeriodically() error {
+func (m *JobMessage) sendMADPeriodically() error {
 	for {
-		nextLimit := time.Now().Add(time.Duration(s.config.Interval) * time.Second)
-		err := s.waitAndSendMAD(nextLimit)
+		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
+		err := m.waitAndSendMAD(nextLimit)
 		if err != nil {
 			return err
 		}
-		if !s.running() {
+		if !m.running() {
 			return nil
 		}
 	}
 	// return nil
 }
 
-func (s *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
+func (m *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
-		if !s.running() {
+		if !m.running() {
 			ticker.Stop()
 			return nil
 		}
@@ -91,17 +91,17 @@ func (s *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 		}
 	}
 
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	m.mux.Lock()
+	defer m.mux.Unlock()
 
 	// Don't send MAD after sending ACK
-	if s.status == acked {
+	if m.status == acked {
 		return nil
 	}
 
-	_, err := s.puller.ModifyAckDeadline(s.sub, []string{s.raw.AckId}, int64(s.config.Delay))
+	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, int64(m.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", s.sub, s.raw.AckId, s.config.Delay, err)
+		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
 	}
 	return nil
 }
