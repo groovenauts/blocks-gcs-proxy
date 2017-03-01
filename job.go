@@ -228,7 +228,7 @@ func (job *Job) downloadFiles() error {
 			return err
 		}
 
-		err = job.storage.Download(url.Host, url.Path, destPath)
+		err = job.storage.Download(url.Host, url.Path[1:], destPath)
 		if err != nil {
 			return err
 		}
