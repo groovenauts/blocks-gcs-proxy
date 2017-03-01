@@ -100,7 +100,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 	go sus.sendMADPeriodically(msg.AckId)
 
 	err = f(msg)
-	sus.status = done
+	sus.Done()
 
 	if err != nil {
 		return err
@@ -149,6 +149,10 @@ func (s *JobSustainer) Ack() error {
 	s.status = acked
 
 	return nil
+}
+
+func (s *JobSustainer) Done() {
+	s.status = done
 }
 
 func (s *JobSustainer) running() bool {
