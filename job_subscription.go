@@ -73,6 +73,8 @@ func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error
 		return nil
 	}
 
+	log.Printf("Received: AckId: %v, Message: %v\n", msg.AckId, msg.Message)
+
 	jobMsg := &JobMessage{
 		sub:    s.config.Subscription,
 		raw:    msg,
