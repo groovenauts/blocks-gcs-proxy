@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -242,10 +243,14 @@ func (job *Job) execute() error {
 		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	log.Printf("EXECUTE running: %v\n", cmd)
 	err = cmd.Run()
 	if err != nil {
-		log.Printf("Command Error: cmd: %v cause of %v\n", cmd, err)
-		// return err // Don't return this err
+		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", cmd, err, out.String())
+		return err
 	}
 	return nil
 }
