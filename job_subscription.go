@@ -58,8 +58,6 @@ type (
 	JobSubscription struct {
 		config *JobConfig
 		puller Puller
-		status JobSubStatus
-		mux    sync.Mutex
 	}
 )
 
