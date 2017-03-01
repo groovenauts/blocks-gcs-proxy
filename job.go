@@ -46,7 +46,7 @@ type (
 func (job *Job) run(ctx context.Context) error {
 	job.notification.notify(PROCESSING, job.message.Message.MessageId, "info")
 	err := job.setupWorkspace(ctx, func() error {
-		err := job.withNotify(DOWNLOADING, job.setupDownloadFiles)()
+		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
 		if err != nil {
 			return err
 		}
