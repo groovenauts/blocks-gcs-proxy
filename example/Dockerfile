@@ -1,4 +1,4 @@
-# [config] IMAGE_NAME: "groovenauts/batch_type_iot_example"
+# [config] IMAGE_NAME: "groovenauts/concurrent_batch_example"
 # [config]
 # [config] WORKING_DIR: "."
 # [config] VERSION_SCRIPT: "ruby -r ../lib/magellan/gcs/proxy/version.rb -e 'puts Magellan::Gcs::Proxy::VERSION'"

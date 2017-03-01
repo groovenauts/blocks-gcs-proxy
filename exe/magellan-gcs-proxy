@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-require 'magellan/gcs/proxy'
-
-Magellan::Gcs::Proxy::Cli.new(*ARGV).run

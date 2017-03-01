@@ -95,16 +95,21 @@ use it as a string.
 
 ### Run one of multiple commands
 
-If you have to run some commands in a docker container image, you can use `commands` in your `config.yml`.
+If you have to run some commands in a docker container image, you can use `command/options` in your `config.json`.
 
 #### Precondition
 
-You have `config.yml`:
+You have `config.json`:
 
-```yaml
-commands:
-  key1: "cmd1 %{uploads_dir} %{download_files}"
-  key2: "cmd2 %{download_files.b}" %{uploads_dir}"
+```json
+{
+  "command": {
+    "options": {
+      "key1": ["cmd1", "%{uploads_dir}", "%{download_files}"],
+      "key2": ["cmd2", "%{download_files.b}", "%{uploads_dir}"]
+    }
+  }
+}
 ```
 
 And run `magellan-gcs-proxy` like this:
@@ -114,12 +119,15 @@ magellan-gcs-proxy %{attrs.foo}
 
 #### Case 1. foo is key1
 
-```yaml
-foo: key1
-download_files:
-- gs://bucket1/file1
-- gs://bucket1/file2
-- gs://bucket1/file3
+```json
+{
+  "foo": "key1",
+  "download_files": [
+    "gs://bucket1/file1",
+    "gs://bucket1/file2",
+    "gs://bucket1/file3"
+  ]
+}
 ```
 
 When `magellan-gcs-proxy` gets the message above, it calls `cmd1`:
@@ -130,12 +138,15 @@ cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspa
 
 #### Case 2. foo is key2
 
-```yaml
-foo: key2
-download_files:
-  a: gs://bucket1/file1
-  b: gs://bucket1/file2
-  c: gs://bucket1/file3
+```json
+{
+  "foo": "key2",
+  "download_files": {
+    "a": "gs://bucket1/file1",
+    "b": "gs://bucket1/file2",
+    "c": "gs://bucket1/file3"
+  }
+}
 ```
 
 When `magellan-gcs-proxy` gets the message above, it calls `cmd2`:
@@ -144,7 +155,7 @@ When `magellan-gcs-proxy` gets the message above, it calls `cmd2`:
 cmd2 path/to/workspace/downloads/file2 path/to/workspace/uploads
 ```
 
-For more detail, see [config.yml/commands](./configuration.md#commands) also.
+For more detail, see [config.json/command](./configuration.md#commandoptions) also.
 
 
 ## Directories
@@ -194,14 +205,14 @@ and `workspace/uploads/bucket2/path/to/file-b` to `gs://bucket2/path/to/file-b`.
 If your application takes a long time over [acknowledgement deadline](https://cloud.google.com/pubsub/docs/subscriber#ack_deadline),
 `magellan-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
 
-For more detail, see [config.yml/sustainer](./configuration.md#sustainer) also.
+For more detail, see [config.yml/sustainer](./configuration.md#jobsustainer) also.
 
 
 ## Progress notification
 
 `magellan-gcs-proxy` sends a message for each progress to the topic if given.
 
-To set the topic, see [config.yml/progress_notification](./configuration.md#progress_notification) also.
+To set the topic, see [config.yml/progress](./configuration.md#progress) also.
 
 The message has the following attributes:
 
@@ -209,6 +220,7 @@ The message has the following attributes:
 |----------------|--------|
 | progress       | number from 1 to 14 |
 | total          | 14                  |
+| completed      | "false" or "true"   |
 | job_message_id | Job message ID      |
 | level          | "INFO"              |
 

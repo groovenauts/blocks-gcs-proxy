@@ -1,0 +1,36 @@
+{
+  "resources": [
+    {
+      "type": "pubsub.v1.topic",
+      "name": "{{ env["deployment"] }}-job-topic",
+      "properties": {
+        "topic": "{{ env["deployment"] }}-job-topic"
+      }
+    },
+    {
+      "type": "pubsub.v1.subscription",
+      "name": "{{ env["deployment"] }}-job-subscription",
+      "properties": {
+        "subscription": "{{ env["deployment"] }}-job-subscription",
+        "topic": "$(ref.{{ env["deployment"] }}-job-topic.name)",
+        "ackDeadlineSeconds": 600
+      }
+    },
+    {
+      "type": "pubsub.v1.topic",
+      "name": "{{ env["deployment"] }}-progress-topic",
+      "properties": {
+        "topic": "{{ env["deployment"] }}-progress-topic"
+      }
+    },
+    {
+      "type": "pubsub.v1.subscription",
+      "name": "{{ env["deployment"] }}-progress-subscription",
+      "properties": {
+        "subscription": "{{ env["deployment"] }}-progress-subscription",
+        "topic": "$(ref.{{ env["deployment"] }}-progress-topic.name)",
+        "ackDeadlineSeconds": 30
+      }
+    }
+  ]
+}

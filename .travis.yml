@@ -1,5 +1,17 @@
 sudo: false
-language: ruby
-rvm:
-  - 2.3.1
-before_install: gem install bundler -v 1.13.6
+language: go
+go:
+  - 1.6.3
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:masterminds/glide'
+    packages:
+      - glide
+before_install:
+  - test -d $GOPATH/bin || mkdir -p $GOPATH/bin
+install:
+  ## Install dependencies
+  - glide install
+script:
+  - go test
