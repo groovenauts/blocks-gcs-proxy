@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -220,6 +221,13 @@ func (job *Job) downloadFiles() error {
 			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
 			return err
 		}
+
+		dir := path.Dir(destPath)
+		err = os.MkdirAll(dir, 0700)
+		if err != nil {
+			return err
+		}
+
 		err = job.storage.Download(url.Host, url.Path, destPath)
 		if err != nil {
 			return err
