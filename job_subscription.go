@@ -91,6 +91,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 	}
 
 	sus := &JobSustainer{
+		msg:    msg,
 		config: s.config,
 		puller: s.puller,
 		status: running,
@@ -105,7 +106,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		return err
 	}
 
-	return sus.Ack(msg)
+	return sus.Ack()
 }
 
 func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
@@ -126,6 +127,7 @@ func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedM
 
 type (
 	JobSustainer struct {
+		msg    *pubsub.ReceivedMessage
 		config *JobConfig
 		puller Puller
 		status JobSubStatus
@@ -134,13 +136,13 @@ type (
 )
 
 
-func (s *JobSustainer) Ack(msg *pubsub.ReceivedMessage) error {
+func (s *JobSustainer) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	_, err := s.puller.Acknowledge(s.config.Subscription, msg.AckId)
+	_, err := s.puller.Acknowledge(s.config.Subscription, s.msg.AckId)
 	if err != nil {
-		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", msg, err)
+		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", s.msg, err)
 		return err
 	}
 
