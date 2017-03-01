@@ -242,7 +242,7 @@ func (job *Job) execute() error {
 		log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
-	err = job.withNotify(EXECUTING, cmd.Run)()
+	err = cmd.Run()
 	if err != nil {
 		log.Printf("Command Error: cmd: %v cause of %v\n", cmd, err)
 		// return err // Don't return this err
