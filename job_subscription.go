@@ -74,7 +74,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(msg *pubsub.Receiv
 		return nil
 	}
 
-	sus := &JobSustainer{
+	sus := &JobMessage{
 		msg:    msg,
 		config: s.config.Sustainer,
 		puller: s.puller,
@@ -117,7 +117,7 @@ type (
 
 	JobSubStatus uint8
 
-	JobSustainer struct {
+	JobMessage struct {
 		sub    string
 		msg    *pubsub.ReceivedMessage
 		config *JobSustainerConfig
@@ -133,7 +133,7 @@ const (
 	acked
 )
 
-func (s *JobSustainer) Ack() error {
+func (s *JobMessage) Ack() error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
@@ -148,15 +148,15 @@ func (s *JobSustainer) Ack() error {
 	return nil
 }
 
-func (s *JobSustainer) Done() {
+func (s *JobMessage) Done() {
 	s.status = done
 }
 
-func (s *JobSustainer) running() bool {
+func (s *JobMessage) running() bool {
 	return s.status == running
 }
 
-func (s *JobSustainer) sendMADPeriodically() error {
+func (s *JobMessage) sendMADPeriodically() error {
 	for {
 		nextLimit := time.Now().Add(time.Duration(s.config.Interval) * time.Second)
 		err := s.waitAndSendMAD(nextLimit)
@@ -170,7 +170,7 @@ func (s *JobSustainer) sendMADPeriodically() error {
 	// return nil
 }
 
-func (s *JobSustainer) waitAndSendMAD(nextLimit time.Time) error {
+func (s *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !s.running() {
