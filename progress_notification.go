@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"log"
 	"strconv"
 
@@ -84,7 +85,7 @@ func (pn *ProgressNotification) notify(progress int, job_msg_id, level string) e
 		"job_message_id": job_msg_id,
 		"level":          level,
 	}
-	m := &pubsub.PubsubMessage{Data: msg, Attributes: opts}
+	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(msg)), Attributes: opts}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
 		log.Printf("Error to publish notification to %v msg: %v cause of %v\n", pn.config.Topic, m, err)
