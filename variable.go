@@ -38,13 +38,13 @@ func (v *Variable) expand(str string) (string, error) {
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
 	re2 := regexp.MustCompile(`\s*\}\z`)
+	errors := []error{}
 	res := re0.ReplaceAllStringFunc(str, func(raw string) string {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
 		value, err := v.dive(expr)
 		if err != nil {
-			log.Printf("Error to dive: %v: %v\n", expr, err)
-			// return err
-			value = ""
+			errors = append(errors, err)
+			return ""
 		}
 		switch value.(type) {
 		case string:
@@ -59,6 +59,9 @@ func (v *Variable) expand(str string) (string, error) {
 			return fmt.Sprintf("%v", value)
 		}
 	})
+	if len(errors) > 0 {
+		return "", errors[0]
+	}
 	return res, nil
 }
 
