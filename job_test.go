@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	workspace = "/tmp/workspace"
+	workspace     = "/tmp/workspace"
 	downloads_dir = workspace + "/downloads"
-	uploads_dir = workspace + "/uploads"
+	uploads_dir   = workspace + "/uploads"
 )
 
 func NewBasicJob() *Job {
@@ -20,17 +20,17 @@ func NewBasicJob() *Job {
 		config: &CommandConfig{
 			Template: []string{"./app.sh", "%{uploads_dir}", "%{download_files.0}"},
 		},
-		workspace: workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir: uploads_dir,
-		localDownloadFiles: []string{downloads_dir + "/bucket1/foo"},
+		workspace:           workspace,
+		downloads_dir:       downloads_dir,
+		uploads_dir:         uploads_dir,
+		localDownloadFiles:  []string{downloads_dir + "/bucket1/foo"},
 		remoteDownloadFiles: []string{"gs://bucket1/foo"},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
 				Message: &pubsub.PubsubMessage{
 					Attributes: map[string]string{
 						"array": "[100,200,300]",
-						"map": `{"foo":"A"}`,
+						"map":   `{"foo":"A"}`,
 					},
 				},
 			},

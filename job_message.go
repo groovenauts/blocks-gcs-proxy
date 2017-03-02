@@ -36,11 +36,11 @@ const (
 
 func (m *JobMessage) Validate() error {
 	if m.MessageId() == "" {
-		return &InvalidJobError{ "no MessageId is given" }
+		return &InvalidJobError{"no MessageId is given"}
 	}
 	_, ok := m.raw.Message.Attributes["download_files"]
 	if !ok {
-		return &InvalidJobError{ "No download_files given." }
+		return &InvalidJobError{"No download_files given."}
 	}
 	return nil
 }

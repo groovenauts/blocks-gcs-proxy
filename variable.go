@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	InvalidExpression struct{
+	InvalidExpression struct {
 		msg string
 	}
 )
@@ -125,19 +125,19 @@ func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error
 func (v *Variable) getFromArray(array interface{}, name string) (interface{}, error) {
 	idx, err := v.parseIndex(name)
 	if err != nil {
-		return nil, &InvalidExpression{ "Invalid index for array: " + name }
+		return nil, &InvalidExpression{"Invalid index for array: " + name}
 	}
 	switch array.(type) {
 	case []string:
 		l := len(array.([]string))
 		if idx >= l {
-			return nil, &InvalidExpression{ fmt.Sprintf("Invalid index %v for array who has %v items", idx, l) }
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid index %v for array who has %v items", idx, l)}
 		}
 		return array.([]string)[idx], nil
 	case []interface{}:
 		l := len(array.([]interface{}))
 		if idx >= l {
-			return nil, &InvalidExpression{ fmt.Sprintf("Invalid index %v for array who has %v items", idx, l) }
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid index %v for array who has %v items", idx, l)}
 		}
 		return array.([]interface{})[idx], nil
 	default:
@@ -151,21 +151,20 @@ func (v *Variable) getFromMap(obj interface{}, name string) (interface{}, error)
 		m := obj.(map[string]interface{})
 		v, ok := m[name]
 		if !ok {
-			return nil, &InvalidExpression{ fmt.Sprintf("Invalid key %v for map %v", name, m) }
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid key %v for map %v", name, m)}
 		}
 		return v, nil
 	case map[string]string:
 		m := obj.(map[string]string)
 		v, ok := m[name]
 		if !ok {
-			return nil, &InvalidExpression{ fmt.Sprintf("Invalid key %v for map %v", name, m) }
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid key %v for map %v", name, m)}
 		}
 		return v, nil
 	default:
 		return nil, fmt.Errorf("Unsupported object given as a map: [%T]%v", obj, obj)
 	}
 }
-
 
 func (v *Variable) parseIndex(str string) (int, error) {
 	re := regexp.MustCompile(`\A\d+\z`)

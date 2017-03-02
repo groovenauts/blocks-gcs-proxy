@@ -39,7 +39,7 @@ type (
 )
 
 const (
-	CANCELLING    = 1 + iota
+	CANCELLING = 1 + iota
 	CANCELL_OK
 	CANCELL_ERROR
 	PREPARING
