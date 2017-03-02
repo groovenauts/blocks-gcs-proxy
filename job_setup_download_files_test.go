@@ -55,11 +55,11 @@ func TestJobSetupCase1(t *testing.T) {
 	assert.Equal(t, url1, job.remoteDownloadFiles)
 	assert.Equal(t, local1, job.localDownloadFiles)
 
-	cmd, err := job.build()
+	err = job.build()
 	assert.NoError(t, err)
 
-	assert.Equal(t, "cmd1", cmd.Path)
-	assert.Equal(t, []string{"cmd1", local1, uploads_dir}, cmd.Args)
+	assert.Equal(t, "cmd1", job.cmd.Path)
+	assert.Equal(t, []string{"cmd1", local1, uploads_dir}, job.cmd.Args)
 }
 
 func TestJobSetupCase2(t *testing.T) {
@@ -119,11 +119,11 @@ func TestJobSetupCase2(t *testing.T) {
 		"bar": []interface{}{local2, local3},
 	}, job.localDownloadFiles)
 
-	cmd, err := job.build()
+	err = job.build()
 	assert.NoError(t, err)
 
-	assert.Equal(t, "cmd1", cmd.Path)
-	assert.Equal(t, []string{"cmd1", uploads_dir, local1, local2, local3}, cmd.Args)
+	assert.Equal(t, "cmd1", job.cmd.Path)
+	assert.Equal(t, []string{"cmd1", uploads_dir, local1, local2, local3}, job.cmd.Args)
 }
 
 func TestJobSetupCase3(t *testing.T) {
@@ -191,9 +191,9 @@ func TestJobSetupCase3(t *testing.T) {
 	assert.Equal(t, []interface{}{url1, url2, url3}, job.remoteDownloadFiles)
 	assert.Equal(t, []interface{}{local1, local2, local3}, job.localDownloadFiles)
 
-	cmd, err := job.build()
+	err = job.build()
 	assert.NoError(t, err)
 
-	assert.Equal(t, "cmd1", cmd.Path)
-	assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, cmd.Args)
+	assert.Equal(t, "cmd1", job.cmd.Path)
+	assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
 }
