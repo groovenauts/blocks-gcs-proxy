@@ -56,7 +56,6 @@ func (job *Job) run(ctx context.Context) error {
 }
 
 func (job *Job) runImpl(ctx context.Context) error {
-	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 
 	err := job.withNotify(PREPARING, job.prepare)()
