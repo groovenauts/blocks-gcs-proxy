@@ -59,25 +59,8 @@ func (job *Job) runImpl(ctx context.Context) error {
 	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 
-	err := job.message.Validate()
+	err := job.withNotify(PREPARING, job.prepare)()
 	if err != nil {
-		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
-		return nil
-	}
-
-	err = job.setupWorkspace()
-	if err != nil {
-		return err
-	}
-
-	err = job.withNotify(PREPARING, job.setupDownloadFiles)()
-	if err != nil {
-		return err
-	}
-
-	err = job.build()
-	if err != nil {
-		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
 
@@ -119,6 +102,31 @@ func (job *Job) withNotify(progress int, f func() error) func() error {
 		job.notification.notify(progress+1, msg_id, "info")
 		return nil
 	}
+}
+
+func (job *Job) prepare() error {
+	err := job.message.Validate()
+	if err != nil {
+		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
+		return nil
+	}
+
+	err = job.setupWorkspace()
+	if err != nil {
+		return err
+	}
+
+	err = job.setupDownloadFiles()
+	if err != nil {
+		return err
+	}
+
+	err = job.build()
+	if err != nil {
+		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		return err
+	}
+	return nil
 }
 
 func (job *Job) setupWorkspace() error {
