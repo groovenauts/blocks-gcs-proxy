@@ -38,6 +38,8 @@ type (
 		downloadFileMap     map[string]string
 		remoteDownloadFiles interface{}
 		localDownloadFiles  interface{}
+
+		cmd *exec.Cmd
 	}
 )
 
@@ -198,12 +200,12 @@ func (job *Job) buildVariable() *Variable {
 	}
 }
 
-func (job *Job) build() (*exec.Cmd, error) {
+func (job *Job) build() error {
 	v := job.buildVariable()
 
 	values, err := job.extract(v, job.config.Template)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if len(job.config.Options) > 0 {
 		key := strings.Join(values, " ")
@@ -214,12 +216,12 @@ func (job *Job) build() (*exec.Cmd, error) {
 		if t != nil {
 			values, err = job.extract(v, t)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-	cmd := exec.Command(values[0], values[1:]...)
-	return cmd, nil
+	job.cmd = exec.Command(values[0], values[1:]...)
+	return nil
 }
 
 func (job *Job) extract(v *Variable, values []string) ([]string, error) {
@@ -260,18 +262,18 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) execute() error {
-	cmd, err := job.build()
+	err := job.build()
 	if err != nil {
 		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
 	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	log.Printf("EXECUTE running: %v\n", cmd)
-	err = cmd.Run()
+	job.cmd.Stdout = &out
+	job.cmd.Stderr = &out
+	log.Printf("EXECUTE running: %v\n", job.cmd)
+	err = job.cmd.Run()
 	if err != nil {
-		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", cmd, err, out.String())
+		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", job.cmd, err, out.String())
 		return err
 	}
 	return nil
