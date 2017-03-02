@@ -48,7 +48,10 @@ func TestJobBuildWithInvalidIndexForArray(t *testing.T) {
 	job := NewBasicJob()
 	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files.1}"}
 	err := job.build()
-	assert.IsType(t, &InvalidJobError{}, err)
+
+	if assert.Implements(t, (*RetryableError)(nil), err) {
+		assert.False(t, (err.(RetryableError)).Retryable())
+	}
 }
 
 // Key string is given for the array "download_files"
@@ -56,7 +59,9 @@ func TestJobBuildWithStringKeyForArray(t *testing.T) {
 	job := NewBasicJob()
 	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files.foo}"}
 	err := job.build()
-	assert.IsType(t, &InvalidJobError{}, err)
+	if assert.Implements(t, (*RetryableError)(nil), err) {
+		assert.False(t, (err.(RetryableError)).Retryable())
+	}
 }
 
 // Invalid key given for the map "download_files"
@@ -67,5 +72,19 @@ func TestJobBuildWithInvalidKeyForMap(t *testing.T) {
 		"foo": downloads_dir + "/bucket1/foo",
 	}
 	err := job.build()
-	assert.IsType(t, &InvalidJobError{}, err)
+	if assert.Implements(t, (*RetryableError)(nil), err) {
+		assert.False(t, (err.(RetryableError)).Retryable())
+	}
+}
+
+// Invalid index and invalid key for the array and map in attrs
+func TestJobBuildWithInvalidIndexAndKeyInAttrs(t *testing.T) {
+	job := NewBasicJob()
+	job.config.Template = []string{"echo", "%{attrs.array.3}", "%{attrs.map.bar}"}
+	err := job.build()
+	if assert.Implements(t, (*RetryableError)(nil), err) {
+		assert.False(t, (err.(RetryableError)).Retryable())
+	}
+	assert.Regexp(t, "Invalid index 3", err.Error())
+	assert.Regexp(t, "Invalid key bar", err.Error())
 }

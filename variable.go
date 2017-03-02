@@ -60,7 +60,7 @@ func (v *Variable) expand(str string) (string, error) {
 		}
 	})
 	if len(errors) > 0 {
-		return "", errors[0]
+		return "", &CompositeError{errors}
 	}
 	return res, nil
 }

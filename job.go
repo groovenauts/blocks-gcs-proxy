@@ -44,10 +44,13 @@ type (
 func (job *Job) run() error {
 	err := job.runWithoutCancelling()
 	switch err.(type) {
-	case InvalidJobError:
-		err := job.withNotify(CANCELLING, job.message.Ack)()
-		if err != nil {
-			return err
+	case RetryableError:
+		e := err.(RetryableError)
+		if !e.Retryable() {
+			err := job.withNotify(CANCELLING, job.message.Ack)()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err
@@ -246,15 +249,20 @@ func (job *Job) build() error {
 
 func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	result := []string{}
+	errors := []error{}
 	for _, src := range values {
 		extracted, err := v.expand(src)
 		if err != nil {
-			return nil, &InvalidJobError{err.Error()}
+			errors = append(errors, &InvalidJobError{err.Error()})
+			continue
 		}
 		vals := strings.Split(extracted, v.separator)
 		for _, val := range vals {
 			result = append(result, val)
 		}
+	}
+	if len(errors) > 0 {
+		return nil, &CompositeError{errors}
 	}
 	return result, nil
 }
