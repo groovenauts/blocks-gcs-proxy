@@ -64,12 +64,11 @@ func (job *Job) runImpl(ctx context.Context) error {
 		return nil
 	}
 
+	defer job.clearWorkspace() // Call clearWorkspace even if setupWorkspace retuns error
 	err = job.setupWorkspace()
 	if err != nil {
 		return err
 	}
-
-	defer job.clearWorkspace()
 
 	err = job.withNotify(PREPARING, job.setupDownloadFiles)()
 	if err != nil {
@@ -147,7 +146,10 @@ func (job *Job) setupWorkspace() error {
 }
 
 func (job *Job) clearWorkspace() error {
-	return os.RemoveAll(job.workspace)
+	if job.workspace != "" {
+		return os.RemoveAll(job.workspace)
+	}
+	return nil
 }
 
 func (job *Job) setupDownloadFiles() error {
