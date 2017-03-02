@@ -44,15 +44,23 @@ type (
 )
 
 func (job *Job) run(ctx context.Context) error {
+	err := job.runImpl(ctx)
+	switch err.(type) {
+	case InvalidJobError:
+		err := job.withNotify(CANCELLING, job.message.Ack)()
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+func (job *Job) runImpl(ctx context.Context) error {
 	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 
 	verr := job.message.Validate()
 	if verr != nil {
 		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
-		err := job.withNotify(CANCELLING, job.message.Ack)()
-		if err != nil {
-			return err
-		}
 		return nil
 	}
 
