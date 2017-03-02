@@ -44,6 +44,8 @@ type (
 )
 
 func (job *Job) run(ctx context.Context) error {
+	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
+
 	verr := job.message.Validate()
 	if verr != nil {
 		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
@@ -53,11 +55,6 @@ func (job *Job) run(ctx context.Context) error {
 		}
 		return nil
 	}
-
-	go job.message.sendMADPeriodically()
-	defer job.message.Done()
-
-	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 
 	err := job.setupWorkspace()
 	if err != nil {
@@ -71,11 +68,14 @@ func (job *Job) run(ctx context.Context) error {
 		return err
 	}
 
-	err := job.build()
+	err = job.build()
 	if err != nil {
 		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
+
+	go job.message.sendMADPeriodically()
+	defer job.message.Done()
 
 	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
 	if err != nil {
@@ -272,7 +272,7 @@ func (job *Job) execute() error {
 	job.cmd.Stdout = &out
 	job.cmd.Stderr = &out
 	log.Printf("EXECUTE running: %v\n", job.cmd)
-	err = job.cmd.Run()
+	err := job.cmd.Run()
 	if err != nil {
 		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", job.cmd, err, out.String())
 		return err
