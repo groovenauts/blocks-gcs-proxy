@@ -56,8 +56,15 @@ func (job *Job) run(ctx context.Context) error {
 	defer job.message.Done()
 
 	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
-	err := job.setupWorkspace(ctx, func() error {
-		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
+
+	err := job.setupWorkspace()
+	if err != nil {
+		return err
+	}
+
+	defer job.clearWorkspace()
+
+	  err = job.withNotify(PREPARING, job.setupDownloadFiles)()
 		if err != nil {
 			return err
 		}
@@ -82,8 +89,6 @@ func (job *Job) run(ctx context.Context) error {
 			return err
 		}
 
-		return nil
-	})
 	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
 }
@@ -102,13 +107,12 @@ func (job *Job) withNotify(progress int, f func() error) func() error {
 	}
 }
 
-func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
+func (job *Job) setupWorkspace() error {
 	dir, err := ioutil.TempDir("", "workspace")
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	defer os.RemoveAll(dir) // clean up
 
 	subdirs := []string{
 		filepath.Join(dir, "downloads"),
@@ -123,7 +127,11 @@ func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 	job.workspace = dir
 	job.downloads_dir = subdirs[0]
 	job.uploads_dir = subdirs[1]
-	return f()
+	return nil
+}
+
+func (job *Job) clearWorkspace() error {
+	return os.RemoveAll(job.workspace)
 }
 
 func (job *Job) setupDownloadFiles() error {
