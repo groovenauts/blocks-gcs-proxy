@@ -112,9 +112,9 @@ func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error
 	case []interface{}:
 		return v.getFromArray(tmp, name)
 	case map[string]interface{}:
-		return tmp.(map[string]interface{})[name], nil
+		return v.getFromMap(tmp, name)
 	case map[string]string:
-		return tmp.(map[string]string)[name], nil
+		return v.getFromMap(tmp, name)
 	default:
 		return nil, fmt.Errorf("Unsupported Object type: [%T]%v", tmp, tmp)
 	}
@@ -139,7 +139,18 @@ func (v *Variable) getFromArray(array interface{}, name string) (interface{}, er
 		}
 		return array.([]interface{})[idx], nil
 	default:
-		return nil, fmt.Errorf("Unsupported object given as an array: %v", array)
+		return nil, fmt.Errorf("Unsupported object given as an array: [%T]%v", array, array)
+	}
+}
+
+func (v *Variable) getFromMap(obj interface{}, name string) (interface{}, error) {
+	switch obj.(type) {
+	case map[string]interface{}:
+		return obj.(map[string]interface{})[name], nil
+	case map[string]string:
+		return obj.(map[string]string)[name], nil
+	default:
+		return nil, fmt.Errorf("Unsupported object given as a map: [%T]%v", obj, obj)
 	}
 }
 
