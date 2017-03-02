@@ -28,7 +28,7 @@ func NewBasicJob() *Job {
 			raw: &pubsub.ReceivedMessage{
 				Message: &pubsub.PubsubMessage{
 					Attributes: map[string]string{
-						"array": "{1,2,3}",
+						"array": "[100,200,300]",
 						"map": `{"foo":"A"}`,
 					},
 				},
