@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func (c *ProcessConfig) setup(ctx context.Context, args []string) error {
+func (c *ProcessConfig) setup(args []string) error {
 	if c.Command == nil {
 		c.Command = &CommandConfig{}
 	}
@@ -105,15 +105,15 @@ func (p *Process) setup(ctx context.Context) error {
 	return nil
 }
 
-func (p *Process) run(ctx context.Context) error {
-	err := p.subscription.listen(ctx, func(msg *JobMessage) error {
+func (p *Process) run() error {
+	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
 			config:       p.config.Command,
 			message:      msg,
 			notification: p.notification,
 			storage:      p.storage,
 		}
-		err := job.run(ctx)
+		err := job.run()
 		if err != nil {
 			log.Printf("Job Error %v cause of %v\n", msg, err)
 			return err

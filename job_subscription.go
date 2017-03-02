@@ -4,8 +4,6 @@ import (
 	"log"
 	"time"
 
-	"golang.org/x/net/context"
-
 	pubsub "google.golang.org/api/pubsub/v1"
 )
 
@@ -53,9 +51,9 @@ type (
 	}
 )
 
-func (s *JobSubscription) listen(ctx context.Context, f func(*JobMessage) error) error {
+func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 	for {
-		err := s.process(ctx, f)
+		err := s.process(f)
 		if err != nil {
 			return err
 		}
@@ -64,8 +62,8 @@ func (s *JobSubscription) listen(ctx context.Context, f func(*JobMessage) error)
 	return nil
 }
 
-func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error) error {
-	msg, err := s.waitForMessage(ctx)
+func (s *JobSubscription) process(f func(*JobMessage) error) error {
+	msg, err := s.waitForMessage()
 	if err != nil {
 		return err
 	}
@@ -86,7 +84,7 @@ func (s *JobSubscription) process(ctx context.Context, f func(*JobMessage) error
 	return f(jobMsg)
 }
 
-func (s *JobSubscription) waitForMessage(ctx context.Context) (*pubsub.ReceivedMessage, error) {
+func (s *JobSubscription) waitForMessage() (*pubsub.ReceivedMessage, error) {
 	pullRequest := &pubsub.PullRequest{
 		ReturnImmediately: false,
 		MaxMessages:       1,

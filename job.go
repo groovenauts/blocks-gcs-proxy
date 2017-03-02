@@ -11,8 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"golang.org/x/net/context"
 )
 
 type (
@@ -43,8 +41,8 @@ type (
 	}
 )
 
-func (job *Job) run(ctx context.Context) error {
-	err := job.runWithoutCancelling(ctx)
+func (job *Job) run() error {
+	err := job.runWithoutCancelling()
 	switch err.(type) {
 	case InvalidJobError:
 		err := job.withNotify(CANCELLING, job.message.Ack)()
@@ -55,7 +53,7 @@ func (job *Job) run(ctx context.Context) error {
 	return err
 }
 
-func (job *Job) runWithoutCancelling(ctx context.Context) error {
+func (job *Job) runWithoutCancelling() error {
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 
 	err := job.withNotify(PREPARING, job.prepare)()
