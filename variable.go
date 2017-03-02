@@ -107,13 +107,9 @@ func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) 
 
 func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error) {
 	switch tmp.(type) {
-	case []string:
+	case []string, []interface{}:
 		return v.getFromArray(tmp, name)
-	case []interface{}:
-		return v.getFromArray(tmp, name)
-	case map[string]interface{}:
-		return v.getFromMap(tmp, name)
-	case map[string]string:
+	case map[string]interface{}, map[string]string:
 		return v.getFromMap(tmp, name)
 	default:
 		return nil, fmt.Errorf("Unsupported Object type: [%T]%v", tmp, tmp)
