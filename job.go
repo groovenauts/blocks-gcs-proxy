@@ -76,6 +76,12 @@ func (job *Job) run(ctx context.Context) error {
 		return err
 	}
 
+	err := job.build()
+	if err != nil {
+		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		return err
+	}
+
 	err = job.withNotify(EXECUTING, job.execute)()
 	if err != nil {
 		return err
@@ -262,11 +268,6 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) execute() error {
-	err := job.build()
-	if err != nil {
-		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
-		return err
-	}
 	var out bytes.Buffer
 	job.cmd.Stdout = &out
 	job.cmd.Stderr = &out
