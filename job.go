@@ -64,7 +64,7 @@ func (job *Job) runImpl(ctx context.Context) error {
 		return nil
 	}
 
-	defer job.clearWorkspace() // Call clearWorkspace even if setupWorkspace retuns error
+	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 	err = job.setupWorkspace()
 	if err != nil {
 		return err
@@ -104,7 +104,6 @@ func (job *Job) runImpl(ctx context.Context) error {
 		return err
 	}
 
-	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
 }
 
