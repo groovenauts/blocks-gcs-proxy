@@ -1,8 +1,8 @@
-# [config] IMAGE_NAME: "groovenauts/concurrent_batch_example"
+# [config] IMAGE_NAME: "groovenauts/concurrent_batch_basic_example"
 # [config]
 # [config] WORKING_DIR: "."
-# [config] VERSION_SCRIPT: 'grep VERSION ../version.go | cut -f2 -d\"'
-# [config] GIT_TAG_PREFIX: 'example/'
+# [config] VERSION_SCRIPT: 'grep VERSION ../../version.go | cut -f2 -d\"'
+# [config] GIT_TAG_PREFIX: 'examples/basic/'
 
 FROM buildpack-deps:jessie-curl
 

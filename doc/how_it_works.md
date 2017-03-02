@@ -56,7 +56,7 @@ If you can use `attrs.array_data` also. It extends the data joined with spaces.
 |--------------------|---------------|
 | `attrs.array_data` | "foo bar baz" |
 
-See an example at [example/Dockerfile](https://github.com/groovenauts/blocks-gcs-proxy/blob/4bb4d0f60d1e62ba0e06b2180ec5835726e0fc57/example/Dockerfile#L18).
+See an example at [examples/basic/Dockerfile](https://github.com/groovenauts/blocks-gcs-proxy/blob/4bb4d0f60d1e62ba0e06b2180ec5835726e0fc57/examples/basic/Dockerfile#L18).
 
 
 ### Map Parameter

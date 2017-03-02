@@ -1,4 +1,4 @@
-# magellan-gcs-proxy example
+# magellan-gcs-proxy basic example
 
 ## How to run application locally
 
@@ -25,7 +25,7 @@ $ pubsub-devsub --project $PROJECT --subscription "${PIPELINE}-progress-subscrip
 
 ```
 $ cd path/to/workspace/magellan-gcs-proxy
-$ cd example
+$ cd examples/basic
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
 $
