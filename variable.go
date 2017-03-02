@@ -146,9 +146,19 @@ func (v *Variable) getFromArray(array interface{}, name string) (interface{}, er
 func (v *Variable) getFromMap(obj interface{}, name string) (interface{}, error) {
 	switch obj.(type) {
 	case map[string]interface{}:
-		return obj.(map[string]interface{})[name], nil
+		m := obj.(map[string]interface{})
+		v, ok := m[name]
+		if !ok {
+			return nil, &InvalidExpression{ fmt.Sprintf("Invalid key %v for map %v", name, m) }
+		}
+		return v, nil
 	case map[string]string:
-		return obj.(map[string]string)[name], nil
+		m := obj.(map[string]string)
+		v, ok := m[name]
+		if !ok {
+			return nil, &InvalidExpression{ fmt.Sprintf("Invalid key %v for map %v", name, m) }
+		}
+		return v, nil
 	default:
 		return nil, fmt.Errorf("Unsupported object given as a map: [%T]%v", obj, obj)
 	}
