@@ -58,13 +58,13 @@ func (job *Job) run(ctx context.Context) error {
 func (job *Job) runImpl(ctx context.Context) error {
 	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 
-	verr := job.message.Validate()
-	if verr != nil {
-		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
+	err := job.message.Validate()
+	if err != nil {
+		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
 		return nil
 	}
 
-	err := job.setupWorkspace()
+	err = job.setupWorkspace()
 	if err != nil {
 		return err
 	}
