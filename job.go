@@ -71,14 +71,14 @@ func (job *Job) run(ctx context.Context) error {
 		return err
 	}
 
-	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
-	if err != nil {
-		return err
-	}
-
 	err := job.build()
 	if err != nil {
 		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		return err
+	}
+
+	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
+	if err != nil {
 		return err
 	}
 
