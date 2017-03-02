@@ -64,30 +64,30 @@ func (job *Job) run(ctx context.Context) error {
 
 	defer job.clearWorkspace()
 
-	  err = job.withNotify(PREPARING, job.setupDownloadFiles)()
-		if err != nil {
-			return err
-		}
+	err = job.withNotify(PREPARING, job.setupDownloadFiles)()
+	if err != nil {
+		return err
+	}
 
-		err = job.withNotify(DOWNLOADING, job.downloadFiles)()
-		if err != nil {
-			return err
-		}
+	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
+	if err != nil {
+		return err
+	}
 
-		err = job.withNotify(EXECUTING, job.execute)()
-		if err != nil {
-			return err
-		}
+	err = job.withNotify(EXECUTING, job.execute)()
+	if err != nil {
+		return err
+	}
 
-		err = job.withNotify(UPLOADING, job.uploadFiles)()
-		if err != nil {
-			return err
-		}
+	err = job.withNotify(UPLOADING, job.uploadFiles)()
+	if err != nil {
+		return err
+	}
 
-		err = job.withNotify(ACKSENDING, job.message.Ack)()
-		if err != nil {
-			return err
-		}
+	err = job.withNotify(ACKSENDING, job.message.Ack)()
+	if err != nil {
+		return err
+	}
 
 	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
