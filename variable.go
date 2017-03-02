@@ -10,6 +10,16 @@ import (
 )
 
 type (
+	InvalidExpression struct{
+		msg string
+	}
+)
+
+func (e *InvalidExpression) Error() string {
+	return e.msg
+}
+
+type (
 	Variable struct {
 		data map[string]interface{}
 		// quoteString boolean
@@ -98,17 +108,9 @@ func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) 
 func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error) {
 	switch tmp.(type) {
 	case []string:
-		idx, err := v.parseIndex(name)
-		if err != nil {
-			return nil, err
-		}
-		return tmp.([]string)[idx], nil
+		return v.getFromArray(tmp, name)
 	case []interface{}:
-		idx, err := v.parseIndex(name)
-		if err != nil {
-			return nil, err
-		}
-		return tmp.([]interface{})[idx], nil
+		return v.getFromArray(tmp, name)
 	case map[string]interface{}:
 		return tmp.(map[string]interface{})[name], nil
 	case map[string]string:
@@ -117,6 +119,30 @@ func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error
 		return nil, fmt.Errorf("Unsupported Object type: [%T]%v", tmp, tmp)
 	}
 }
+
+func (v *Variable) getFromArray(array interface{}, name string) (interface{}, error) {
+	idx, err := v.parseIndex(name)
+	if err != nil {
+		return nil, &InvalidExpression{ "Invalid index for array: " + name }
+	}
+	switch array.(type) {
+	case []string:
+		l := len(array.([]string))
+		if idx >= l {
+			return nil, &InvalidExpression{ fmt.Sprintf("Invalid index %v for array who has %v items", idx, l) }
+		}
+		return array.([]string)[idx], nil
+	case []interface{}:
+		l := len(array.([]interface{}))
+		if idx >= l {
+			return nil, &InvalidExpression{ fmt.Sprintf("Invalid index %v for array who has %v items", idx, l) }
+		}
+		return array.([]interface{})[idx], nil
+	default:
+		return nil, fmt.Errorf("Unsupported object given as an array: %v", array)
+	}
+}
+
 
 func (v *Variable) parseIndex(str string) (int, error) {
 	re := regexp.MustCompile(`\A\d+\z`)
