@@ -50,7 +50,10 @@ func (m *JobMessage) MessageId() string {
 }
 
 func (m *JobMessage) DownloadFiles() interface{} {
-	str := m.raw.Message.Attributes["download_files"]
+	str, ok := m.raw.Message.Attributes["download_files"]
+	if !ok {
+		return nil
+	}
 	return m.parseJson(str)
 }
 

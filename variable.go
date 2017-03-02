@@ -46,6 +46,9 @@ func (v *Variable) expand(str string) (string, error) {
 			errors = append(errors, err)
 			return ""
 		}
+		if value == nil {
+			errors = append(errors, &InvalidExpression{"No value found for " + expr})
+		}
 		switch value.(type) {
 		case string:
 			return value.(string)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -87,4 +88,20 @@ func TestJobBuildWithInvalidIndexAndKeyInAttrs(t *testing.T) {
 	}
 	assert.Regexp(t, "Invalid index 3", err.Error())
 	assert.Regexp(t, "Invalid key bar", err.Error())
+}
+
+// Invalid reference download_files in spite of no download_files given
+func TestJobBuildWithInvalidDownloadFilesReference(t *testing.T) {
+	job := NewBasicJob()
+	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files}"}
+	job.localDownloadFiles = nil
+	err := job.build()
+	fmt.Printf("cmd: %v\n", job.cmd)
+	if assert.Error(t, err) {
+		if assert.Implements(t, (*RetryableError)(nil), err) {
+			assert.False(t, (err.(RetryableError)).Retryable())
+		}
+		assert.Regexp(t, "No value found", err.Error())
+		assert.Regexp(t, "download_files", err.Error())
+	}
 }
