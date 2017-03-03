@@ -72,7 +72,7 @@ See [How it works/Progress notification](https://github.com/groovenauts/blocks-g
 
 ## Environment Variables
 
-You can use environment variables in the `config.json` with `{{env "HOME"}}`, `{{ .HOME }}` or `or .HOME default`.
+You can use environment variables in the `config.json` with `{{env "HOME"}}`, `{{ .HOME }}` or `{{ or .HOME default}}`.
 
 ### Examples
 
