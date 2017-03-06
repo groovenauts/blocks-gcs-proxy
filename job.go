@@ -1,20 +1,18 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"golang.org/x/net/context"
-
-	pubsub "google.golang.org/api/pubsub/v1"
 )
 
 type (
@@ -27,7 +25,7 @@ type (
 	Job struct {
 		config *CommandConfig
 		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
-		message      *pubsub.ReceivedMessage
+		message      *JobMessage
 		notification *ProgressNotification
 		storage      Storage
 
@@ -44,9 +42,22 @@ type (
 )
 
 func (job *Job) run(ctx context.Context) error {
-	job.notification.notify(PROCESSING, job.message.Message.MessageId, "info")
+	verr := job.message.Validate()
+	if verr != nil {
+		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
+		err := job.withNotify(CANCELLING, job.message.Ack)()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	go job.message.sendMADPeriodically()
+	defer job.message.Done()
+
+	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
 	err := job.setupWorkspace(ctx, func() error {
-		err := job.withNotify(DOWNLOADING, job.setupDownloadFiles)()
+		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
 		if err != nil {
 			return err
 		}
@@ -66,14 +77,19 @@ func (job *Job) run(ctx context.Context) error {
 			return err
 		}
 
+		err = job.withNotify(ACKSENDING, job.message.Ack)()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
-	job.notification.notify(CLEANUP, job.message.Message.MessageId, "info")
+	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
 }
 
 func (job *Job) withNotify(progress int, f func() error) func() error {
-	msg_id := job.message.Message.MessageId
+	msg_id := job.message.MessageId()
 	return func() error {
 		job.notification.notify(progress, msg_id, "info")
 		err := f()
@@ -112,7 +128,7 @@ func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
-	job.remoteDownloadFiles = job.parseJson(job.message.Message.Attributes["download_files"])
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
@@ -167,9 +183,9 @@ func (job *Job) buildVariable() *Variable {
 			"download_files":        job.localDownloadFiles,
 			"local_download_files":  job.localDownloadFiles,
 			"remote_download_files": job.remoteDownloadFiles,
-			"attrs":                 job.message.Message.Attributes,
-			"attributes":            job.message.Message.Attributes,
-			"data":                  job.message.Message.Data,
+			"attrs":                 job.message.raw.Message.Attributes,
+			"attributes":            job.message.raw.Message.Attributes,
+			"data":                  job.message.raw.Message.Data,
 		},
 	}
 }
@@ -220,7 +236,14 @@ func (job *Job) downloadFiles() error {
 			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
 			return err
 		}
-		err = job.storage.Download(url.Host, url.Path, destPath)
+
+		dir := path.Dir(destPath)
+		err = os.MkdirAll(dir, 0700)
+		if err != nil {
+			return err
+		}
+
+		err = job.storage.Download(url.Host, url.Path[1:], destPath)
 		if err != nil {
 			return err
 		}
@@ -231,13 +254,17 @@ func (job *Job) downloadFiles() error {
 func (job *Job) execute() error {
 	cmd, err := job.build()
 	if err != nil {
-		log.Printf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
 		return err
 	}
-	err = job.withNotify(EXECUTING, cmd.Run)()
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	log.Printf("EXECUTE running: %v\n", cmd)
+	err = cmd.Run()
 	if err != nil {
-		log.Printf("Command Error: cmd: %v cause of %v\n", cmd, err)
-		// return err // Don't return this err
+		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", cmd, err, out.String())
+		return err
 	}
 	return nil
 }
@@ -279,22 +306,6 @@ func (job *Job) listFiles(dir string) ([]string, error) {
 		return nil, err
 	}
 	return result, nil
-}
-
-func (job *Job) parseJson(str string) interface{} {
-	matched, err := regexp.MatchString(`\A\[.*\]\z|\A\{.*\}\z|`, str)
-	if err != nil {
-		return str
-	}
-	if !matched {
-		return str
-	}
-	var dest interface{}
-	err = json.Unmarshal([]byte(str), &dest)
-	if err != nil {
-		return str
-	}
-	return dest
 }
 
 func (job *Job) flatten(obj interface{}) []interface{} {

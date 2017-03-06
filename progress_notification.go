@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"log"
 	"strconv"
 
@@ -38,20 +39,26 @@ type (
 )
 
 const (
-	PROCESSING     = 1
-	DOWNLOADING    = 2
-	DOWNLOAD_OK    = 3
-	DOWNLOAD_ERROR = 4
-	EXECUTING      = 5
-	EXECUTE_OK     = 6
-	EXECUTE_ERROR  = 7
-	UPLOADING      = 8
-	UPLOAD_OK      = 9
-	UPLOAD_ERROR   = 10
-	ACKSENDING     = 11
-	ACKSEND_OK     = 12
-	ACKSEND_ERROR  = 13
-	CLEANUP        = 14
+	PROCESSING     = 1 + iota
+	CANCELLING
+	CANCELL_OK
+	CANCELL_ERROR
+	PREPARING
+	PREPARE_OK
+	PREPARE_ERROR
+	DOWNLOADING
+	DOWNLOAD_OK
+	DOWNLOAD_ERROR
+	EXECUTING
+	EXECUTE_OK
+	EXECUTE_ERROR
+	UPLOADING
+	UPLOAD_OK
+	UPLOAD_ERROR
+	ACKSENDING
+	ACKSEND_OK
+	ACKSEND_ERROR
+	CLEANUP
 
 	COMPLETED = ACKSEND_OK
 	TOTAL     = CLEANUP
@@ -59,6 +66,12 @@ const (
 
 var PROGRESS_MESSAFGES = map[int]string{
 	PROCESSING:     "PROCESSING",
+	CANCELLING:     "CANCELLING",
+	CANCELL_OK:     "CANCELL_OK",
+	CANCELL_ERROR:  "CANCELL_ERROR",
+	PREPARING:      "PREPARING",
+	PREPARE_OK:     "PREPARE_OK",
+	PREPARE_ERROR:  "PREPARE_ERROR",
 	DOWNLOADING:    "DOWNLOADING",
 	DOWNLOAD_OK:    "DOWNLOAD_OK",
 	DOWNLOAD_ERROR: "DOWNLOAD_ERROR",
@@ -84,7 +97,7 @@ func (pn *ProgressNotification) notify(progress int, job_msg_id, level string) e
 		"job_message_id": job_msg_id,
 		"level":          level,
 	}
-	m := &pubsub.PubsubMessage{Data: msg, Attributes: opts}
+	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(msg)), Attributes: opts}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
 		log.Printf("Error to publish notification to %v msg: %v cause of %v\n", pn.config.Topic, m, err)

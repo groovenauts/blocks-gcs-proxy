@@ -20,6 +20,7 @@ type (
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {
+	log.Printf("Downloading gs://%v/%v to %v\n", bucket, object, destPath)
 	dest, err := os.Create(destPath)
 	if err != nil {
 		log.Fatalf("Error creating %q: %v", destPath, err)
@@ -29,31 +30,32 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 
 	resp, err := ct.service.Get(bucket, object).Download()
 	if err != nil {
-		log.Printf("Error downloading gs://%q/%q: %v", bucket, object, err)
+		log.Printf("Error downloading bucket: %q object: %q because of %v", bucket, object, err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	n, err := io.Copy(dest, resp.Body)
 	if err != nil {
-		log.Fatalf("Error copry gs://%q/%q to %q: %v", bucket, object, destPath, err)
+		log.Fatalf("Error copry bucket: %q object: %q to %q because of %v", bucket, object, destPath, err)
 		return err
 	}
-	log.Printf("Downloaded gs://%q/%q: %d bytes", bucket, object, n)
+	log.Printf("Downloaded bucket: gs://%v/%v to %v (%d bytes)", bucket, object, destPath, n)
 	return nil
 }
 
 func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
+	log.Printf("Uploading %v to gs://%v/%v\n", srcPath, bucket, object)
 	f, err := os.Open(srcPath)
 	if err != nil {
 		log.Fatalf("Error opening %q: %v", srcPath, err)
 		return err
 	}
-	obj, err := ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
-	log.Printf("Got storage.Object, err: %#v, %v", obj, err)
+	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
 		log.Printf("Error uploading gs://%q/%q: %v", bucket, srcPath, err)
 		return err
 	}
+	log.Printf("Uploaded %v to gs://%v/%v\n", srcPath, bucket, object)
 	return nil
 }

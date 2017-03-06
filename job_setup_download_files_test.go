@@ -28,14 +28,16 @@ func TestJobSetupCase1(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{download_files}", "%{uploads_dir}"},
 		},
-		message: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data: "",
-				Attributes: map[string]string{
-					"download_files": url1,
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data: "",
+					Attributes: map[string]string{
+						"download_files": url1,
+					},
+					MessageId: "test-message1",
 				},
-				MessageId: "test-message1",
 			},
 		},
 		workspace:     workspace,
@@ -79,17 +81,19 @@ func TestJobSetupCase2(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
 		},
-		message: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data: "",
-				Attributes: map[string]string{
-					"download_files": generateJSON(t, map[string]interface{}{
-						"foo": url1,
-						"bar": []string{url2, url3},
-					}),
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data: "",
+					Attributes: map[string]string{
+						"download_files": generateJSON(t, map[string]interface{}{
+							"foo": url1,
+							"bar": []string{url2, url3},
+						}),
+					},
+					MessageId: "test-message1",
 				},
-				MessageId: "test-message1",
 			},
 		},
 		workspace:     workspace,
@@ -147,12 +151,14 @@ func TestJobSetupCase3(t *testing.T) {
 		config: &CommandConfig{
 			Template: []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
 		},
-		message: &pubsub.ReceivedMessage{
-			AckId: "test-ack1",
-			Message: &pubsub.PubsubMessage{
-				Data:       "",
-				Attributes: attrs,
-				MessageId:  "test-message1",
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data:       "",
+					Attributes: attrs,
+					MessageId:  "test-message1",
+				},
 			},
 		},
 		workspace:     workspace,
