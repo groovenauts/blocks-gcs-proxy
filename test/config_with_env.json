@@ -1,0 +1,19 @@
+{
+  "command": {
+    "options": {
+      "key1": ["./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"],
+      "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]
+    }
+  },
+  "job": {
+    "subscription": "projects/{{ env "GCP_PROJECT" }}/subscriptions/{{ env "PIPELINE" }}-job-subscription",
+    "pull_interval": {{ env "PULL_INTERVAL" }},
+    "sustainer": {
+      "delay": {{ env "SUSTAINER_DELAY" }},
+      "interval": {{ env "SUSTAINER_INTERVAL" }}
+    }
+  },
+  "progress": {
+    "topic": "projects/{{ env "GCP_PROJECT" }}/topics/{{ env "PIPELINE" }}-progress-topic"
+  }
+}

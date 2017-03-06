@@ -1,6 +1,6 @@
 # config.yml
 
-## command
+## Elements
 
 ### command/options
 
@@ -25,7 +25,7 @@ See [How it works/Run one of multiple commands](./how_it_works.md#run-one-of-mul
 `magellan-gcs-proxy` doesn't run command if dryrun given.
 `true`, `yes`, `on` or `1` are true. The others are false.
 
-## job
+### job
 
 ```json
 {
@@ -54,7 +54,7 @@ The new deadline will be `delay` seconds later at the time.
 See [How it works/Long time job support](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#long-time-job-support) also.
 
 
-## progress
+### progress
 
 If you need to notify the job progresses to progress-topic, use `progress` configuration.
 It must be a map which has `topic`.
@@ -68,3 +68,9 @@ It must be a map which has `topic`.
 ```
 
 See [How it works/Progress notification](https://github.com/groovenauts/magellan-gcs-proxy/blob/features/documents/doc/how_it_works.md#progress-notification) also.
+
+
+## Environment Variables
+
+You can use environment variables in the `config.json` with `{{env "HOME"}}`.
+See [the file for test](https://github.com/groovenauts/magellan-gcs-proxy/blob/2104fb374544c78a6c240141bc131559a48fa382/test/config_with_env.json) if you need examples.
