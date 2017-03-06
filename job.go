@@ -63,7 +63,7 @@ func (job *Job) run() error {
 func (job *Job) runWithoutErrorHandling() error {
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 
-	err := job.withNotify(PREPARING, job.prepare)()
+	err := job.withNotify(INITIALIZING, job.prepare)()
 	if err != nil {
 		return err
 	}

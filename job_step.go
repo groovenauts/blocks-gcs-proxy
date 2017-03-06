@@ -20,7 +20,7 @@ func (jss JobStepStatus) String() string {
 type JobStep int
 
 const (
-	PREPARING   JobStep = 1 + iota
+	INITIALIZING JobStep = 1 + iota
 	DOWNLOADING
 	EXECUTING
 	UPLOADING
@@ -32,7 +32,7 @@ const (
 
 var (
 	JOB_STEP_DEFS = map[JobStep][]string {
-		PREPARING:    []string{"PREPARING"	, "info" , "error"},
+		INITIALIZING: []string{"INITIALIZING"	, "info" , "error"},
 		DOWNLOADING:	[]string{"DOWNLOADING", "info" , "error"},
 		EXECUTING:		[]string{"EXECUTING"	,	"info" , "error"},
 		UPLOADING:		[]string{"UPLOADING"	,	"info" , "error"},
