@@ -1,5 +1,5 @@
 PKGDIR=./pkg
-BASENAME=magellan-gcs-proxy
+BASENAME=blocks-gcs-proxy
 VERSION=`grep VERSION version.go | cut -f2 -d\"`
 OS=linux
 ARCH=amd64

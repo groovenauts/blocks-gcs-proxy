@@ -15,7 +15,7 @@
 
 ## Build command
 
-magellan-gcs-proxy builds command to run you application from job message by extending
+blocks-gcs-proxy builds command to run you application from job message by extending
 parameters in `%{...}`.
 
 ### Parameters
@@ -56,7 +56,7 @@ If you can use `attrs.array_data` also. It extends the data joined with spaces.
 |--------------------|---------------|
 | `attrs.array_data` | "foo bar baz" |
 
-See an example at [example/Dockerfile](https://github.com/groovenauts/magellan-gcs-proxy/blob/4bb4d0f60d1e62ba0e06b2180ec5835726e0fc57/example/Dockerfile#L18).
+See an example at [example/Dockerfile](https://github.com/groovenauts/blocks-gcs-proxy/blob/4bb4d0f60d1e62ba0e06b2180ec5835726e0fc57/example/Dockerfile#L18).
 
 
 ### Map Parameter
@@ -88,8 +88,8 @@ If you can use `attrs.map_data` also. It extends the values joined with spaces.
 
 ### Recognizing attribute as array or hash
 
-If the value match `/\A\[.*\]\z/` or `/\A\{.*\}\z/`, magellan-gcs-proxy tries to parse as JSON.
-When it succeeds magellan-gcs-proxy use it as an array or a map. When it fails magellan-gcs-proxy
+If the value match `/\A\[.*\]\z/` or `/\A\{.*\}\z/`, blocks-gcs-proxy tries to parse as JSON.
+When it succeeds blocks-gcs-proxy use it as an array or a map. When it fails blocks-gcs-proxy
 use it as a string.
 
 
@@ -112,9 +112,9 @@ You have `config.json`:
 }
 ```
 
-And run `magellan-gcs-proxy` like this:
+And run `blocks-gcs-proxy` like this:
 ```
-magellan-gcs-proxy %{attrs.foo}
+blocks-gcs-proxy %{attrs.foo}
 ```
 
 #### Case 1. foo is key1
@@ -130,7 +130,7 @@ magellan-gcs-proxy %{attrs.foo}
 }
 ```
 
-When `magellan-gcs-proxy` gets the message above, it calls `cmd1`:
+When `blocks-gcs-proxy` gets the message above, it calls `cmd1`:
 
 ```
 cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspace/downloads/file2 path/to/workspace/downloads/file3
@@ -149,7 +149,7 @@ cmd1 path/to/workspace/uploads path/to/workspace/downloads/file1 path/to/workspa
 }
 ```
 
-When `magellan-gcs-proxy` gets the message above, it calls `cmd2`:
+When `blocks-gcs-proxy` gets the message above, it calls `cmd2`:
 
 ```
 cmd2 path/to/workspace/downloads/file2 path/to/workspace/uploads
@@ -160,7 +160,7 @@ For more detail, see [config.json/command](./configuration.md#commandoptions) al
 
 ## Directories
 
-`magellan-gcs-proxy` makes temporary `workspace` directory.
+`blocks-gcs-proxy` makes temporary `workspace` directory.
 
 When a message which has the following attribute:
 
@@ -168,7 +168,7 @@ When a message which has the following attribute:
 download_files: ["gs://bucket1/path/to/file1"]
 ```
 
-`magellan-gcs-proxy` makes the following directories and download the file before calling user application.
+`blocks-gcs-proxy` makes the following directories and download the file before calling user application.
 
 ```
 workspace/
@@ -197,20 +197,20 @@ workspace/uploads/bucket2/path/to/
 workspace/uploads/bucket2/path/to/file-b
 ```
 
-`magellan-gcs-proxy` uploads `workspace/uploads/bucket1/path/to/file-a` to `gs://bucket1/path/to/file-a`
+`blocks-gcs-proxy` uploads `workspace/uploads/bucket1/path/to/file-a` to `gs://bucket1/path/to/file-a`
 and `workspace/uploads/bucket2/path/to/file-b` to `gs://bucket2/path/to/file-b`.
 
 ## Long time job support
 
 If your application takes a long time over [acknowledgement deadline](https://cloud.google.com/pubsub/docs/subscriber#ack_deadline),
-`magellan-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
+`blocks-gcs-proxy` sends `modifyAckDeadline` request to job-subscription automatically.
 
 For more detail, see [config.yml/sustainer](./configuration.md#jobsustainer) also.
 
 
 ## Progress notification
 
-`magellan-gcs-proxy` sends a message for each progress to the topic if given.
+`blocks-gcs-proxy` sends a message for each progress to the topic if given.
 
 To set the topic, see [config.yml/progress](./configuration.md#progress) also.
 
