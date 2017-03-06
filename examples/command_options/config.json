@@ -2,7 +2,7 @@
   "command": {
     "dryrun": {{ or .BLOCKS_BATCH_DRYRUN "false" }},
     "options": {
-      "app": ["./app.sh", "%{download_files.0}", "%{downloads_dir}", "%{uploads_dir}", "test"],
+      "default": ["./app.sh", "%{download_files.0}", "%{downloads_dir}", "%{uploads_dir}", "test"],
       "sleep": ["sleep", "%{attrs.sleep}"],
       "env": ["env"]
     }

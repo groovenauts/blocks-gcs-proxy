@@ -38,7 +38,7 @@ $ blocks-gcs-proxy %{attrs.cmd}
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
 $ export TOPIC="projects/${PROJECT}/topics/${PIPELINE}-job-topic"
-$ gcloud beta pubsub topics publish $TOPIC "" --attribute='cmd=app,download_files=["gs://bucket1/path/to/file"]'
+$ gcloud beta pubsub topics publish $TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
 $ gcloud beta pubsub topics publish $TOPIC "" --attribute='cmd=sleep,sleep=60'
 $ gcloud beta pubsub topics publish $TOPIC "" --attribute='cmd=env'
 ```
