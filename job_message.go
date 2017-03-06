@@ -84,6 +84,21 @@ func (m *JobMessage) Ack() error {
 	return nil
 }
 
+func (m *JobMessage) Nack() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
+	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, 0)
+	if err != nil {
+		log.Fatalf("Failed to send ModifyAckDeadline as a nack for message: %v cause of %v\n", m.raw, err)
+		return err
+	}
+
+	m.status = done
+
+	return nil
+}
+
 func (m *JobMessage) Done() {
 	if m.status == running {
 		m.status = done
