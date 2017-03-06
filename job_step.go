@@ -3,7 +3,7 @@ package main
 type JobStepStatus int
 
 const (
-	STARTING = 1 + iota
+	STARTING JobStepStatus = 1 + iota
 	SUCCESS
 	FAILURE
 )
@@ -20,7 +20,7 @@ func (jss JobStepStatus) String() string {
 type JobStep int
 
 const (
-	PREPARING   = 1 + iota
+	PREPARING   JobStep = 1 + iota
 	DOWNLOADING
 	EXECUTING
 	UPLOADING
