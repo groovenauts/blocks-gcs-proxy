@@ -108,7 +108,7 @@ func (job *Job) prepare() error {
 	err := job.message.Validate()
 	if err != nil {
 		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
-		return nil
+		return err
 	}
 
 	err = job.setupWorkspace()
