@@ -95,17 +95,7 @@ func (job *Job) runWithoutErrorHandling() error {
 }
 
 func (job *Job) withNotify(step JobStep, f func() error) func() error {
-	msg_id := job.message.MessageId()
-	return func() error {
-		job.notification.notify(msg_id, step, STARTING)
-		err := f()
-		if err != nil {
-			job.notification.notifyWithMessage(msg_id, step, FAILURE, err.Error())
-			return err
-		}
-		job.notification.notify(msg_id, step, SUCCESS)
-		return nil
-	}
+	return job.notification.wrap(job.message.MessageId(), step, f)
 }
 
 func (job *Job) prepare() error {

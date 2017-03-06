@@ -105,6 +105,19 @@ type (
 	}
 )
 
+func (pn *ProgressNotification) wrap(msg_id string, step JobStep, f func() error) func() error {
+	return func() error {
+		pn.notify(msg_id, step, STARTING)
+		err := f()
+		if err != nil {
+			pn.notifyWithMessage(msg_id, step, FAILURE, err.Error())
+			return err
+		}
+		pn.notify(msg_id, step, SUCCESS)
+		return nil
+	}
+}
+
 func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobStepStatus) error {
 	msg := fmt.Sprintf("%v %v", step, st)
 	return pn.notifyWithMessage(job_msg_id, step, st, msg)
