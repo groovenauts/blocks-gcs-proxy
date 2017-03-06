@@ -42,7 +42,7 @@ type (
 )
 
 func (job *Job) run() error {
-	err := job.runWithoutCancelling()
+	err := job.runWithoutErrorHandling()
 	switch err.(type) {
 	case RetryableError:
 		var f func() error
@@ -60,7 +60,7 @@ func (job *Job) run() error {
 	return err
 }
 
-func (job *Job) runWithoutCancelling() error {
+func (job *Job) runWithoutErrorHandling() error {
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
 
 	err := job.withNotify(PREPARING, job.prepare)()
