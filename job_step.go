@@ -32,25 +32,22 @@ const (
 
 var (
 	JOB_STEP_DEFS = map[JobStep][]string {
-		INITIALIZING: []string{"INITIALIZING"	, "info" , "error"},
-		DOWNLOADING:	[]string{"DOWNLOADING", "info" , "error"},
-		EXECUTING:		[]string{"EXECUTING"	,	"info" , "error"},
-		UPLOADING:		[]string{"UPLOADING"	,	"info" , "error"},
-		CLEANUP:			[]string{"CLEANUP"		, "info" , "warn" },
-		NACKSENDING:	[]string{"NACKSENDING", "info" , "warn" },
-		CANCELLING:		[]string{"CANCELLING" , "info" , "fatal"},
-		ACKSENDING:		[]string{"ACKSENDING" , "info" , "fatal"},
+		INITIALIZING: []string{"INITIALIZING"	, "error"},
+		DOWNLOADING:	[]string{"DOWNLOADING", "error"},
+		EXECUTING:		[]string{"EXECUTING"	,	"error"},
+		UPLOADING:		[]string{"UPLOADING"	,	"error"},
+		CLEANUP:			[]string{"CLEANUP"		, "warn" },
+		NACKSENDING:	[]string{"NACKSENDING", "warn" },
+		CANCELLING:		[]string{"CANCELLING" , "fatal"},
+		ACKSENDING:		[]string{"ACKSENDING" , "fatal"},
 	}
 )
 
 func (js JobStep) String() string {
 	return JOB_STEP_DEFS[js][0]
 }
-func (js JobStep) successLogLevel() string {
-	return JOB_STEP_DEFS[js][1]
-}
 func (js JobStep) failureLogLevel() string {
-	return JOB_STEP_DEFS[js][2]
+	return JOB_STEP_DEFS[js][1]
 }
 
 func (js JobStep) completed(st JobStepStatus) bool {
