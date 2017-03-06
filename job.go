@@ -68,7 +68,7 @@ func (job *Job) runWithoutErrorHandling() error {
 		return err
 	}
 
-	go job.message.sendMADPeriodically()
+	go job.message.sendMADPeriodically(job.notification)
 	defer job.message.Done()
 
 	err = job.withNotify(DOWNLOADING, job.downloadFiles)()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 	"sync"
@@ -109,10 +110,10 @@ func (m *JobMessage) running() bool {
 	return m.status == running
 }
 
-func (m *JobMessage) sendMADPeriodically() error {
+func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) error {
 	for {
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
-		err := m.waitAndSendMAD(nextLimit)
+		err := m.waitAndSendMAD(notification, nextLimit)
 		if err != nil {
 			return err
 		}
@@ -123,7 +124,7 @@ func (m *JobMessage) sendMADPeriodically() error {
 	// return nil
 }
 
-func (m *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
+func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimit time.Time) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !m.running() {
@@ -145,7 +146,9 @@ func (m *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, int64(m.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
+		msg := fmt.Sprintf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
+		log.Fatalf(msg)
+		notification.notifyProgress(m.MessageId(), WORKING, false, "error", msg)
 	}
 	return nil
 }
