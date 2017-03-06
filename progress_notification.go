@@ -96,7 +96,10 @@ var PROGRESS_MESSAFGES = map[int]string{
 }
 
 func (pn *ProgressNotification) notify(job_msg_id string, progress int, level string) error {
-	msg := PROGRESS_MESSAFGES[progress]
+	return pn.notifyWithMessage(job_msg_id, progress, level, PROGRESS_MESSAFGES[progress])
+}
+
+func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, progress int, level string, msg string) error {
 	log.Printf("Notify %v/%v %v\n", progress, TOTAL, msg)
 	opts := map[string]string{
 		"progress":       strconv.Itoa(progress),
