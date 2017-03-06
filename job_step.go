@@ -10,19 +10,23 @@ const (
 
 func (jss JobStepStatus) String() string {
 	switch jss {
-	case STARTING: return "STARTING"
-	case SUCCESS: return "SUCCESS"
-	case FAILURE: return "FAILURE"
-	default: return "Unknown"
+	case STARTING:
+		return "STARTING"
+	case SUCCESS:
+		return "SUCCESS"
+	case FAILURE:
+		return "FAILURE"
+	default:
+		return "Unknown"
 	}
 }
 
 type (
-	JobStep int
+	JobStep    int
 	JobStepDef struct {
-		name string
+		name            string
 		failureLogLevel string
-		baseProgress Progress
+		baseProgress    Progress
 	}
 )
 
@@ -38,15 +42,15 @@ const (
 )
 
 var (
-	JOB_STEP_DEFS = map[JobStep]JobStepDef {
-		INITIALIZING: JobStepDef{"INITIALIZING"	, "error", PREPARING},
-		DOWNLOADING:	JobStepDef{"DOWNLOADING"  , "error", WORKING},
-		EXECUTING:		JobStepDef{"EXECUTING"	  ,	"error", WORKING},
-		UPLOADING:		JobStepDef{"UPLOADING"	  ,	"error", WORKING},
-		CLEANUP:			JobStepDef{"CLEANUP"		  , "warn" , WORKING},
-		NACKSENDING:	JobStepDef{"NACKSENDING"  , "warn" , RETRYING },
-		CANCELLING:		JobStepDef{"CANCELLING"   , "fatal", INVALID_JOB},
-		ACKSENDING:		JobStepDef{"ACKSENDING"   , "fatal", COMPLETED},
+	JOB_STEP_DEFS = map[JobStep]JobStepDef{
+		INITIALIZING: JobStepDef{"INITIALIZING", "error", PREPARING},
+		DOWNLOADING:  JobStepDef{"DOWNLOADING", "error", WORKING},
+		EXECUTING:    JobStepDef{"EXECUTING", "error", WORKING},
+		UPLOADING:    JobStepDef{"UPLOADING", "error", WORKING},
+		CLEANUP:      JobStepDef{"CLEANUP", "warn", WORKING},
+		NACKSENDING:  JobStepDef{"NACKSENDING", "warn", RETRYING},
+		CANCELLING:   JobStepDef{"CANCELLING", "fatal", INVALID_JOB},
+		ACKSENDING:   JobStepDef{"ACKSENDING", "fatal", COMPLETED},
 	}
 )
 
@@ -67,8 +71,10 @@ func (js JobStep) logLevelFor(st JobStepStatus) string {
 	switch st {
 	// case STARTING: return "info"
 	// case SUCCESS: return js.successLogLevel()
-	case FAILURE: return js.failureLogLevel()
-	default: return "info"
+	case FAILURE:
+		return js.failureLogLevel()
+	default:
+		return "info"
 	}
 }
 func (js JobStep) progressFor(st JobStepStatus) Progress {
@@ -77,11 +83,13 @@ func (js JobStep) progressFor(st JobStepStatus) Progress {
 		return js.baseProgress()
 	case NACKSENDING, CANCELLING, ACKSENDING:
 		switch st {
-		case STARTING: return WORKING
-		case SUCCESS: return js.baseProgress()
-		case FAILURE: return WORKING
+		case STARTING:
+			return WORKING
+		case SUCCESS:
+			return js.baseProgress()
+		case FAILURE:
+			return WORKING
 		}
 	}
 	return Progress(0)
 }
-
