@@ -28,6 +28,15 @@ func (pp *pubsubPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pu
 	return pp.topicsService.Publish(topic, req).Do()
 }
 
+type Progress int
+
+const (
+	PREPARING Progress = 1 + iota
+	WORKING
+	RETRYING
+	INVALID_JOB
+	COMPLETED
+)
 
 type (
 	ProgressConfig struct {
@@ -61,7 +70,7 @@ func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobSt
 func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
 	log.Printf("Notify %v: %v %v\n", job_msg_id, step, msg)
 	opts := map[string]string{
-		"progress":       strconv.Itoa(int(step)),
+		"progress":       strconv.Itoa(int(step.progressFor(st))),
 		"completed":      strconv.FormatBool(step.completed(st)),
 		"job_message_id": job_msg_id,
 		"level":          step.logLevelFor(st),
