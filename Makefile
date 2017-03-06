@@ -15,10 +15,10 @@ build:
 	gox -output="${PKGDIR}/{{.Dir}}_${OS}_${ARCH}" -os="${OS}" -arch="${ARCH}"
 
 release: build
-	ghr -u groovenauts --replace --draft ${VERSION} pkg
+	ghr -u groovenauts -r magellan-gcs-proxy --replace --draft ${VERSION} pkg
 
 prerelease: build
-	ghr -u groovenauts --replace --draft --prerelease ${VERSION} pkg
+	ghr -u groovenauts -r magellan-gcs-proxy --replace --draft --prerelease ${VERSION} pkg
 
 version:
 	echo ${VERSION}
