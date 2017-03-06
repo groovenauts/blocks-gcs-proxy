@@ -100,7 +100,7 @@ func (job *Job) withNotify(progress int, f func() error) func() error {
 		job.notification.notify(msg_id, progress, "info")
 		err := f()
 		if err != nil {
-			job.notification.notify(msg_id, progress+2, "error")
+			job.notification.notifyWithMessage(msg_id, progress+2, "error", err.Error())
 			return err
 		}
 		job.notification.notify(msg_id, progress+1, "info")
