@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -27,6 +28,72 @@ func (pp *pubsubPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pu
 	return pp.topicsService.Publish(topic, req).Do()
 }
 
+type JobStepStatus int
+
+const (
+	STARTING = 1 + iota
+	SUCCESS
+	FAILURE
+)
+
+func (jss JobStepStatus) String() string {
+	switch jss {
+	case STARTING: return "STARTING"
+	case SUCCESS: return "SUCCESS"
+	case FAILURE: return "FAILURE"
+	default: return "Unknown"
+	}
+}
+
+type JobStep int
+
+const (
+	PREPARING   = 1 + iota
+	DOWNLOADING
+	EXECUTING
+	UPLOADING
+	CANCELLING
+	ACKSENDING
+	NACKSENDING
+	CLEANUP
+)
+
+var (
+	JOB_STEP_DEFS = map[JobStep][]string {
+		PREPARING:    []string{"PREPARING"	, "info" , "error"},
+		DOWNLOADING:	[]string{"DOWNLOADING", "info" , "error"},
+		EXECUTING:		[]string{"EXECUTING"	,	"info" , "error"},
+		UPLOADING:		[]string{"UPLOADING"	,	"info" , "error"},
+		CANCELLING:		[]string{"CANCELLING" , "info" , "fatal"},
+		ACKSENDING:		[]string{"ACKSENDING" , "info" , "error"},
+		NACKSENDING:	[]string{"NACKSENDING", "info" , "warn" },
+		CLEANUP:			[]string{"CLEANUP"		, "debug", "warn" },
+	}
+)
+
+func (js JobStep) String() string {
+	return JOB_STEP_DEFS[js][0]
+}
+func (js JobStep) successLogLevel() string {
+	return JOB_STEP_DEFS[js][1]
+}
+func (js JobStep) failureLogLevel() string {
+	return JOB_STEP_DEFS[js][2]
+}
+
+func (js JobStep) completed(st JobStepStatus) bool {
+	return (js == ACKSENDING) && (st == SUCCESS)
+}
+func (js JobStep) logLevelFor(st JobStepStatus) string {
+	switch st {
+	// case STARTING: return "info"
+	case SUCCESS: return js.successLogLevel()
+	case FAILURE: return js.failureLogLevel()
+	default: return "info"
+	}
+}
+
+
 type (
 	ProgressConfig struct {
 		Topic string
@@ -38,75 +105,18 @@ type (
 	}
 )
 
-const (
-	CANCELLING = 1 + iota
-	CANCELL_OK
-	CANCELL_ERROR
-	PREPARING
-	PREPARE_OK
-	PREPARE_ERROR
-	DOWNLOADING
-	DOWNLOAD_OK
-	DOWNLOAD_ERROR
-	EXECUTING
-	EXECUTE_OK
-	EXECUTE_ERROR
-	UPLOADING
-	UPLOAD_OK
-	UPLOAD_ERROR
-	ACKSENDING
-	ACKSEND_OK
-	ACKSEND_ERROR
-	NACKSENDING
-	NACKSEND_OK
-	NACKSEND_ERROR
-	CLEANUP
-	CLEANUP_OK
-	CLEANUP_ERROR
-
-	COMPLETED = ACKSEND_OK
-	TOTAL     = CLEANUP
-)
-
-var PROGRESS_MESSAFGES = map[int]string{
-	CANCELLING:     "CANCELLING",
-	CANCELL_OK:     "CANCELL_OK",
-	CANCELL_ERROR:  "CANCELL_ERROR",
-	PREPARING:      "PREPARING",
-	PREPARE_OK:     "PREPARE_OK",
-	PREPARE_ERROR:  "PREPARE_ERROR",
-	DOWNLOADING:    "DOWNLOADING",
-	DOWNLOAD_OK:    "DOWNLOAD_OK",
-	DOWNLOAD_ERROR: "DOWNLOAD_ERROR",
-	EXECUTING:      "EXECUTING",
-	EXECUTE_OK:     "EXECUTE_OK",
-	EXECUTE_ERROR:  "EXECUTE_ERROR",
-	UPLOADING:      "UPLOADING",
-	UPLOAD_OK:      "UPLOAD_OK",
-	UPLOAD_ERROR:   "UPLOAD_ERROR",
-	ACKSENDING:     "ACKSENDING",
-	ACKSEND_OK:     "ACKSEND_OK",
-	ACKSEND_ERROR:  "ACKSEND_ERROR",
-	NACKSENDING:    "NACKSENDING",
-	NACKSEND_OK:		"NACKSEND_OK",
-	NACKSEND_ERROR: "NACKSEND_ERROR",
-	CLEANUP:        "CLEANUP",
-	CLEANUP_OK:     "CLEANUP_OK",
-	CLEANUP_ERROR:  "CLEANUP_ERROR",
+func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobStepStatus) error {
+	msg := fmt.Sprintf("%v %v", step, st)
+	return pn.notifyWithMessage(job_msg_id, step, st, msg)
 }
 
-func (pn *ProgressNotification) notify(job_msg_id string, progress int, level string) error {
-	return pn.notifyWithMessage(job_msg_id, progress, level, PROGRESS_MESSAFGES[progress])
-}
-
-func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, progress int, level string, msg string) error {
-	log.Printf("Notify %v/%v %v\n", progress, TOTAL, msg)
+func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
+	log.Printf("Notify %v: %v %v\n", job_msg_id, step, msg)
 	opts := map[string]string{
-		"progress":       strconv.Itoa(progress),
-		"total":          strconv.Itoa(TOTAL),
-		"completed":      strconv.FormatBool(progress == COMPLETED),
+		"progress":       strconv.Itoa(int(step)),
+		"completed":      strconv.FormatBool(step.completed(st)),
 		"job_message_id": job_msg_id,
-		"level":          level,
+		"level":          step.logLevelFor(st),
 	}
 	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(msg)), Attributes: opts}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)

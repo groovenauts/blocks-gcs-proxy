@@ -94,16 +94,16 @@ func (job *Job) runWithoutErrorHandling() error {
 	return err
 }
 
-func (job *Job) withNotify(progress int, f func() error) func() error {
+func (job *Job) withNotify(step JobStep, f func() error) func() error {
 	msg_id := job.message.MessageId()
 	return func() error {
-		job.notification.notify(msg_id, progress, "info")
+		job.notification.notify(msg_id, step, STARTING)
 		err := f()
 		if err != nil {
-			job.notification.notifyWithMessage(msg_id, progress+2, "error", err.Error())
+			job.notification.notifyWithMessage(msg_id, step, FAILURE, err.Error())
 			return err
 		}
-		job.notification.notify(msg_id, progress+1, "info")
+		job.notification.notify(msg_id, step, SUCCESS)
 		return nil
 	}
 }
