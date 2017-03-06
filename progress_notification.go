@@ -69,13 +69,17 @@ func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobSt
 
 func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
 	log.Printf("Notify %v: %v %v\n", job_msg_id, step, msg)
+	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
+}
+
+func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level, data string) error {
 	opts := map[string]string{
-		"progress":       strconv.Itoa(int(step.progressFor(st))),
-		"completed":      strconv.FormatBool(step.completed(st)),
+		"progress":       strconv.Itoa(int(progress)),
+		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
-		"level":          step.logLevelFor(st),
+		"level":          level,
 	}
-	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(msg)), Attributes: opts}
+	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: opts}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
 		log.Printf("Error to publish notification to %v msg: %v cause of %v\n", pn.config.Topic, m, err)
