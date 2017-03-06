@@ -24,10 +24,10 @@ const (
 	DOWNLOADING
 	EXECUTING
 	UPLOADING
+	CLEANUP
+	NACKSENDING
 	CANCELLING
 	ACKSENDING
-	NACKSENDING
-	CLEANUP
 )
 
 var (
@@ -36,10 +36,10 @@ var (
 		DOWNLOADING:	[]string{"DOWNLOADING", "info" , "error"},
 		EXECUTING:		[]string{"EXECUTING"	,	"info" , "error"},
 		UPLOADING:		[]string{"UPLOADING"	,	"info" , "error"},
-		CANCELLING:		[]string{"CANCELLING" , "info" , "fatal"},
-		ACKSENDING:		[]string{"ACKSENDING" , "info" , "error"},
+		CLEANUP:			[]string{"CLEANUP"		, "info" , "warn" },
 		NACKSENDING:	[]string{"NACKSENDING", "info" , "warn" },
-		CLEANUP:			[]string{"CLEANUP"		, "debug", "warn" },
+		CANCELLING:		[]string{"CANCELLING" , "info" , "fatal"},
+		ACKSENDING:		[]string{"ACKSENDING" , "info" , "fatal"},
 	}
 )
 
