@@ -95,7 +95,7 @@ var PROGRESS_MESSAFGES = map[int]string{
 	CLEANUP_ERROR:  "CLEANUP_ERROR",
 }
 
-func (pn *ProgressNotification) notify(progress int, job_msg_id, level string) error {
+func (pn *ProgressNotification) notify(job_msg_id string, progress int, level string) error {
 	msg := PROGRESS_MESSAFGES[progress]
 	log.Printf("Notify %v/%v %v\n", progress, TOTAL, msg)
 	opts := map[string]string{

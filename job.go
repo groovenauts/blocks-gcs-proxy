@@ -97,13 +97,13 @@ func (job *Job) runWithoutErrorHandling() error {
 func (job *Job) withNotify(progress int, f func() error) func() error {
 	msg_id := job.message.MessageId()
 	return func() error {
-		job.notification.notify(progress, msg_id, "info")
+		job.notification.notify(msg_id, progress, "info")
 		err := f()
 		if err != nil {
-			job.notification.notify(progress+2, msg_id, "error")
+			job.notification.notify(msg_id, progress+2, "error")
 			return err
 		}
-		job.notification.notify(progress+1, msg_id, "info")
+		job.notification.notify(msg_id, progress+1, "info")
 		return nil
 	}
 }
