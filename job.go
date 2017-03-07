@@ -247,7 +247,7 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	for _, src := range values {
 		extracted, err := v.expand(src)
 		if err != nil {
-			errors = append(errors, &InvalidJobError{err.Error()})
+			errors = append(errors, &InvalidJobError{cause: err})
 			continue
 		}
 		vals := strings.Split(extracted, v.separator)
