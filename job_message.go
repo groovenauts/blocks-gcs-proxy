@@ -147,6 +147,7 @@ func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimi
 			log.Printf("waitAndSendMAD nextLimit passed\n")
 			ticker.Stop()
 			log.Printf("waitAndSendMAD ticker stopped\n")
+			break
 		}
 	}
 
