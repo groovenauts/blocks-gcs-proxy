@@ -16,4 +16,4 @@ RUN mkdir -p /usr/app && \
          https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy-${BLOCKS_GCS_PROXY_VERSION}_linux-amd64 && \
     chmod +x /usr/app/blocks-gcs-proxy
 
-CMD ["bundle", "exec", "magellan-gcs-proxy", "%{attrs.cmd}"]
+CMD ["blocks-gcs-proxy", "%{attrs.cmd}"]
