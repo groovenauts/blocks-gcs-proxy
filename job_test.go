@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -96,7 +95,6 @@ func TestJobBuildWithInvalidDownloadFilesReference(t *testing.T) {
 	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files}"}
 	job.localDownloadFiles = nil
 	err := job.build()
-	fmt.Printf("cmd: %v\n", job.cmd)
 	if assert.Error(t, err) {
 		if assert.Implements(t, (*RetryableError)(nil), err) {
 			assert.False(t, (err.(RetryableError)).Retryable())
