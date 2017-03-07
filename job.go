@@ -219,12 +219,21 @@ func (job *Job) buildVariable() *Variable {
 
 func (job *Job) build() error {
 	v := job.buildVariable()
-
 	values, err := job.extract(v, job.config.Template)
-	if err != nil {
-		return err
-	}
 	if len(job.config.Options) > 0 {
+		if err != nil {
+			switch err.(type) {
+			case NestableError:
+				ne := err.(NestableError)
+				if ne.CausedBy((*InvalidExpression)(nil)) {
+					values = []string{}
+				} else {
+					return err
+				}
+			default:
+				return err
+			}
+		}
 		key := strings.Join(values, " ")
 		t := job.config.Options[key]
 		if t == nil {
@@ -235,6 +244,10 @@ func (job *Job) build() error {
 			if err != nil {
 				return err
 			}
+		}
+	} else {
+		if err != nil {
+			return err
 		}
 	}
 	job.cmd = exec.Command(values[0], values[1:]...)
