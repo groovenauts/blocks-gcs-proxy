@@ -301,20 +301,6 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		downloads_dir: downloads_dir,
 		uploads_dir:   uploads_dir,
 	}
-
-	v = job.buildVariable()
-	val, err = v.dig(v.data, "attrs", "attrs")
-	assert.NoError(t, err)
-	assert.Equal(t, attrs, val)
-
-	val, err = v.dive("attrs.foo")
-	assert.NoError(t, err)
-	assert.Equal(t, attrs["foo"], val)
-
-	val, err = v.expand("%{attrs.foo}")
-	assert.NoError(t, err)
-	assert.Equal(t, attrs["foo"], val)
-
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 
