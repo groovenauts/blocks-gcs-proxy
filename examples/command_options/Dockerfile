@@ -1,7 +1,7 @@
 # [config] IMAGE_NAME: "groovenauts/concurrent_batch_command_options_example"
 # [config]
 # [config] WORKING_DIR: "."
-# [config] VERSION_SCRIPT: 'grep VERSION ../version.go | cut -f2 -d\"'
+# [config] VERSION_SCRIPT: 'grep VERSION ../../version.go | cut -f2 -d\"'
 # [config] GIT_TAG_PREFIX: 'examples/command_options/'
 
 FROM buildpack-deps:jessie-curl
