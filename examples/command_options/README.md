@@ -23,12 +23,13 @@ $ pubsub-devsub --project $PROJECT --subscription "${PIPELINE}-progress-subscrip
 
 ### Terminal 2
 
+Download [magellan-gcs-proxy](https://github.com/groovenauts/blocks-gcs-proxy/releases) and put it into the directory on PATH.
+
 ```
 $ cd path/to/workspace/magellan-gcs-proxy
 $ cd examples/command_options
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
-$
 $ blocks-gcs-proxy %{attrs.cmd}
 ```
 
@@ -40,5 +41,4 @@ $ export PROJECT=your-gcp-project
 $ export TOPIC="projects/${PROJECT}/topics/${PIPELINE}-job-topic"
 $ gcloud beta pubsub topics publish $TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
 $ gcloud beta pubsub topics publish $TOPIC "" --attribute='cmd=sleep,sleep=60'
-$ gcloud beta pubsub topics publish $TOPIC "" --attribute='cmd=env'
 ```
