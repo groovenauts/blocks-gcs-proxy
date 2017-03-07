@@ -16,11 +16,11 @@ type (
 	}
 )
 
-func (e InvalidJobError) Error() string {
+func (e *InvalidJobError) Error() string {
 	return e.msg
 }
 
-func (e InvalidJobError) Retryable() bool {
+func (e *InvalidJobError) Retryable() bool {
 	return false
 }
 
@@ -38,7 +38,7 @@ func (e *CompositeError) Error() string {
 	return strings.Join(msgs, "\n")
 }
 
-func (e CompositeError) Retryable() bool {
+func (e *CompositeError) Retryable() bool {
 	for _, err := range e.errors {
 		switch err.(type) {
 		case RetryableError:
@@ -49,4 +49,13 @@ func (e CompositeError) Retryable() bool {
 		}
 	}
 	return true
+}
+
+func (e *CompositeError) Any(f func(error) bool) bool {
+	for _, err := range e.errors {
+		if f(err) {
+			return true
+		}
+	}
+	return false
 }
