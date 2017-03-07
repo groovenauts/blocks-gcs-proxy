@@ -12,8 +12,8 @@ WORKDIR $APP_HOME
 
 ENV BLOCKS_GCS_PROXY_VERSION 0.4.0-alpha2
 RUN mkdir -p /usr/app && \
-    curl -L --output /usr/app/blocks-gcs-proxy \
-         https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy-${BLOCKS_GCS_PROXY_VERSION}_linux-amd64 && \
-    chmod +x /usr/app/blocks-gcs-proxy
+    curl -L --output ${APP_HOME}/blocks-gcs-proxy \
+         https://github.com/groovenauts/blocks-gcs-proxy/releases/download/${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
+    chmod +x ${APP_HOME}/blocks-gcs-proxy
 
-CMD ["blocks-gcs-proxy", "%{attrs.cmd}"]
+CMD ["./blocks-gcs-proxy", "%{attrs.cmd}"]
