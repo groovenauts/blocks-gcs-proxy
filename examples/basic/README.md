@@ -7,7 +7,7 @@ $ cd path/to/workspace
 $ git clone https://github.com/groovenauts/magellan-gcs-proxy.git
 $ cd magellan-gcs-proxy
 $ bundle
-$ export PIPELINE=akm-pipeline01
+$ export PIPELINE=pipeline01
 $ gcloud deployment-manager deployments create $PIPELINE --config test/pubsub.jinja
 ```
 
@@ -23,13 +23,14 @@ $ pubsub-devsub --project $PROJECT --subscription "${PIPELINE}-progress-subscrip
 
 ### Terminal 2
 
+Download [magellan-gcs-proxy](https://github.com/groovenauts/blocks-gcs-proxy/releases) and put it into the directory on PATH.
+
 ```
 $ cd path/to/workspace/magellan-gcs-proxy
 $ cd examples/basic
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
-$
-$ blocks-gcs-proxy ./app.sh %{download_files.0} %{uploads_dir}
+$ blocks-gcs-proxy ./app.sh %{download_files.0} %{downloads_dir} %{uploads_dir} test
 ```
 
 ### Terminal 3 Publish message
