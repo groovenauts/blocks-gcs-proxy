@@ -319,4 +319,36 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	assert.Equal(t, "cmd2", job.cmd.Path)
 	assert.Equal(t, []string{"cmd2", uploads_dir, local1, local2, local3}, job.cmd.Args)
 
+	// Use "invalid_key" option for the message with attrs.cmd
+	attrs = map[string]string{
+		"cmd":            "invalid_key",
+		"download_files": generateJSON(t, []interface{}{url1, url2, url3}),
+		"foo":            "ABC",
+		"bar":            "DEFG",
+		"baz":            "HIJKL",
+	}
+	job = &Job{
+		config: config,
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data:       "",
+					Attributes: attrs,
+					MessageId:  "test-message1",
+				},
+			},
+		},
+		workspace:     workspace,
+		downloads_dir: downloads_dir,
+		uploads_dir:   uploads_dir,
+	}
+
+	err = job.setupDownloadFiles()
+	assert.NoError(t, err)
+
+	err = job.build()
+	if assert.Error(t, err) {
+		assert.Regexp(t, "Invalid command options key", err.Error())
+	}
 }

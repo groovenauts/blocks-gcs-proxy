@@ -235,15 +235,16 @@ func (job *Job) build() error {
 			}
 		}
 		key := strings.Join(values, " ")
+		if key == "" {
+			key = "default"
+		}
 		t := job.config.Options[key]
 		if t == nil {
-			t = job.config.Options["default"]
+			return &InvalidJobError{msg: fmt.Sprintf("Invalid command options key: %v", key)}
 		}
-		if t != nil {
-			values, err = job.extract(v, t)
-			if err != nil {
-				return err
-			}
+		values, err = job.extract(v, t)
+		if err != nil {
+			return err
 		}
 	} else {
 		if err != nil {
