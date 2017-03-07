@@ -20,7 +20,7 @@ func (e *TestError1) Error() string {
 
 type (
 	TestError2 struct {
-		msg string
+		msg   string
 		cause error
 	}
 )

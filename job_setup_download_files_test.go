@@ -198,7 +198,6 @@ func TestJobSetupCase3(t *testing.T) {
 	assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
 }
 
-
 func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	workspace := "/tmp/workspace"
 	downloads_dir := workspace + "/downloads"
@@ -218,7 +217,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		Template: []string{"%{attrs.cmd}"},
 		Options: map[string][]string{
 			"default": []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
-			"key2": []string{"cmd2", "%{uploads_dir}", "%{download_files}"},
+			"key2":    []string{"cmd2", "%{uploads_dir}", "%{download_files}"},
 		},
 	}
 
@@ -276,7 +275,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		assert.Equal(t, "cmd1", job.cmd.Path)
 		assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
 	}
-	
+
 	// Use "key2" option for the message with attrs.cmd
 	attrs = map[string]string{
 		"cmd":            "key2",

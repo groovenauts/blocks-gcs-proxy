@@ -17,7 +17,7 @@ type (
 
 type (
 	InvalidJobError struct {
-		msg string
+		msg   string
 		cause error
 	}
 )
