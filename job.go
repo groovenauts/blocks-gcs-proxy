@@ -11,8 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"golang.org/x/net/context"
 )
 
 type (
@@ -38,77 +36,99 @@ type (
 		downloadFileMap     map[string]string
 		remoteDownloadFiles interface{}
 		localDownloadFiles  interface{}
+
+		cmd *exec.Cmd
 	}
 )
 
-func (job *Job) run(ctx context.Context) error {
-	verr := job.message.Validate()
-	if verr != nil {
-		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, verr)
-		err := job.withNotify(CANCELLING, job.message.Ack)()
+func (job *Job) run() error {
+	err := job.runWithoutErrorHandling()
+	switch err.(type) {
+	case RetryableError:
+		var f func() error
+		e := err.(RetryableError)
+		if e.Retryable() {
+			f = job.withNotify(NACKSENDING, job.message.Nack)
+		} else {
+			f = job.withNotify(CANCELLING, job.message.Ack)
+		}
+		err := f()
 		if err != nil {
 			return err
 		}
-		return nil
 	}
-
-	go job.message.sendMADPeriodically()
-	defer job.message.Done()
-
-	job.notification.notify(PROCESSING, job.message.MessageId(), "info")
-	err := job.setupWorkspace(ctx, func() error {
-		err := job.withNotify(PREPARING, job.setupDownloadFiles)()
-		if err != nil {
-			return err
-		}
-
-		err = job.withNotify(DOWNLOADING, job.downloadFiles)()
-		if err != nil {
-			return err
-		}
-
-		err = job.withNotify(EXECUTING, job.execute)()
-		if err != nil {
-			return err
-		}
-
-		err = job.withNotify(UPLOADING, job.uploadFiles)()
-		if err != nil {
-			return err
-		}
-
-		err = job.withNotify(ACKSENDING, job.message.Ack)()
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-	job.notification.notify(CLEANUP, job.message.MessageId(), "info")
 	return err
 }
 
-func (job *Job) withNotify(progress int, f func() error) func() error {
-	msg_id := job.message.MessageId()
-	return func() error {
-		job.notification.notify(progress, msg_id, "info")
-		err := f()
-		if err != nil {
-			job.notification.notify(progress+2, msg_id, "error")
-			return err
-		}
-		job.notification.notify(progress+1, msg_id, "info")
-		return nil
+func (job *Job) runWithoutErrorHandling() error {
+	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
+
+	err := job.withNotify(INITIALIZING, job.prepare)()
+	if err != nil {
+		return err
 	}
+
+	go job.message.sendMADPeriodically(job.notification)
+	defer job.message.Done()
+
+	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
+	if err != nil {
+		return err
+	}
+
+	err = job.withNotify(EXECUTING, job.execute)()
+	if err != nil {
+		return err
+	}
+
+	err = job.withNotify(UPLOADING, job.uploadFiles)()
+	if err != nil {
+		return err
+	}
+
+	err = job.withNotify(ACKSENDING, job.message.Ack)()
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
-func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
+func (job *Job) withNotify(step JobStep, f func() error) func() error {
+	return job.notification.wrap(job.message.MessageId(), step, f)
+}
+
+func (job *Job) prepare() error {
+	err := job.message.Validate()
+	if err != nil {
+		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
+		return err
+	}
+
+	err = job.setupWorkspace()
+	if err != nil {
+		return err
+	}
+
+	err = job.setupDownloadFiles()
+	if err != nil {
+		return err
+	}
+
+	err = job.build()
+	if err != nil {
+		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		return err
+	}
+	return nil
+}
+
+func (job *Job) setupWorkspace() error {
 	dir, err := ioutil.TempDir("", "workspace")
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	defer os.RemoveAll(dir) // clean up
 
 	subdirs := []string{
 		filepath.Join(dir, "downloads"),
@@ -123,7 +143,14 @@ func (job *Job) setupWorkspace(ctx context.Context, f func() error) error {
 	job.workspace = dir
 	job.downloads_dir = subdirs[0]
 	job.uploads_dir = subdirs[1]
-	return f()
+	return nil
+}
+
+func (job *Job) clearWorkspace() error {
+	if job.workspace != "" {
+		return os.RemoveAll(job.workspace)
+	}
+	return nil
 }
 
 func (job *Job) setupDownloadFiles() error {
@@ -190,12 +217,12 @@ func (job *Job) buildVariable() *Variable {
 	}
 }
 
-func (job *Job) build() (*exec.Cmd, error) {
+func (job *Job) build() error {
 	v := job.buildVariable()
 
 	values, err := job.extract(v, job.config.Template)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if len(job.config.Options) > 0 {
 		key := strings.Join(values, " ")
@@ -206,25 +233,30 @@ func (job *Job) build() (*exec.Cmd, error) {
 		if t != nil {
 			values, err = job.extract(v, t)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-	cmd := exec.Command(values[0], values[1:]...)
-	return cmd, nil
+	job.cmd = exec.Command(values[0], values[1:]...)
+	return nil
 }
 
 func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	result := []string{}
+	errors := []error{}
 	for _, src := range values {
 		extracted, err := v.expand(src)
 		if err != nil {
-			return nil, err
+			errors = append(errors, &InvalidJobError{err.Error()})
+			continue
 		}
 		vals := strings.Split(extracted, v.separator)
 		for _, val := range vals {
 			result = append(result, val)
 		}
+	}
+	if len(errors) > 0 {
+		return nil, &CompositeError{errors}
 	}
 	return result, nil
 }
@@ -252,18 +284,13 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) execute() error {
-	cmd, err := job.build()
-	if err != nil {
-		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
-		return err
-	}
 	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	log.Printf("EXECUTE running: %v\n", cmd)
-	err = cmd.Run()
+	job.cmd.Stdout = &out
+	job.cmd.Stderr = &out
+	log.Printf("EXECUTE running: %v\n", job.cmd)
+	err := job.cmd.Run()
 	if err != nil {
-		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", cmd, err, out.String())
+		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", job.cmd, err, out.String())
 		return err
 	}
 	return nil

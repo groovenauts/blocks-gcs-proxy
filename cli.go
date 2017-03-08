@@ -16,7 +16,7 @@ func main() {
 		fmt.Printf("Error to load %v cause of %v\n", configPath, err)
 		os.Exit(1)
 	}
-	config.setup(ctx, os.Args[1:])
+	config.setup(os.Args[1:])
 
 	p := &Process{config: config}
 	err = p.setup(ctx)
@@ -25,7 +25,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = p.run(ctx)
+	err = p.run()
 	if err != nil {
 		fmt.Printf("Error to run cause of %v\n", err)
 		os.Exit(1)

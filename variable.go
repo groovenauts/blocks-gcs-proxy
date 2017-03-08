@@ -10,6 +10,16 @@ import (
 )
 
 type (
+	InvalidExpression struct {
+		msg string
+	}
+)
+
+func (e *InvalidExpression) Error() string {
+	return e.msg
+}
+
+type (
 	Variable struct {
 		data map[string]interface{}
 		// quoteString boolean
@@ -28,13 +38,16 @@ func (v *Variable) expand(str string) (string, error) {
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
 	re2 := regexp.MustCompile(`\s*\}\z`)
+	errors := []error{}
 	res := re0.ReplaceAllStringFunc(str, func(raw string) string {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
 		value, err := v.dive(expr)
 		if err != nil {
-			log.Printf("Error to dive: %v: %v\n", expr, err)
-			// return err
-			value = ""
+			errors = append(errors, err)
+			return ""
+		}
+		if value == nil {
+			errors = append(errors, &InvalidExpression{"No value found for " + expr})
 		}
 		switch value.(type) {
 		case string:
@@ -49,6 +62,9 @@ func (v *Variable) expand(str string) (string, error) {
 			return fmt.Sprintf("%v", value)
 		}
 	})
+	if len(errors) > 0 {
+		return "", &CompositeError{errors}
+	}
 	return res, nil
 }
 
@@ -97,24 +113,56 @@ func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) 
 
 func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error) {
 	switch tmp.(type) {
-	case []string:
-		idx, err := v.parseIndex(name)
-		if err != nil {
-			return nil, err
-		}
-		return tmp.([]string)[idx], nil
-	case []interface{}:
-		idx, err := v.parseIndex(name)
-		if err != nil {
-			return nil, err
-		}
-		return tmp.([]interface{})[idx], nil
-	case map[string]interface{}:
-		return tmp.(map[string]interface{})[name], nil
-	case map[string]string:
-		return tmp.(map[string]string)[name], nil
+	case []string, []interface{}:
+		return v.getFromArray(tmp, name)
+	case map[string]interface{}, map[string]string:
+		return v.getFromMap(tmp, name)
 	default:
 		return nil, fmt.Errorf("Unsupported Object type: [%T]%v", tmp, tmp)
+	}
+}
+
+func (v *Variable) getFromArray(array interface{}, name string) (interface{}, error) {
+	idx, err := v.parseIndex(name)
+	if err != nil {
+		return nil, &InvalidExpression{"Invalid index for array: " + name}
+	}
+	switch array.(type) {
+	case []string:
+		l := len(array.([]string))
+		if idx >= l {
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid index %v for array who has %v items", idx, l)}
+		}
+		return array.([]string)[idx], nil
+	case []interface{}:
+		l := len(array.([]interface{}))
+		if idx >= l {
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid index %v for array who has %v items", idx, l)}
+		}
+		return array.([]interface{})[idx], nil
+	default:
+		return nil, fmt.Errorf("Unsupported object given as an array: [%T]%v", array, array)
+	}
+}
+
+func (v *Variable) getFromMap(obj interface{}, name string) (interface{}, error) {
+	switch obj.(type) {
+	case map[string]interface{}:
+		m := obj.(map[string]interface{})
+		v, ok := m[name]
+		if !ok {
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid key %v for map %v", name, m)}
+		}
+		return v, nil
+	case map[string]string:
+		m := obj.(map[string]string)
+		v, ok := m[name]
+		if !ok {
+			return nil, &InvalidExpression{fmt.Sprintf("Invalid key %v for map %v", name, m)}
+		}
+		return v, nil
+	default:
+		return nil, fmt.Errorf("Unsupported object given as a map: [%T]%v", obj, obj)
 	}
 }
 

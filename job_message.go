@@ -37,11 +37,7 @@ const (
 
 func (m *JobMessage) Validate() error {
 	if m.MessageId() == "" {
-		return fmt.Errorf("no MessageId is given")
-	}
-	_, ok := m.raw.Message.Attributes["download_files"]
-	if !ok {
-		return fmt.Errorf("No download_files given.")
+		return &InvalidJobError{"no MessageId is given"}
 	}
 	return nil
 }
@@ -51,7 +47,10 @@ func (m *JobMessage) MessageId() string {
 }
 
 func (m *JobMessage) DownloadFiles() interface{} {
-	str := m.raw.Message.Attributes["download_files"]
+	str, ok := m.raw.Message.Attributes["download_files"]
+	if !ok {
+		return nil
+	}
 	return m.parseJson(str)
 }
 
@@ -86,6 +85,21 @@ func (m *JobMessage) Ack() error {
 	return nil
 }
 
+func (m *JobMessage) Nack() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
+	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, 0)
+	if err != nil {
+		log.Fatalf("Failed to send ModifyAckDeadline as a nack for message: %v cause of %v\n", m.raw, err)
+		return err
+	}
+
+	m.status = done
+
+	return nil
+}
+
 func (m *JobMessage) Done() {
 	if m.status == running {
 		m.status = done
@@ -96,10 +110,10 @@ func (m *JobMessage) running() bool {
 	return m.status == running
 }
 
-func (m *JobMessage) sendMADPeriodically() error {
+func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) error {
 	for {
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
-		err := m.waitAndSendMAD(nextLimit)
+		err := m.waitAndSendMAD(notification, nextLimit)
 		if err != nil {
 			return err
 		}
@@ -110,7 +124,7 @@ func (m *JobMessage) sendMADPeriodically() error {
 	// return nil
 }
 
-func (m *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
+func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimit time.Time) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !m.running() {
@@ -132,7 +146,9 @@ func (m *JobMessage) waitAndSendMAD(nextLimit time.Time) error {
 
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, int64(m.config.Delay))
 	if err != nil {
-		log.Fatalf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
+		msg := fmt.Sprintf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
+		log.Fatalf(msg)
+		notification.notifyProgress(m.MessageId(), WORKING, false, "error", msg)
 	}
 	return nil
 }
