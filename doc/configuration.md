@@ -77,5 +77,5 @@ You can use environment variables in the `config.json` with `{{env "HOME"}}`, `{
 ### Examples
 
 - [config file wih env](https://github.com/groovenauts/blocks-gcs-proxy/blob/2104fb374544c78a6c240141bc131559a48fa382/test/config_with_env.json)
-- [dot style config file](https://github.com/groovenauts/magellan-gcs-proxy/blob/5d4624048aafd743f3c49cd2a4eaede026a73552/test/config_with_env2.json)
-- [dot style config file with default values](https://github.com/groovenauts/magellan-gcs-proxy/blob/5257ace08db7fbd860b6a20795ae887892077f18/test/config_with_env_and_default3.json)
+- [dot style config file](https://github.com/groovenauts/blocks-gcs-proxy/blob/5d4624048aafd743f3c49cd2a4eaede026a73552/test/config_with_env2.json)
+- [dot style config file with default values](https://github.com/groovenauts/blocks-gcs-proxy/blob/5257ace08db7fbd860b6a20795ae887892077f18/test/config_with_env_and_default3.json)
