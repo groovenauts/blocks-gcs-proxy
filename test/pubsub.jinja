@@ -13,7 +13,7 @@
       "properties": {
         "subscription": "{{ env["deployment"] }}-job-subscription",
         "topic": "$(ref.{{ env["deployment"] }}-job-topic.name)",
-        "ackDeadlineSeconds": 600
+        "ackDeadlineSeconds": 60
       }
     },
     {
