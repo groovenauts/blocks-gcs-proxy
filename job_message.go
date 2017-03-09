@@ -37,7 +37,7 @@ const (
 
 func (m *JobMessage) Validate() error {
 	if m.MessageId() == "" {
-		return &InvalidJobError{"no MessageId is given"}
+		return &InvalidJobError{msg: "no MessageId is given"}
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strings"
 )
 
@@ -8,20 +9,50 @@ type (
 	RetryableError interface {
 		Retryable() bool
 	}
+
+	NestableError interface {
+		CausedBy(err error) bool
+	}
 )
 
 type (
 	InvalidJobError struct {
-		msg string
+		msg   string
+		cause error
 	}
 )
 
-func (e InvalidJobError) Error() string {
-	return e.msg
+func SameErrorType(obj, expected error) bool {
+	et1 := reflect.TypeOf(obj)
+	et2 := reflect.TypeOf(expected)
+	if et1 == et2 {
+		return true
+	}
+	switch obj.(type) {
+	case NestableError:
+		ne := obj.(NestableError)
+		return ne.CausedBy(expected)
+	default:
+		return false
+	}
 }
 
-func (e InvalidJobError) Retryable() bool {
+func (e *InvalidJobError) Error() string {
+	if e.msg != "" {
+		return e.msg
+	}
+	if e.cause != nil {
+		return e.cause.Error()
+	}
+	return ""
+}
+
+func (e *InvalidJobError) Retryable() bool {
 	return false
+}
+
+func (e *InvalidJobError) CausedBy(err error) bool {
+	return SameErrorType(e.cause, err)
 }
 
 type (
@@ -38,7 +69,7 @@ func (e *CompositeError) Error() string {
 	return strings.Join(msgs, "\n")
 }
 
-func (e CompositeError) Retryable() bool {
+func (e *CompositeError) Retryable() bool {
 	for _, err := range e.errors {
 		switch err.(type) {
 		case RetryableError:
@@ -49,4 +80,20 @@ func (e CompositeError) Retryable() bool {
 		}
 	}
 	return true
+}
+
+func (e *CompositeError) CausedBy(err error) bool {
+	f := func(e error) bool {
+		return SameErrorType(e, err)
+	}
+	return e.Any(f)
+}
+
+func (e *CompositeError) Any(f func(error) bool) bool {
+	for _, err := range e.errors {
+		if f(err) {
+			return true
+		}
+	}
+	return false
 }

@@ -219,22 +219,36 @@ func (job *Job) buildVariable() *Variable {
 
 func (job *Job) build() error {
 	v := job.buildVariable()
-
 	values, err := job.extract(v, job.config.Template)
-	if err != nil {
-		return err
-	}
 	if len(job.config.Options) > 0 {
-		key := strings.Join(values, " ")
-		t := job.config.Options[key]
-		if t == nil {
-			t = job.config.Options["default"]
-		}
-		if t != nil {
-			values, err = job.extract(v, t)
-			if err != nil {
+		if err != nil {
+			switch err.(type) {
+			case NestableError:
+				ne := err.(NestableError)
+				if ne.CausedBy((*InvalidExpression)(nil)) {
+					values = []string{}
+				} else {
+					return err
+				}
+			default:
 				return err
 			}
+		}
+		key := strings.Join(values, " ")
+		if key == "" {
+			key = "default"
+		}
+		t := job.config.Options[key]
+		if t == nil {
+			return &InvalidJobError{msg: fmt.Sprintf("Invalid command options key: %v", key)}
+		}
+		values, err = job.extract(v, t)
+		if err != nil {
+			return err
+		}
+	} else {
+		if err != nil {
+			return err
 		}
 	}
 	job.cmd = exec.Command(values[0], values[1:]...)
@@ -247,7 +261,7 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	for _, src := range values {
 		extracted, err := v.expand(src)
 		if err != nil {
-			errors = append(errors, &InvalidJobError{err.Error()})
+			errors = append(errors, &InvalidJobError{cause: err})
 			continue
 		}
 		vals := strings.Split(extracted, v.separator)
