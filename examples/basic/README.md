@@ -1,11 +1,11 @@
-# magellan-gcs-proxy basic example
+# blocks-gcs-proxy basic example
 
 ## How to run application locally
 
 ```
 $ cd path/to/workspace
-$ git clone https://github.com/groovenauts/magellan-gcs-proxy.git
-$ cd magellan-gcs-proxy
+$ git clone https://github.com/groovenauts/blocks-gcs-proxy.git
+$ cd blocks-gcs-proxy
 $ bundle
 $ export PIPELINE=pipeline01
 $ gcloud deployment-manager deployments create $PIPELINE --config test/pubsub.jinja
@@ -23,10 +23,10 @@ $ pubsub-devsub --project $PROJECT --subscription "${PIPELINE}-progress-subscrip
 
 ### Terminal 2
 
-Download [magellan-gcs-proxy](https://github.com/groovenauts/blocks-gcs-proxy/releases) and put it into the directory on PATH.
+Download [blocks-gcs-proxy](https://github.com/groovenauts/blocks-gcs-proxy/releases) and put it into the directory on PATH.
 
 ```
-$ cd path/to/workspace/magellan-gcs-proxy
+$ cd path/to/workspace/blocks-gcs-proxy
 $ cd examples/basic
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
