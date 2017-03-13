@@ -45,7 +45,7 @@ func (v *Variable) Expand(str string) (string, error) {
 	errors := Errors{}
 	res := re0.ReplaceAllStringFunc(str, func(raw string) string {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
-		value, err := v.dive(expr)
+		value, err := v.Dive(expr)
 		if err != nil {
 			errors = append(errors, err)
 			return ""
@@ -72,7 +72,7 @@ func (v *Variable) Expand(str string) (string, error) {
 	return res, nil
 }
 
-func (v *Variable) dive(expr string) (interface{}, error) {
+func (v *Variable) Dive(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
 	// fmt.Printf("var_names: %v\n", var_names)
 	res, err := v.inject(var_names, v.Data, func(tmp interface{}, name string) (interface{}, error) {
