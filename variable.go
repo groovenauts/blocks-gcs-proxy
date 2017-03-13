@@ -9,27 +9,21 @@ import (
 	"strings"
 )
 
-type (
-	InvalidExpression struct {
-		msg string
-	}
-)
+type InvalidExpression struct {
+	msg string
+}
 
 func (e *InvalidExpression) Error() string {
 	return e.msg
 }
 
-type (
-	Variable struct {
-		data map[string]interface{}
-		// quoteString boolean
-		separator string
-	}
-)
+type Variable struct {
+	data map[string]interface{}
+	// quoteString boolean
+	separator string
+}
 
-const (
-	DefaultExpandedArraySeparator = "[[SEP]]"
-)
+const DefaultExpandedArraySeparator = "[[SEP]]"
 
 func (v *Variable) expand(str string) (string, error) {
 	if v.separator == "" {
