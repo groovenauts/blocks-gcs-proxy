@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+type Errors []error
+
+func (e Errors) Error() string {
+	msgs := []string{}
+	for _, err := range e {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "\n")
+}
+
 type InvalidExpression struct {
 	msg string
 }
@@ -32,7 +42,7 @@ func (v *Variable) expand(str string) (string, error) {
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
 	re2 := regexp.MustCompile(`\s*\}\z`)
-	errors := []error{}
+	errors := Errors{}
 	res := re0.ReplaceAllStringFunc(str, func(raw string) string {
 		expr := re1.ReplaceAllString(re2.ReplaceAllString(raw, ""), "")
 		value, err := v.dive(expr)
@@ -57,7 +67,7 @@ func (v *Variable) expand(str string) (string, error) {
 		}
 	})
 	if len(errors) > 0 {
-		return "", &CompositeError{errors}
+		return "", &errors
 	}
 	return res, nil
 }

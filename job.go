@@ -260,6 +260,7 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	errors := []error{}
 	for _, src := range values {
 		extracted, err := v.expand(src)
+		err = job.convertError(err)
 		if err != nil {
 			errors = append(errors, &InvalidJobError{cause: err})
 			continue
@@ -273,6 +274,16 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 		return nil, &CompositeError{errors}
 	}
 	return result, nil
+}
+
+func (job *Job) convertError(src error) error {
+	switch src.(type) {
+	case *Errors:
+		err := src.(*Errors)
+		return &CompositeError{ []error(*err) }
+	default:
+		return src
+	}
 }
 
 func (job *Job) downloadFiles() error {
