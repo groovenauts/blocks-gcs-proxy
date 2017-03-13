@@ -203,7 +203,7 @@ func (job *Job) copyWithFileMap(obj interface{}) interface{} {
 
 func (job *Job) buildVariable() *Variable {
 	return &Variable{
-		data: map[string]interface{}{
+		Data: map[string]interface{}{
 			"workspace":             job.workspace,
 			"downloads_dir":         job.downloads_dir,
 			"uploads_dir":           job.uploads_dir,
@@ -265,7 +265,7 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 			errors = append(errors, &InvalidJobError{cause: err})
 			continue
 		}
-		vals := strings.Split(extracted, v.separator)
+		vals := strings.Split(extracted, v.Separator)
 		for _, val := range vals {
 			result = append(result, val)
 		}

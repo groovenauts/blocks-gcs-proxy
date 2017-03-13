@@ -28,16 +28,16 @@ func (e *InvalidExpression) Error() string {
 }
 
 type Variable struct {
-	data map[string]interface{}
+	Data map[string]interface{}
 	// quoteString boolean
-	separator string
+	Separator string
 }
 
 const DefaultExpandedArraySeparator = "[[SEP]]"
 
 func (v *Variable) expand(str string) (string, error) {
-	if v.separator == "" {
-		v.separator = DefaultExpandedArraySeparator
+	if v.Separator == "" {
+		v.Separator = DefaultExpandedArraySeparator
 	}
 	re0 := regexp.MustCompile(`\%\{\s*([\w.]+)\s*\}`)
 	re1 := regexp.MustCompile(`\A\%\{\s*`)
@@ -75,7 +75,7 @@ func (v *Variable) expand(str string) (string, error) {
 func (v *Variable) dive(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
 	// fmt.Printf("var_names: %v\n", var_names)
-	res, err := v.inject(var_names, v.data, func(tmp interface{}, name string) (interface{}, error) {
+	res, err := v.inject(var_names, v.Data, func(tmp interface{}, name string) (interface{}, error) {
 		res, err := v.dig(tmp, name, expr)
 		// fmt.Printf("res: %v err: %v\n", res, err)
 		if err != nil {
@@ -207,25 +207,25 @@ func (v *Variable) flatten(obj interface{}) string {
 	case string:
 		return obj.(string)
 	case []string:
-		return strings.Join(obj.([]string), v.separator)
+		return strings.Join(obj.([]string), v.Separator)
 	case []interface{}:
 		res := []string{}
 		for _, i := range obj.([]interface{}) {
 			res = append(res, v.flatten(i))
 		}
-		return strings.Join(res, v.separator)
+		return strings.Join(res, v.Separator)
 	case map[string]interface{}:
 		res := []string{}
 		for _, i := range obj.(map[string]interface{}) {
 			res = append(res, v.flatten(i))
 		}
-		return strings.Join(res, v.separator)
+		return strings.Join(res, v.Separator)
 	case map[string]string:
 		res := []string{}
 		for _, i := range obj.(map[string]string) {
 			res = append(res, v.flatten(i))
 		}
-		return strings.Join(res, v.separator)
+		return strings.Join(res, v.Separator)
 	default:
 		return fmt.Sprintf("%v", obj)
 	}
