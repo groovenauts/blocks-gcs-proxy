@@ -16,7 +16,7 @@ func assertDig(t *testing.T, v *Variable, expected, tmp interface{}, name, expr 
 }
 
 func assertExpand(t *testing.T, v *Variable, expected, expr string) {
-	res, err := v.expand(expr)
+	res, err := v.Expand(expr)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }

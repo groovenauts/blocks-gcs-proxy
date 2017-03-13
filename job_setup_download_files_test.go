@@ -175,7 +175,7 @@ func TestJobSetupCase3(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
-	val, err = v.expand("%{attrs.foo}")
+	val, err = v.Expand("%{attrs.foo}")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
@@ -254,7 +254,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
-	val, err = v.expand("%{attrs.foo}")
+	val, err = v.Expand("%{attrs.foo}")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 

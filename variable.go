@@ -35,7 +35,7 @@ type Variable struct {
 
 const DefaultExpandedArraySeparator = "[[SEP]]"
 
-func (v *Variable) expand(str string) (string, error) {
+func (v *Variable) Expand(str string) (string, error) {
 	if v.Separator == "" {
 		v.Separator = DefaultExpandedArraySeparator
 	}

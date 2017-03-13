@@ -259,7 +259,7 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 	result := []string{}
 	errors := []error{}
 	for _, src := range values {
-		extracted, err := v.expand(src)
+		extracted, err := v.Expand(src)
 		err = job.convertError(err)
 		if err != nil {
 			errors = append(errors, &InvalidJobError{cause: err})
