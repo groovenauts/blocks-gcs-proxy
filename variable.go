@@ -28,7 +28,7 @@ type (
 )
 
 const (
-	DefaultExpandedArraySeparator = "[[GCSPROXY:SEP]]"
+	DefaultExpandedArraySeparator = "[[SEP]]"
 )
 
 func (v *Variable) expand(str string) (string, error) {
