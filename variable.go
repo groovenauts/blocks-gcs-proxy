@@ -76,7 +76,7 @@ func (v *Variable) Dive(expr string) (interface{}, error) {
 	var_names := strings.Split(expr, expr_separator)
 	// fmt.Printf("var_names: %v\n", var_names)
 	res, err := v.inject(var_names, v.Data, func(tmp interface{}, name string) (interface{}, error) {
-		res, err := v.dig(tmp, name, expr)
+		res, err := v.Dig(tmp, name, expr)
 		// fmt.Printf("res: %v err: %v\n", res, err)
 		if err != nil {
 			return nil, err
@@ -89,8 +89,8 @@ func (v *Variable) Dive(expr string) (interface{}, error) {
 	return res, nil
 }
 
-func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) {
-	result, err := v.digIn(tmp, name, expr)
+func (v *Variable) Dig(tmp interface{}, name, expr string) (interface{}, error) {
+	result, err := v.DigIn(tmp, name, expr)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (v *Variable) dig(tmp interface{}, name, expr string) (interface{}, error) 
 	}
 }
 
-func (v *Variable) digIn(tmp interface{}, name, expr string) (interface{}, error) {
+func (v *Variable) DigIn(tmp interface{}, name, expr string) (interface{}, error) {
 	switch tmp.(type) {
 	case []string, []interface{}:
 		return v.getFromArray(tmp, name)

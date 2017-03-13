@@ -167,7 +167,7 @@ func TestJobSetupCase3(t *testing.T) {
 	}
 
 	v := job.buildVariable()
-	val, err := v.dig(v.Data, "attrs", "attrs")
+	val, err := v.Dig(v.Data, "attrs", "attrs")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs, val)
 
@@ -246,7 +246,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	}
 
 	v := job.buildVariable()
-	val, err := v.dig(v.Data, "attrs", "attrs")
+	val, err := v.Dig(v.Data, "attrs", "attrs")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs, val)
 

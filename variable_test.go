@@ -10,7 +10,7 @@ import (
 )
 
 func assertDig(t *testing.T, v *Variable, expected, tmp interface{}, name, expr string) {
-	res, err := v.dig(tmp, name, expr)
+	res, err := v.Dig(tmp, name, expr)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
