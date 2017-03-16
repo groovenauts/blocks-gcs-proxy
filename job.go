@@ -11,6 +11,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/groovenauts/blocks-variable"
 )
 
 type (
@@ -201,9 +203,9 @@ func (job *Job) copyWithFileMap(obj interface{}) interface{} {
 	}
 }
 
-func (job *Job) buildVariable() *Variable {
-	return &Variable{
-		data: map[string]interface{}{
+func (job *Job) buildVariable() *bvariable.Variable {
+	return &bvariable.Variable{
+		Data: map[string]interface{}{
 			"workspace":             job.workspace,
 			"downloads_dir":         job.downloads_dir,
 			"uploads_dir":           job.uploads_dir,
@@ -225,7 +227,7 @@ func (job *Job) build() error {
 			switch err.(type) {
 			case NestableError:
 				ne := err.(NestableError)
-				if ne.CausedBy((*InvalidExpression)(nil)) {
+				if ne.CausedBy((*bvariable.InvalidExpression)(nil)) {
 					values = []string{}
 				} else {
 					return err
@@ -255,16 +257,17 @@ func (job *Job) build() error {
 	return nil
 }
 
-func (job *Job) extract(v *Variable, values []string) ([]string, error) {
+func (job *Job) extract(v *bvariable.Variable, values []string) ([]string, error) {
 	result := []string{}
 	errors := []error{}
 	for _, src := range values {
-		extracted, err := v.expand(src)
+		extracted, err := v.Expand(src)
+		err = job.convertError(err)
 		if err != nil {
 			errors = append(errors, &InvalidJobError{cause: err})
 			continue
 		}
-		vals := strings.Split(extracted, v.separator)
+		vals := strings.Split(extracted, v.Separator)
 		for _, val := range vals {
 			result = append(result, val)
 		}
@@ -273,6 +276,16 @@ func (job *Job) extract(v *Variable, values []string) ([]string, error) {
 		return nil, &CompositeError{errors}
 	}
 	return result, nil
+}
+
+func (job *Job) convertError(src error) error {
+	switch src.(type) {
+	case *bvariable.Errors:
+		err := src.(*bvariable.Errors)
+		return &CompositeError{ []error(*err) }
+	default:
+		return src
+	}
 }
 
 func (job *Job) downloadFiles() error {

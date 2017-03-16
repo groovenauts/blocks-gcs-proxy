@@ -167,15 +167,15 @@ func TestJobSetupCase3(t *testing.T) {
 	}
 
 	v := job.buildVariable()
-	val, err := v.dig(v.data, "attrs", "attrs")
+	val, err := v.Dig(v.Data, "attrs", "attrs")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs, val)
 
-	val, err = v.dive("attrs.foo")
+	val, err = v.Dive("attrs.foo")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
-	val, err = v.expand("%{attrs.foo}")
+	val, err = v.Expand("%{attrs.foo}")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
@@ -246,15 +246,15 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	}
 
 	v := job.buildVariable()
-	val, err := v.dig(v.data, "attrs", "attrs")
+	val, err := v.Dig(v.Data, "attrs", "attrs")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs, val)
 
-	val, err = v.dive("attrs.foo")
+	val, err = v.Dive("attrs.foo")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
-	val, err = v.expand("%{attrs.foo}")
+	val, err = v.Expand("%{attrs.foo}")
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 

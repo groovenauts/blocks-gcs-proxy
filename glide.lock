@@ -1,5 +1,5 @@
-hash: 0bb89b6862bb586f7705b12e4085e2606db2a0c1bee946c8b252e7a93f35eb03
-updated: 2017-02-22T19:25:00.67232918+09:00
+hash: c647ff3de42f3a844861247c9d2dcc6e7ca7129d1535df9b7463f245c8492334
+updated: 2017-03-15T14:50:29.286729875+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -12,6 +12,8 @@ imports:
   - proto
 - name: github.com/googleapis/gax-go
   version: da06d194a00e19ce00d9011a13931c3f6f6887c7
+- name: github.com/groovenauts/blocks-variable
+  version: 833d2f1e70b82c8a0a1149827906ab32aed40276
 - name: golang.org/x/net
   version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
   subpackages:
@@ -39,6 +41,7 @@ imports:
   - iterator
   - pubsub
   - pubsub/v1
+  - storage/v1
 - name: google.golang.org/appengine
   version: 08a149cfaee099e6ce4be01c0113a78c85ee1dee
   subpackages:
@@ -65,6 +68,14 @@ imports:
   - tap
   - transport
 testImports:
+- name: github.com/davecgh/go-spew
+  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
 - name: github.com/stretchr/testify
   version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
