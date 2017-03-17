@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"sync"
 	"time"
 
 	pubsub "google.golang.org/api/pubsub/v1"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -74,16 +75,21 @@ func (m *JobMessage) Ack() error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
+	logAttrs := log.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
+	log.WithFields(logAttrs).Debugln("Sending ACK")
+
 	_, err := m.puller.Acknowledge(m.sub, m.raw.AckId)
 	if err != nil {
-		log.Fatalf("Failed to acknowledge for message: %v cause of %v\n", m.raw, err)
+		logAttrs["raw"] = fmt.Sprintf("%v", m.raw)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorln("Failed to acknowledge")
 		return err
 	}
 
-	log.Printf("JobMessage.Ack m.status: %v\n", m.status)
-	m.status = acked
-	log.Printf("JobMessage.Ack m.status: %v\n", m.status)
+	logAttrs["status"] = m.status
+	log.WithFields(logAttrs).Debugln("Updating status to acked")
 
+	m.status = acked
 	return nil
 }
 
@@ -91,25 +97,30 @@ func (m *JobMessage) Nack() error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
+	logAttrs := log.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
+	log.WithFields(logAttrs).Debugln("Sending NACK")
+
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, 0)
 	if err != nil {
-		log.Fatalf("Failed to send ModifyAckDeadline as a nack for message: %v cause of %v\n", m.raw, err)
+		logAttrs["raw"] = fmt.Sprintf("%v", m.raw)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorln("Failed to send ModifyAckDeadline as a NACK")
 		return err
 	}
 
-	log.Printf("JobMessage.Nack m.status: %v\n", m.status)
-	m.status = done
-	log.Printf("JobMessage.Nack m.status: %v\n", m.status)
+	logAttrs["status"] = m.status
+	log.WithFields(logAttrs).Debugln("Updating status to done")
 
+	m.status = done
 	return nil
 }
 
 func (m *JobMessage) Done() {
-	log.Printf("JobMessage.Done m.status: %v\n", m.status)
+	logAttrs := log.Fields{"job_message_id": m.MessageId(), "status": m.status}
+	log.WithFields(logAttrs).Debugln("Done()")
 	if m.status == running {
 		m.status = done
 	}
-	log.Printf("JobMessage.Done m.status: %v\n", m.status)
 }
 
 func (m *JobMessage) running() bool {
@@ -122,11 +133,11 @@ func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) err
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
 		err := m.waitAndSendMAD(notification, nextLimit)
 		if err != nil {
-			log.Printf("sendMADPeriodically err: %v\n", err)
+			log.WithFields(log.Fields{"error": err}).Errorln("Error in sendMADPeriodically")
 			return err
 		}
 		if !m.running() {
-			log.Printf("sendMADPeriodically return\n")
+			log.Debugln("sendMADPeriodically return")
 			return nil
 		}
 	}
@@ -134,42 +145,47 @@ func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) err
 }
 
 func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimit time.Time) error {
-	log.Printf("waitAndSendMAD starting\n")
+	log.Debugln("waitAndSendMAD starting")
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for now := range ticker.C {
 		if !m.running() {
-			log.Printf("waitAndSendMAD ticker stopping\n")
+			log.Debugln("waitAndSendMAD ticker stopping")
 			ticker.Stop()
-			log.Printf("waitAndSendMAD ticker stopped\n")
+			log.Debugln("waitAndSendMAD ticker stopped")
 			return nil
 		}
 		if now.After(nextLimit) {
-			log.Printf("waitAndSendMAD nextLimit passed\n")
+			log.Debugln("waitAndSendMAD nextLimit passed")
 			ticker.Stop()
-			log.Printf("waitAndSendMAD ticker stopped\n")
+			log.Debugln("waitAndSendMAD ticker stopped")
 			break
 		}
 	}
 
-	log.Printf("waitAndSendMAD m.mux locking m: %v\n", m)
+	log.Debugln("waitAndSendMAD m.mux locking")
 
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	log.Printf("waitAndSendMAD m.status: %v\n", m.status)
+	logAttrs := log.Fields{"status": m.status}
+	log.WithFields(logAttrs).Debugln("waitAndSendMAD")
 
 	// Don't send MAD after sending ACK
 	if m.status == acked {
-		log.Printf("waitAndSendMAD already acked\n")
+		log.WithFields(logAttrs).Infoln("waitAndSendMAD already acked")
 		return nil
 	}
 
-	log.Printf("waitAndSendMAD sending ModifyAckDeadline\n")
+	log.WithFields(logAttrs).Debugln("waitAndSendMAD sending ModifyAckDeadline")
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, int64(m.config.Delay))
 	if err != nil {
-		log.Printf("waitAndSendMAD ModifyAckDeadline err: \n", err)
+		logAttrs["error"] = err
+		logAttrs["subscription"] = m.sub
+		logAttrs["AckId"] = m.raw.AckId
+		logAttrs["Delay"] = m.config.Delay
+		log.WithFields(logAttrs).Errorln("waitAndSendMAD ModifyAckDeadline")
 		msg := fmt.Sprintf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
-		log.Fatalf(msg)
+		log.WithFields(logAttrs).Fatalf(msg)
 		notification.notifyProgress(m.MessageId(), WORKING, false, "error", msg)
 	}
 	return nil

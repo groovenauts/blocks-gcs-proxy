@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
@@ -13,6 +12,8 @@ import (
 	"strings"
 
 	"github.com/groovenauts/blocks-variable"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -101,9 +102,12 @@ func (job *Job) withNotify(step JobStep, f func() error) func() error {
 }
 
 func (job *Job) prepare() error {
+	logAttrs := log.Fields{"job_message_id": job.message.MessageId()}
 	err := job.message.Validate()
 	if err != nil {
-		log.Printf("Invalid Message: MessageId: %v, Message: %v, error: %v\n", job.message.MessageId(), job.message.raw.Message, err)
+		logAttrs["message"] = job.message.raw.Message
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Invalid Message")
 		return err
 	}
 
@@ -119,7 +123,10 @@ func (job *Job) prepare() error {
 
 	err = job.build()
 	if err != nil {
-		log.Fatalf("Command build Error template: %v msg: %v cause of %v\n", job.config.Template, job.message, err)
+		logAttrs["template"] = job.config.Template
+		logAttrs["message"] = job.message
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Failed to build command")
 		return err
 	}
 	return nil
@@ -165,13 +172,13 @@ func (job *Job) setupDownloadFiles() error {
 		case string:
 			remoteUrls = append(remoteUrls, obj.(string))
 		default:
-			log.Printf("Invalid download file URL: %v [%T]", obj, obj)
+			log.WithFields(log.Fields{"url": obj}).Errorf("Invalid download file URL: %T\n", obj)
 		}
 	}
 	for _, remote_url := range remoteUrls {
 		url, err := url.Parse(remote_url)
 		if err != nil {
-			log.Fatalf("Invalid URL: %v because of %v\n", remote_url, err)
+			log.WithFields(log.Fields{"url": remote_url}).Errorln("Invalid download file URL")
 			return err
 		}
 		urlstr := fmt.Sprintf("gs://%v%v", url.Host, url.Path)
@@ -242,7 +249,7 @@ func (job *Job) build() error {
 		}
 		t := job.config.Options[key]
 		if t == nil {
-			return &InvalidJobError{msg: fmt.Sprintf("Invalid command options key: %v", key)}
+			return &InvalidJobError{msg: fmt.Sprintf("Invalid command options key: %q", key)}
 		}
 		values, err = job.extract(v, t)
 		if err != nil {
@@ -282,7 +289,7 @@ func (job *Job) convertError(src error) error {
 	switch src.(type) {
 	case *bvariable.Errors:
 		err := src.(*bvariable.Errors)
-		return &CompositeError{ []error(*err) }
+		return &CompositeError{[]error(*err)}
 	default:
 		return src
 	}
@@ -292,7 +299,7 @@ func (job *Job) downloadFiles() error {
 	for remoteURL, destPath := range job.downloadFileMap {
 		url, err := url.Parse(remoteURL)
 		if err != nil {
-			log.Fatalf("Invalid URL: %v because of %v\n", remoteURL, err)
+			log.WithFields(log.Fields{"url": remoteURL, "error": err}).Errorln("Invalid URL")
 			return err
 		}
 
@@ -314,10 +321,10 @@ func (job *Job) execute() error {
 	var out bytes.Buffer
 	job.cmd.Stdout = &out
 	job.cmd.Stderr = &out
-	log.Printf("EXECUTE running: %v\n", job.cmd)
+	log.WithFields(log.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
 	err := job.cmd.Run()
 	if err != nil {
-		log.Printf("Command Error: cmd: %v cause of %v\n%v\n", job.cmd, err, out.String())
+		log.WithFields(log.Fields{"cmd": job.cmd, "error": err, "outputs": out.String()}).Errorln("Command returned error")
 		return err
 	}
 	return nil
@@ -331,7 +338,7 @@ func (job *Job) uploadFiles() error {
 	for _, localPath := range localPaths {
 		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
-			log.Fatalf("Error getting relative path of %v: %v\n", localPath, err)
+			log.WithFields(log.Fields{"error": err, "localPath": localPath, "uploads_dir": job.uploads_dir}).Errorln("Failed to get relative path")
 			return err
 		}
 		sep := string([]rune{os.PathSeparator})
@@ -340,7 +347,7 @@ func (job *Job) uploadFiles() error {
 		object := strings.Join(parts[1:], sep)
 		err = job.storage.Upload(bucket, object, localPath)
 		if err != nil {
-			log.Fatalf("Error uploading %v to gs://%v/%v: %v\n", localPath, bucket, object, err)
+			log.WithFields(log.Fields{"error": err, "localPath": localPath, "url": "gs://" + bucket + "/" + object}).Errorln("Failed to get relative path")
 			return err
 		}
 	}
@@ -356,7 +363,7 @@ func (job *Job) listFiles(dir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		log.Fatalf("Error listing upload files: %v\n", err)
+		log.WithFields(log.Fields{"error": err}).Errorln("Error to list upload files")
 		return nil, err
 	}
 	return result, nil
