@@ -60,7 +60,6 @@ func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 		}
 		time.Sleep(time.Duration(s.config.PullInterval) * time.Second)
 	}
-	return nil
 }
 
 func (s *JobSubscription) process(f func(*JobMessage) error) error {
