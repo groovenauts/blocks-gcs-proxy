@@ -1,5 +1,5 @@
-hash: c647ff3de42f3a844861247c9d2dcc6e7ca7129d1535df9b7463f245c8492334
-updated: 2017-03-15T14:50:29.286729875+09:00
+hash: 2bcad2a5c6c4598559a5fd13ad38b0817eefa567cd1e71f837d7f9bf05c605b5
+updated: 2017-03-17T18:55:08.231159+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -14,6 +14,8 @@ imports:
   version: da06d194a00e19ce00d9011a13931c3f6f6887c7
 - name: github.com/groovenauts/blocks-variable
   version: 833d2f1e70b82c8a0a1149827906ab32aed40276
+- name: github.com/Sirupsen/logrus
+  version: 547e984ad93a90192134fc0fdb57a468edb514fe
 - name: golang.org/x/net
   version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
   subpackages:
