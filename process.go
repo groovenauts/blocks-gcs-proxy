@@ -22,6 +22,7 @@ type (
 		Command  *CommandConfig  `json:"command,omitempty"`
 		Job      *JobConfig      `json:"job,omitempty"`
 		Progress *ProgressConfig `json:"progress,omitempty"`
+		Log      *LogConfig      `json:"log,omitempty`
 	}
 )
 
@@ -30,6 +31,10 @@ func (c *ProcessConfig) setup(args []string) error {
 		c.Command = &CommandConfig{}
 	}
 	c.Command.Template = args
+	err := c.Log.setup()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
