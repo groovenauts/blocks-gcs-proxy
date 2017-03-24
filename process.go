@@ -114,6 +114,8 @@ func (p *Process) setup(ctx context.Context) error {
 }
 
 func (p *Process) run() error {
+	logAttrs := log.Fields{"VERSION": VERSION, "config": p.config}
+	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
 			config:       p.config.Command,
