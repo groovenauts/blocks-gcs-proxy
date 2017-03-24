@@ -12,13 +12,32 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+type JobMessageStatus uint8
+
+const (
+	running JobMessageStatus = iota
+	done
+	acked
+)
+
+func (s JobMessageStatus) String() string {
+	switch s {
+	case running:
+		return "running"
+	case done:
+		return "done"
+	case acked:
+		return "acked"
+	default:
+		return fmt.Sprintf("JobMessageStatus[Unknown:%v]", uint8(s))
+	}
+}
+
 type (
 	JobSustainerConfig struct {
 		Delay    float64 `json:"delay,omitempty"`
 		Interval float64 `json:"interval,omitempty"`
 	}
-
-	JobMessageStatus uint8
 
 	JobMessage struct {
 		sub    string
@@ -28,12 +47,6 @@ type (
 		status JobMessageStatus
 		mux    sync.Mutex
 	}
-)
-
-const (
-	running JobMessageStatus = iota
-	done
-	acked
 )
 
 func (m *JobMessage) Validate() error {
