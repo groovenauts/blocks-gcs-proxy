@@ -8,6 +8,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+func init() {
+	log.SetLevel(log.PanicLevel)
+}
+
 func TestLogConfig(t *testing.T) {
 	backup := log.GetLevel()
 	defer func() {
