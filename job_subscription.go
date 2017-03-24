@@ -71,7 +71,7 @@ func (s *JobSubscription) process(f func(*JobMessage) error) error {
 		return nil
 	}
 
-	log.WithFields(log.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Debugln("Message received")
+	log.WithFields(log.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
 
 	jobMsg := &JobMessage{
 		sub:    s.config.Subscription,

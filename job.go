@@ -227,19 +227,27 @@ func (job *Job) buildVariable() *bvariable.Variable {
 }
 
 func (job *Job) build() error {
+	logAttrs := log.Fields{}
 	v := job.buildVariable()
 	values, err := job.extract(v, job.config.Template)
 	if len(job.config.Options) > 0 {
+		logAttrs["options_key_template"] = job.config.Template
+		logAttrs["options_key_base"] = values
+		log.WithFields(logAttrs).Debugln("extracting key of options")
 		if err != nil {
+			logAttrs["error"] = err
 			switch err.(type) {
 			case NestableError:
 				ne := err.(NestableError)
 				if ne.CausedBy((*bvariable.InvalidExpression)(nil)) {
+					log.WithFields(logAttrs).Warnln("Invalid Expression to extract")
 					values = []string{}
 				} else {
+					log.WithFields(logAttrs).Errorln("extract error")
 					return err
 				}
 			default:
+				log.WithFields(logAttrs).Errorln("extract error")
 				return err
 			}
 		}
@@ -248,18 +256,30 @@ func (job *Job) build() error {
 			key = "default"
 		}
 		t := job.config.Options[key]
+		logAttrs["options_key"] = key
+		logAttrs["command_template"] = t
+		log.WithFields(logAttrs).Debugln("extracting command of options")
 		if t == nil {
-			return &InvalidJobError{msg: fmt.Sprintf("Invalid command options key: %q", key)}
+			msg := fmt.Sprintf("Invalid command options key: %q", key)
+			log.WithFields(logAttrs).Errorln(msg)
+			return &InvalidJobError{msg: msg}
 		}
 		values, err = job.extract(v, t)
 		if err != nil {
+			logAttrs["error"] = err
+			log.WithFields(logAttrs).Errorln("extract error")
 			return err
 		}
 	} else {
+		logAttrs["command_template"] = job.config.Template
 		if err != nil {
+			logAttrs["error"] = err
+			log.WithFields(logAttrs).Errorln("extract error")
 			return err
 		}
 	}
+	logAttrs["command"] = values
+	log.WithFields(logAttrs).Debugln("")
 	job.cmd = exec.Command(values[0], values[1:]...)
 	return nil
 }
