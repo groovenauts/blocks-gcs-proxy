@@ -22,7 +22,7 @@ type (
 		Command  *CommandConfig  `json:"command,omitempty"`
 		Job      *JobConfig      `json:"job,omitempty"`
 		Progress *ProgressConfig `json:"progress,omitempty"`
-		Log      *LogConfig      `json:"log,omitempty`
+		Log      *LogConfig      `json:"log,omitempty"`
 	}
 )
 
