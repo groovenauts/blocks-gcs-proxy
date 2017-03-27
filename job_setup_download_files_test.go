@@ -351,3 +351,57 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		assert.Regexp(t, "Invalid command options key", err.Error())
 	}
 }
+
+func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
+	workspace := "/tmp/workspace"
+	downloads_dir := workspace + "/downloads"
+	uploads_dir := workspace + "/uploads"
+	bucket := "bucket1"
+	path1 := "path/to/file1"
+	path2 := "path/to/file2"
+	path3 := "path/to/file3"
+	url1 := "gs://" + bucket + "/" + path1
+	url2 := "gs://" + bucket + "/" + path2
+	url3 := "gs://" + bucket + "/" + path3
+	// local1 := downloads_dir + "/" + bucket + "/" + path1
+	// local2 := downloads_dir + "/" + bucket + "/" + path2
+	// local3 := downloads_dir + "/" + bucket + "/" + path3
+
+	job := &Job{
+		config: &CommandConfig{
+			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
+		},
+		message: &JobMessage{
+			raw: &pubsub.ReceivedMessage{
+				AckId: "test-ack1",
+				Message: &pubsub.PubsubMessage{
+					Data: generateJSON(t, map[string]interface{}{
+						"foo":            url1,
+						"download_files": []string{url2, url3},
+					}),
+					Attributes: map[string]string{
+						"download_files": generateJSON(t, map[string]interface{}{
+							"foo": url1,
+						}),
+						"use-data-as-attributes": "true",
+					},
+					MessageId: "test-message1",
+				},
+			},
+		},
+		workspace:     workspace,
+		downloads_dir: downloads_dir,
+		uploads_dir:   uploads_dir,
+	}
+
+	assert.Equal(t, "", job.message.raw.Message.Attributes["foo"])
+
+	err := job.useDataAsAttributesIfPossible()
+	assert.NoError(t, err)
+	assert.Equal(t, url1, job.message.raw.Message.Attributes["foo"])
+
+	err = job.setupDownloadFiles()
+	assert.NoError(t, err)
+
+	assert.Equal(t, []interface{}{url2, url3}, job.message.DownloadFiles())
+}

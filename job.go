@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/groovenauts/blocks-variable"
@@ -116,6 +118,11 @@ func (job *Job) prepare() error {
 		return err
 	}
 
+	err = job.useDataAsAttributesIfPossible()
+	if err != nil {
+		return err
+	}
+
 	err = job.setupDownloadFiles()
 	if err != nil {
 		return err
@@ -158,6 +165,42 @@ func (job *Job) setupWorkspace() error {
 func (job *Job) clearWorkspace() error {
 	if job.workspace != "" {
 		return os.RemoveAll(job.workspace)
+	}
+	return nil
+}
+
+const UseDataAsAttributesKey = "use-data-as-attributes"
+
+var UseDataAsAttributesRegexp = regexp.MustCompile("(?i)true|yes|on|1")
+
+func (job *Job) useDataAsAttributesIfPossible() error {
+	attrs := job.message.raw.Message.Attributes
+	flg := attrs[UseDataAsAttributesKey]
+	if !UseDataAsAttributesRegexp.MatchString(flg) {
+		return nil
+	}
+	var parsed map[string]interface{}
+	err := json.Unmarshal([]byte(job.message.raw.Message.Data), &parsed)
+	if err != nil {
+		logAttrs := log.Fields{"error": err, "data": job.message.raw.Message.Data}
+		log.WithFields(logAttrs).Errorf("Failed to json.Unmarshal")
+		return err
+	}
+	for key, obj := range parsed {
+		var value string
+		switch obj.(type) {
+		case string:
+			value = obj.(string)
+		default:
+			b, err := json.Marshal(obj)
+			if err != nil {
+				logAttrs := log.Fields{"error": err, "obj": obj}
+				log.WithFields(logAttrs).Errorf("Failed to json.Marshal")
+				return err
+			}
+			value = string(b)
+		}
+		attrs[key] = value
 	}
 	return nil
 }
