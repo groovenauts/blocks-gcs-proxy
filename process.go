@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"text/template"
@@ -14,6 +13,8 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -21,6 +22,7 @@ type (
 		Command  *CommandConfig  `json:"command,omitempty"`
 		Job      *JobConfig      `json:"job,omitempty"`
 		Progress *ProgressConfig `json:"progress,omitempty"`
+		Log      *LogConfig      `json:"log,omitempty"`
 	}
 )
 
@@ -29,6 +31,10 @@ func (c *ProcessConfig) setup(args []string) error {
 		c.Command = &CommandConfig{}
 	}
 	c.Command.Template = args
+	err := c.Log.setup()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,14 +81,15 @@ func (p *Process) setup(ctx context.Context) error {
 	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope)
 
 	if err != nil {
-		log.Printf("Failed to create DefaultClient\n")
+		log.Fatalln("Failed to create DefaultClient")
 		return err
 	}
 
 	// Create a storageService
 	storageService, err := storage.New(client)
 	if err != nil {
-		log.Printf("Failed to create storage.Service with %v: %v\n", client, err)
+		logAttrs := log.Fields{"client": client, "error": err}
+		log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
 		return err
 	}
 	p.storage = &CloudStorage{storageService.Objects}
@@ -90,7 +97,8 @@ func (p *Process) setup(ctx context.Context) error {
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)
 	if err != nil {
-		log.Printf("Failed to create pubsub.Service with %v: %v\n", client, err)
+		logAttrs := log.Fields{"client": client, "error": err}
+		log.WithFields(logAttrs).Fatalln("Failed to create pubsub.Service")
 		return err
 	}
 
@@ -106,6 +114,17 @@ func (p *Process) setup(ctx context.Context) error {
 }
 
 func (p *Process) run() error {
+	logAttrs :=
+		log.Fields{
+			"VERSION": VERSION,
+			"config": map[string]interface{}{
+				"command":  p.config.Command,
+				"job":      p.config.Job,
+				"progress": p.config.Progress,
+				"log":      p.config.Log,
+			},
+		}
+	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
 			config:       p.config.Command,
@@ -115,7 +134,8 @@ func (p *Process) run() error {
 		}
 		err := job.run()
 		if err != nil {
-			log.Printf("Job Error %v cause of %v\n", msg, err)
+			logAttrs := log.Fields{"error": err, "msg": msg}
+			log.WithFields(logAttrs).Fatalln("Kpbg Error")
 			return err
 		}
 		return nil

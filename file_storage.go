@@ -2,10 +2,11 @@ package main
 
 import (
 	"io"
-	"log"
 	"os"
 
 	storage "google.golang.org/api/storage/v1"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -20,42 +21,50 @@ type (
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {
-	log.Printf("Downloading gs://%v/%v to %v\n", bucket, object, destPath)
+	logAttrs := log.Fields{"url": "gs://" + bucket + "/" + object, "destPath": destPath}
+	log.WithFields(logAttrs).Debugln("Downloading")
 	dest, err := os.Create(destPath)
 	if err != nil {
-		log.Fatalf("Error creating %q: %v", destPath, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Creating dest file")
 		return err
 	}
 	defer dest.Close()
 
 	resp, err := ct.service.Get(bucket, object).Download()
 	if err != nil {
-		log.Printf("Error downloading bucket: %q object: %q because of %v", bucket, object, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Failed to download")
 		return err
 	}
 	defer resp.Body.Close()
 
 	n, err := io.Copy(dest, resp.Body)
 	if err != nil {
-		log.Fatalf("Error copry bucket: %q object: %q to %q because of %v", bucket, object, destPath, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Failed to copy")
 		return err
 	}
-	log.Printf("Downloaded bucket: gs://%v/%v to %v (%d bytes)", bucket, object, destPath, n)
+	logAttrs["size"] = n
+	log.WithFields(logAttrs).Debugln("Download successfully")
 	return nil
 }
 
 func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
-	log.Printf("Uploading %v to gs://%v/%v\n", srcPath, bucket, object)
+	logAttrs := log.Fields{"url": "gs://" + bucket + "/" + object, "srcPath": srcPath}
+	log.WithFields(logAttrs).Debugln("Uploading")
 	f, err := os.Open(srcPath)
 	if err != nil {
-		log.Fatalf("Error opening %q: %v", srcPath, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Failed to open the file")
 		return err
 	}
 	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
-		log.Printf("Error uploading gs://%q/%q: %v", bucket, srcPath, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Errorf("Failed to upload")
 		return err
 	}
-	log.Printf("Uploaded %v to gs://%v/%v\n", srcPath, bucket, object)
+	log.WithFields(logAttrs).Debugln("Upload successfully")
 	return nil
 }

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	pubsub "google.golang.org/api/pubsub/v1"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -59,7 +60,6 @@ func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 		}
 		time.Sleep(time.Duration(s.config.PullInterval) * time.Second)
 	}
-	return nil
 }
 
 func (s *JobSubscription) process(f func(*JobMessage) error) error {
@@ -71,7 +71,7 @@ func (s *JobSubscription) process(f func(*JobMessage) error) error {
 		return nil
 	}
 
-	log.Printf("Message received MessageId: %v, Message: %v\n", msg.Message.MessageId, msg.Message)
+	log.WithFields(log.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
 
 	jobMsg := &JobMessage{
 		sub:    s.config.Subscription,
@@ -91,7 +91,7 @@ func (s *JobSubscription) waitForMessage() (*pubsub.ReceivedMessage, error) {
 	}
 	res, err := s.puller.Pull(s.config.Subscription, pullRequest)
 	if err != nil {
-		log.Printf("Failed to pull %v cause of %v\n", s.config.Subscription, err)
+		log.WithFields(log.Fields{"subscription": s.config.Subscription, "error": err}).Errorln("Failed to pull")
 		return nil, err
 	}
 	if len(res.ReceivedMessages) == 0 {

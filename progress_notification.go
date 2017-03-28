@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 	"strconv"
 
 	// "golang.org/x/net/context"
 
 	pubsub "google.golang.org/api/pubsub/v1"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type (
@@ -68,7 +69,6 @@ func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobSt
 }
 
 func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
-	log.Printf("Notify %v: %v %v\n", job_msg_id, step, msg)
 	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
 }
 
@@ -79,10 +79,16 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		"job_message_id": job_msg_id,
 		"level":          level,
 	}
+	logAttrs := log.Fields{}
+	for k, v := range opts {
+		logAttrs[k] = v
+	}
+	log.WithFields(logAttrs).Debugln("Publishing notification")
 	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: opts}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
-		log.Printf("Error to publish notification to %v msg: %v cause of %v\n", pn.config.Topic, m, err)
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Debugln("Failed to publish notification")
 		return err
 	}
 	return nil

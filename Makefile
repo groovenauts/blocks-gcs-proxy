@@ -3,12 +3,28 @@ BASENAME=blocks-gcs-proxy
 VERSION=`grep VERSION version.go | cut -f2 -d\"`
 OS=linux
 ARCH=amd64
+UNFORMATTED=$(shell gofmt -l *.go)
 
 all: build
 
 setup:
 	go get github.com/mitchellh/gox
 	go get github.com/tcnksm/ghr
+
+checksetup:
+	go get golang.org/x/tools/cmd/goimports
+
+check: checkfmt
+	go vet *.go
+	goimports -l *.go
+
+checkfmt:
+ifneq ($(UNFORMATTED),)
+	@echo $(UNFORMATTED)
+	exit 1
+else
+	@echo "gofmt -l *.go OK"
+endif
 
 build:
 	mkdir -p ${PKGDIR}
