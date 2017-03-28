@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"testing"
 
@@ -375,10 +376,10 @@ func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
 			raw: &pubsub.ReceivedMessage{
 				AckId: "test-ack1",
 				Message: &pubsub.PubsubMessage{
-					Data: generateJSON(t, map[string]interface{}{
+					Data: base64.StdEncoding.EncodeToString([]byte(generateJSON(t, map[string]interface{}{
 						"foo":            url1,
 						"download_files": []string{url2, url3},
-					}),
+					}))),
 					Attributes: map[string]string{
 						"download_files": generateJSON(t, map[string]interface{}{
 							"foo": url1,

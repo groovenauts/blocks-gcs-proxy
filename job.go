@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -179,8 +180,14 @@ func (job *Job) useDataAsAttributesIfPossible() error {
 	if !UseDataAsAttributesRegexp.MatchString(flg) {
 		return nil
 	}
+	decoded, err := base64.StdEncoding.DecodeString(job.message.raw.Message.Data)
+	if err != nil {
+		logAttrs := log.Fields{"error": err, "data": job.message.raw.Message.Data}
+		log.WithFields(logAttrs).Errorf("Failed to decode by base64")
+		return err
+	}
 	var parsed map[string]interface{}
-	err := json.Unmarshal([]byte(job.message.raw.Message.Data), &parsed)
+	err = json.Unmarshal([]byte(decoded), &parsed)
 	if err != nil {
 		logAttrs := log.Fields{"error": err, "data": job.message.raw.Message.Data}
 		log.WithFields(logAttrs).Errorf("Failed to json.Unmarshal")
