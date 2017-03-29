@@ -135,7 +135,7 @@ func (p *Process) run() error {
 		err := job.run()
 		if err != nil {
 			logAttrs := log.Fields{"error": err, "msg": msg}
-			log.WithFields(logAttrs).Fatalln("Kpbg Error")
+			log.WithFields(logAttrs).Fatalln("Job Error")
 			return err
 		}
 		return nil
