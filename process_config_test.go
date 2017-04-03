@@ -34,7 +34,7 @@ func TestLoadProcessConfigReal(t *testing.T) {
 		}
 		path := "./test/" + file.Name()
 		config, err := LoadProcessConfig(path)
-		if assert.NoError(t, err, "path: " + path) {
+		if assert.NoError(t, err, "path: "+path) {
 			assert.NotNil(t, config)
 			err = config.setup([]string{"%{attrs.command}"})
 			assert.NoError(t, err)
