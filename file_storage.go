@@ -88,17 +88,22 @@ type TargetWorker struct {
 
 func (w *TargetWorker) run() {
 	for {
+		log.Debugln("Getting a target")
 		t, ok := <-w.targets
+		flds := log.Fields{"target": t, "ok": ok}
+		log.WithFields(flds).Debugln("Got a target")
 		if !ok {
+			log.WithFields(flds).Debugln("Not ok")
 			w.done = true
 			w.error = nil
 			break
 		}
 
 		err := w.impl(t.Bucket, t.Object, t.LocalPath)
+		flds["error"] = err
+		log.WithFields(flds).Debugln("Uploaded")
 		if err != nil {
-			logAttrs := log.Fields{"target": t}
-			log.WithFields(logAttrs).Errorf("Failed to %v file", w.name)
+			log.WithFields(flds).Errorf("Failed to %v file", w.name)
 			w.done = true
 			w.error = err
 			break
