@@ -409,15 +409,11 @@ func (job *Job) uploadFiles() error {
 	log.WithFields(log.Fields{"files": localPaths}).Debugln("Uploading files found")
 	targets := []*Target{}
 	for _, localPath := range localPaths {
-		flds := log.Fields{"localPath": localPath}
-		log.WithFields(flds).Debugln("Preparing targets #1")
 		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
 			log.WithFields(log.Fields{"error": err, "localPath": localPath, "uploads_dir": job.uploads_dir}).Errorln("Failed to get relative path")
 			return err
 		}
-		flds["relPath"] = relPath
-		log.WithFields(flds).Debugln("Preparing targets #2")
 		sep := string([]rune{os.PathSeparator})
 		parts := strings.Split(relPath, sep)
 		t := Target{
@@ -425,10 +421,8 @@ func (job *Job) uploadFiles() error {
 			Object:    strings.Join(parts[1:], sep),
 			LocalPath: localPath,
 		}
-		flds["target"] = t
-		log.WithFields(flds).Debugln("Preparing targets #3")
 		targets = append(targets, &t)
-		log.WithFields(flds).Debugln("Preparing targets #4")
+		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
 	}
 
 	if job.config.Uploaders < 1 {
