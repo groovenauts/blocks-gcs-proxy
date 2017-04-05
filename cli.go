@@ -4,13 +4,35 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/urfave/cli"
 	"golang.org/x/net/context"
 )
 
 func main() {
+	app := cli.NewApp()
+	app.Name = "blocks-gcs-proxy"
+	app.Usage = "github.com/groovenauts/blocks-gcs-proxy"
+	app.Version = VERSION
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "config, c",
+			Usage: "Load configuration from `FILE`",
+		},
+	}
+
+	app.Action = run
+
+	app.Run(os.Args)
+}
+
+func run(c *cli.Context) error {
 	ctx := context.Background()
 
-	configPath := "./config.json"
+	configPath := c.String("config")
+	if configPath == "" {
+		configPath = "./config.json"
+	}
 	config, err := LoadProcessConfig(configPath)
 	if err != nil {
 		fmt.Printf("Error to load %v cause of %v\n", configPath, err)
@@ -30,4 +52,5 @@ func main() {
 		fmt.Printf("Error to run cause of %v\n", err)
 		os.Exit(1)
 	}
+	return nil
 }
