@@ -27,17 +27,12 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	config, err := LoadProcessConfig(configPath(c))
-	if err != nil {
-		fmt.Printf("Error to load %v cause of %v\n", configPath, err)
-		os.Exit(1)
-	}
-	config.setup(os.Args[1:])
+	config := LoadAndSetupProcessConfig(c)
 
 	ctx := context.Background()
 
 	p := &Process{config: config}
-	err = p.setup(ctx)
+	err := p.setup(ctx)
 	if err != nil {
 		fmt.Printf("Error to setup Process cause of %v\n", err)
 		os.Exit(1)
@@ -49,6 +44,21 @@ func run(c *cli.Context) error {
 		os.Exit(1)
 	}
 	return nil
+}
+
+func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
+	path := configPath(c)
+	config, err := LoadProcessConfig(path)
+	if err != nil {
+		fmt.Printf("Error to load %v cause of %v\n", path, err)
+		os.Exit(1)
+	}
+	err = config.setup(os.Args[1:])
+	if err != nil {
+		fmt.Printf("Error to setup %v cause of %v\n", path, err)
+		os.Exit(1)
+	}
+	return config
 }
 
 func configPath(c *cli.Context) string {
