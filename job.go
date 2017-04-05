@@ -432,7 +432,11 @@ func (job *Job) uploadFiles() error {
 	for i := 0; i < job.config.Uploaders; i++ {
 		uploader := &TargetWorker{
 			name: "upload",
-			impl: job.storage.Upload,
+			impl: job.storage.UploadImpl,
+		}
+		err := uploader.setup()
+		if err != nil {
+			return err
 		}
 		uploaders = append(uploaders, uploader)
 	}

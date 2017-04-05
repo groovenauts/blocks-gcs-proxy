@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 	storage "google.golang.org/api/storage/v1"
 
 	log "github.com/Sirupsen/logrus"
@@ -16,6 +18,7 @@ type (
 	Storage interface {
 		Download(bucket, object, destPath string) error
 		Upload(bucket, object, srcPath string) error
+		UploadImpl(service *storage.ObjectsService, bucket, object, srcPath string) error
 	}
 
 	CloudStorage struct {
@@ -54,6 +57,10 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 }
 
 func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
+	return ct.UploadImpl(ct.service, bucket, object, srcPath)
+}
+
+func (ct *CloudStorage) UploadImpl(service *storage.ObjectsService, bucket, object, srcPath string) error {
 	logAttrs := log.Fields{"url": "gs://" + bucket + "/" + object, "srcPath": srcPath}
 	log.WithFields(logAttrs).Debugln("Uploading")
 	f, err := os.Open(srcPath)
@@ -62,7 +69,7 @@ func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
 		log.WithFields(logAttrs).Errorf("Failed to open the file")
 		return err
 	}
-	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
+	_, err = service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
 		logAttrs["error"] = err
 		log.WithFields(logAttrs).Errorf("Failed to upload")
@@ -80,10 +87,34 @@ type Target struct {
 
 type TargetWorker struct {
 	name    string
+	service *storage.ObjectsService
 	targets chan *Target
-	impl    func(bucket, object, srcPath string) error
+	impl    func(service *storage.ObjectsService, bucket, object, srcPath string) error
 	done    bool
 	error   error
+}
+
+func (w *TargetWorker) setup() error {
+	ctx := context.Background()
+
+	// https://github.com/google/google-api-go-client#application-default-credentials-example
+	client, err := google.DefaultClient(ctx, storage.DevstorageReadWriteScope)
+
+	if err != nil {
+		log.Fatalln("Failed to create DefaultClient for " + w.name)
+		return err
+	}
+
+	// Create a storageService
+	storageService, err := storage.New(client)
+	if err != nil {
+		logAttrs := log.Fields{"client": client, "error": err}
+		log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
+		return err
+	}
+
+	w.service = storageService.Objects
+	return nil
 }
 
 func (w *TargetWorker) run() {
@@ -105,7 +136,7 @@ func (w *TargetWorker) run() {
 		flds["target"] = t
 		log.WithFields(flds).Debugf("Start to %v\n", w.name)
 
-		err := w.impl(t.Bucket, t.Object, t.LocalPath)
+		err := w.impl(w.service, t.Bucket, t.Object, t.LocalPath)
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Failed to %v\n", w.name)
