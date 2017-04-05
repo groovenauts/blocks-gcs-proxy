@@ -114,14 +114,14 @@ func (w *TargetWorker) run() {
 type TargetWorkers []*TargetWorker
 
 func (ws TargetWorkers) process(targets []*Target) error {
-	c := make(chan *Target)
+	c := make(chan *Target, len(targets))
+	for _, t := range targets {
+		c <- t
+	}
+
 	for _, w := range ws {
 		w.targets = c
 		go w.run()
-	}
-
-	for _, t := range targets {
-		c <- t
 	}
 
 	for {
