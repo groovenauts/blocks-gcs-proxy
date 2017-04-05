@@ -45,9 +45,9 @@ func main() {
 				p := setupProcess(config)
 				p.setup()
 				job := &Job{
-					config: config.Command,
+					config:      config.Command,
 					uploads_dir: c.String("uploads_dir"),
-					storage: p.storage,
+					storage:     p.storage,
 				}
 				err := job.uploadFiles()
 				return err

@@ -92,7 +92,7 @@ func (w *TargetWorker) run() {
 		log.Debugln("Getting a target")
 		var t *Target
 		select {
-		case t = <- w.targets:
+		case t = <-w.targets:
 		default: // Do nothing to break
 		}
 		if t == nil {
