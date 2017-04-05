@@ -108,9 +108,15 @@ func (w *TargetWorker) run() {
 
 type TargetWorkers []*TargetWorker
 
-func (ws TargetWorkers) runAndWait() error {
+func (ws TargetWorkers) process(targets []*Target) error {
+	c := make(chan *Target)
 	for _, w := range ws {
+		w.targets = c
 		go w.run()
+	}
+
+	for _, t := range targets {
+		c <- t
 	}
 
 	for {

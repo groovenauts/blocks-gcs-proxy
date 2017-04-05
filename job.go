@@ -407,7 +407,7 @@ func (job *Job) uploadFiles() error {
 		return err
 	}
 	log.WithFields(log.Fields{"files": localPaths}).Debugln("Uploading files found")
-	targets := make(chan *Target)
+	targets := []*Target{}
 	for _, localPath := range localPaths {
 		flds := log.Fields{"localPath": localPath}
 		log.WithFields(flds).Debugln("Preparing targets #1")
@@ -427,7 +427,7 @@ func (job *Job) uploadFiles() error {
 		}
 		flds["target"] = t
 		log.WithFields(flds).Debugln("Preparing targets #3")
-		targets <- &t
+		targets = append(targets, &t)
 		log.WithFields(flds).Debugln("Preparing targets #4")
 	}
 
@@ -438,14 +438,13 @@ func (job *Job) uploadFiles() error {
 	for i := 0; i < job.config.Uploaders; i++ {
 		uploader := &TargetWorker{
 			name:    "upload",
-			targets: targets,
 			impl:    job.storage.Upload,
 		}
 		uploaders = append(uploaders, uploader)
 	}
 	log.WithFields(log.Fields{"uploaders": len(uploaders)}).Debugln("Uploaders are running")
 
-	err = uploaders.runAndWait()
+	err = uploaders.process(targets)
 	return err
 }
 
