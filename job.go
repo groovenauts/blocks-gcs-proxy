@@ -24,6 +24,7 @@ type (
 		Template []string            `json:"-"`
 		Options  map[string][]string `json:"options,omitempty"`
 		Dryrun   bool                `json:"dryrun,omitempty"`
+		Uploaders int                `json:"uploaders,omitempty"`
 	}
 
 	Job struct {
@@ -422,8 +423,11 @@ func (job *Job) uploadFiles() error {
 		targets <- t
 	}
 
+	if job.config.Uploaders < 1 {
+		job.config.Uploaders = 1
+	}
 	uploaders := TargetWorkers{}
-	for i := 0; i < 3; i++ {
+	for i := 0; i < job.config.Uploaders; i++ {
 		uploader := &TargetWorker{
 			name:    "upload",
 			targets: targets,
