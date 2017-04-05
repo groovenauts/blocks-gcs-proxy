@@ -6,15 +6,40 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+var ConfigFilePattern = regexp.MustCompile(`\.json\z`)
+
 func TestLoadProcessConfigReal(t *testing.T) {
-	_, err := LoadProcessConfig("./test/config1.json")
+	oldProject := os.Getenv("GCP_PROJECT")
+	defer func() {
+		err := os.Setenv("GCP_PROJECT", oldProject)
+		assert.NoError(t, err)
+	}()
+	os.Setenv("GCP_PROJECT", "dummy-proj-999")
+	os.Setenv("PIPELINE", "pipeline01")
+	os.Setenv("PULL_INTERVAL", "60")
+	os.Setenv("SUSTAINER_DELAY", "600")
+	os.Setenv("SUSTAINER_INTERVAL", "540")
+	files, err := ioutil.ReadDir("./test")
 	assert.NoError(t, err)
+	for _, file := range files {
+		if !ConfigFilePattern.MatchString(file.Name()) {
+			continue
+		}
+		path := "./test/" + file.Name()
+		config, err := LoadProcessConfig(path)
+		if assert.NoError(t, err, "path: "+path) {
+			assert.NotNil(t, config)
+			err = config.setup([]string{"%{attrs.command}"})
+			assert.NoError(t, err)
+		}
+	}
 }
 
 func tempEnv(t *testing.T, env map[string]string, f func()) {

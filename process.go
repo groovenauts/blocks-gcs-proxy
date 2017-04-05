@@ -31,6 +31,15 @@ func (c *ProcessConfig) setup(args []string) error {
 		c.Command = &CommandConfig{}
 	}
 	c.Command.Template = args
+	if c.Job == nil {
+		c.Job = &JobConfig{}
+	}
+	if c.Progress == nil {
+		c.Progress = &ProgressConfig{}
+	}
+	if c.Log == nil {
+		c.Log = &LogConfig{}
+	}
 	err := c.Log.setup()
 	if err != nil {
 		return err
