@@ -1,6 +1,7 @@
 package: github.com/groovenauts/blocks-concurrent-subscriber
 import:
 - package: github.com/groovenauts/blocks-variable
+- package: github.com/urfave/cli
 - package: golang.org/x/net
   subpackages:
   - context
