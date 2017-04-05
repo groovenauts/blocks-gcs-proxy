@@ -22,19 +22,19 @@ func main() {
 		configFlag,
 	}
 
-  app.Commands = []cli.Command{
-    {
-      Name:    "check",
-      Usage:   "Check config file is valid",
-      Action:  func(c *cli.Context) error {
+	app.Commands = []cli.Command{
+		{
+			Name:  "check",
+			Usage: "Check config file is valid",
+			Action: func(c *cli.Context) error {
 				LoadAndSetupProcessConfig(c)
 				fmt.Println("OK")
-        return nil
-      },
-		  Flags: []cli.Flag{
+				return nil
+			},
+			Flags: []cli.Flag{
 				configFlag,
 			},
-    },
+		},
 	}
 
 	app.Action = run
