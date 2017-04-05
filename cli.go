@@ -35,6 +35,32 @@ func main() {
 				configFlag,
 			},
 		},
+		{
+			Name:  "upload",
+			Usage: "Upload the files under uploads directory",
+			Action: func(c *cli.Context) error {
+				config := &ProcessConfig{}
+				config.setup([]string{})
+				config.Command.Uploaders = c.Int("uploaders")
+				job := &Job{
+					config: config.Command,
+					uploads_dir: c.String("uploads_dir"),
+				}
+				err := job.uploadFiles()
+				return err
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "uploads_dir, d",
+					Usage: "Path to the directory which has bucket_name/path/to/file",
+				},
+				cli.IntFlag{
+					Name:  "uploaders, n",
+					Usage: "Number of uploaders",
+					Value: 1,
+				},
+			},
+		},
 	}
 
 	app.Action = run
