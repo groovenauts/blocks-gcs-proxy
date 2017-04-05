@@ -405,6 +405,7 @@ func (job *Job) uploadFiles() error {
 	if err != nil {
 		return err
 	}
+	targets := make(chan *Target)
 	for _, localPath := range localPaths {
 		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
@@ -413,15 +414,26 @@ func (job *Job) uploadFiles() error {
 		}
 		sep := string([]rune{os.PathSeparator})
 		parts := strings.Split(relPath, sep)
-		bucket := parts[0]
-		object := strings.Join(parts[1:], sep)
-		err = job.storage.Upload(bucket, object, localPath)
-		if err != nil {
-			log.WithFields(log.Fields{"error": err, "localPath": localPath, "url": "gs://" + bucket + "/" + object}).Errorln("Failed to get relative path")
-			return err
+		t := &Target{
+			Bucket:    parts[0],
+			Object:    strings.Join(parts[1:], sep),
+			LocalPath: localPath,
 		}
+		targets <- t
 	}
-	return nil
+
+	uploaders := TargetWorkers{}
+	for i := 0; i < 3; i++ {
+		uploader := &TargetWorker{
+			name:    "upload",
+			targets: targets,
+			impl:    job.storage.Upload,
+		}
+		uploaders = append(uploaders, uploader)
+	}
+
+	err = uploaders.runAndWait()
+	return err
 }
 
 func (job *Job) listFiles(dir string) ([]string, error) {
