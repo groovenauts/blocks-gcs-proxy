@@ -85,7 +85,9 @@ type (
 	}
 )
 
-func (p *Process) setup(ctx context.Context) error {
+func (p *Process) setup() error {
+	ctx := context.Background()
+
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
 	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope)
 

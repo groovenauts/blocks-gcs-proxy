@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
-	"golang.org/x/net/context"
 )
 
 func main() {
@@ -72,10 +71,8 @@ func main() {
 func run(c *cli.Context) error {
 	config := LoadAndSetupProcessConfig(c)
 
-	ctx := context.Background()
-
 	p := &Process{config: config}
-	err := p.setup(ctx)
+	err := p.setup()
 	if err != nil {
 		fmt.Printf("Error to setup Process cause of %v\n", err)
 		os.Exit(1)
