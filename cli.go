@@ -60,7 +60,7 @@ func main() {
 				cli.IntFlag{
 					Name:  "uploaders, n",
 					Usage: "Number of uploaders",
-					Value: 1,
+					Value: 6,
 				},
 			},
 		},
