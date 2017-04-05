@@ -14,11 +14,27 @@ func main() {
 	app.Usage = "github.com/groovenauts/blocks-gcs-proxy"
 	app.Version = VERSION
 
+	configFlag := cli.StringFlag{
+		Name:  "config, c",
+		Usage: "Load configuration from `FILE`",
+	}
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "config, c",
-			Usage: "Load configuration from `FILE`",
-		},
+		configFlag,
+	}
+
+  app.Commands = []cli.Command{
+    {
+      Name:    "check",
+      Usage:   "Check config file is valid",
+      Action:  func(c *cli.Context) error {
+				LoadAndSetupProcessConfig(c)
+				fmt.Println("OK")
+        return nil
+      },
+		  Flags: []cli.Flag{
+				configFlag,
+			},
+    },
 	}
 
 	app.Action = run
