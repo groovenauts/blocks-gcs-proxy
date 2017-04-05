@@ -40,6 +40,7 @@ func main() {
 			Usage: "Upload the files under uploads directory",
 			Action: func(c *cli.Context) error {
 				config := &ProcessConfig{}
+				config.Log = &LogConfig{Level: "debug"}
 				config.setup([]string{})
 				config.Command.Uploaders = c.Int("uploaders")
 				job := &Job{
