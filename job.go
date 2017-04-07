@@ -21,9 +21,10 @@ import (
 
 type (
 	CommandConfig struct {
-		Template []string            `json:"-"`
-		Options  map[string][]string `json:"options,omitempty"`
-		Dryrun   bool                `json:"dryrun,omitempty"`
+		Template  []string            `json:"-"`
+		Options   map[string][]string `json:"options,omitempty"`
+		Dryrun    bool                `json:"dryrun,omitempty"`
+		Uploaders int                 `json:"uploaders,omitempty"`
 	}
 
 	Job struct {
@@ -405,6 +406,8 @@ func (job *Job) uploadFiles() error {
 	if err != nil {
 		return err
 	}
+	log.WithFields(log.Fields{"files": localPaths}).Debugln("Uploading files found")
+	targets := []*Target{}
 	for _, localPath := range localPaths {
 		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
@@ -413,15 +416,30 @@ func (job *Job) uploadFiles() error {
 		}
 		sep := string([]rune{os.PathSeparator})
 		parts := strings.Split(relPath, sep)
-		bucket := parts[0]
-		object := strings.Join(parts[1:], sep)
-		err = job.storage.Upload(bucket, object, localPath)
-		if err != nil {
-			log.WithFields(log.Fields{"error": err, "localPath": localPath, "url": "gs://" + bucket + "/" + object}).Errorln("Failed to get relative path")
-			return err
+		t := Target{
+			Bucket:    parts[0],
+			Object:    strings.Join(parts[1:], sep),
+			LocalPath: localPath,
 		}
+		targets = append(targets, &t)
+		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
 	}
-	return nil
+
+	if job.config.Uploaders < 1 {
+		job.config.Uploaders = 1
+	}
+	uploaders := TargetWorkers{}
+	for i := 0; i < job.config.Uploaders; i++ {
+		uploader := &TargetWorker{
+			name: "upload",
+			impl: job.storage.Upload,
+		}
+		uploaders = append(uploaders, uploader)
+	}
+	log.WithFields(log.Fields{"uploaders": len(uploaders)}).Debugln("Uploaders are running")
+
+	err = uploaders.process(targets)
+	return err
 }
 
 func (job *Job) listFiles(dir string) ([]string, error) {

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
-	"golang.org/x/net/context"
 )
 
 func main() {
@@ -35,6 +34,36 @@ func main() {
 				configFlag,
 			},
 		},
+		{
+			Name:  "upload",
+			Usage: "Upload the files under uploads directory",
+			Action: func(c *cli.Context) error {
+				config := &ProcessConfig{}
+				config.Log = &LogConfig{Level: "debug"}
+				config.setup([]string{})
+				config.Command.Uploaders = c.Int("uploaders")
+				p := setupProcess(config)
+				p.setup()
+				job := &Job{
+					config:      config.Command,
+					uploads_dir: c.String("uploads_dir"),
+					storage:     p.storage,
+				}
+				err := job.uploadFiles()
+				return err
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "uploads_dir, d",
+					Usage: "Path to the directory which has bucket_name/path/to/file",
+				},
+				cli.IntFlag{
+					Name:  "uploaders, n",
+					Usage: "Number of uploaders",
+					Value: 6,
+				},
+			},
+		},
 	}
 
 	app.Action = run
@@ -44,22 +73,24 @@ func main() {
 
 func run(c *cli.Context) error {
 	config := LoadAndSetupProcessConfig(c)
+	p := setupProcess(config)
 
-	ctx := context.Background()
-
-	p := &Process{config: config}
-	err := p.setup(ctx)
-	if err != nil {
-		fmt.Printf("Error to setup Process cause of %v\n", err)
-		os.Exit(1)
-	}
-
-	err = p.run()
+	err := p.run()
 	if err != nil {
 		fmt.Printf("Error to run cause of %v\n", err)
 		os.Exit(1)
 	}
 	return nil
+}
+
+func setupProcess(config *ProcessConfig) *Process {
+	p := &Process{config: config}
+	err := p.setup()
+	if err != nil {
+		fmt.Printf("Error to setup Process cause of %v\n", err)
+		os.Exit(1)
+	}
+	return p
 }
 
 func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
