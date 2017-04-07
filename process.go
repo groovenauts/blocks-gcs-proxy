@@ -113,7 +113,9 @@ func (p *Process) setup() error {
 		return err
 	}
 
-	err = p.config.Job.setupSustainer(pubsubService)
+	puller := &pubsubPuller{pubsubService.Projects.Subscriptions}
+
+	err = p.config.Job.setupSustainer(puller)
 	if err != nil {
 		logAttrs := log.Fields{"client": client, "error": err}
 		log.WithFields(logAttrs).Fatalln("Failed to setup sustainer")
@@ -122,7 +124,7 @@ func (p *Process) setup() error {
 
 	p.subscription = &JobSubscription{
 		config: p.config.Job,
-		puller: &pubsubPuller{pubsubService.Projects.Subscriptions},
+		puller: puller,
 	}
 	p.notification = &ProgressNotification{
 		config:    p.config.Progress,

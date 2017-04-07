@@ -13,6 +13,7 @@ type (
 		Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error)
 		Acknowledge(subscription, ackId string) (*pubsub.Empty, error)
 		ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error)
+		Get(subscription string) (*pubsub.Subscription, error)
 	}
 
 	pubsubPuller struct {
@@ -39,13 +40,17 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
 }
 
+func (pp *pubsubPuller) Get(subscription string) (*pubsub.Subscription, error) {
+	return pp.subscriptionsService.Get(subscription).Do()
+}
+
 type JobConfig struct {
 	Subscription string              `json:"subscription,omitempty"`
 	PullInterval int                 `json:"pull_interval,omitempty"`
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
-func (c *JobConfig) setupSustainer(service *pubsub.Service) error {
+func (c *JobConfig) setupSustainer(puller Puller) error {
 	flds := log.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
 		cs := c.Sustainer
@@ -59,8 +64,7 @@ func (c *JobConfig) setupSustainer(service *pubsub.Service) error {
 		c.Sustainer = &JobSustainerConfig{}
 	}
 
-	srv := service.Projects.Subscriptions
-	subscription, err := srv.Get(c.Subscription).Do()
+	subscription, err := puller.Get(c.Subscription)
 	if err != nil {
 		flds["error"] = err
 		log.WithFields(flds).Errorln("Failed to get subscription")
