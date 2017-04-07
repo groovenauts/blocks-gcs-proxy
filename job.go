@@ -404,6 +404,7 @@ func (job *Job) downloadFiles() error {
 	}
 	log.WithFields(log.Fields{"downloaders": len(downloaders)}).Debugln("Downloaders are running")
 
+	log.WithFields(log.Fields{"targets": targets}).Debugln("downloaders processing")
 	err := downloaders.process(targets)
 	return err
 }
