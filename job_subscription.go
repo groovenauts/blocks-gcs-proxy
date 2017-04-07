@@ -39,18 +39,16 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
 }
 
-type (
-	JobConfig struct {
-		Subscription string              `json:"subscription,omitempty"`
-		PullInterval int                 `json:"pull_interval,omitempty"`
-		Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
-	}
+type JobConfig struct {
+	Subscription string              `json:"subscription,omitempty"`
+	PullInterval int                 `json:"pull_interval,omitempty"`
+	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
+}
 
-	JobSubscription struct {
-		config *JobConfig
-		puller Puller
-	}
-)
+type JobSubscription struct {
+	config *JobConfig
+	puller Puller
+}
 
 func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 	for {
