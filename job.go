@@ -397,7 +397,7 @@ func (job *Job) downloadFiles() error {
 	downloaders := TargetWorkers{}
 	for i := 0; i < job.config.Downloaders; i++ {
 		downloader := &TargetWorker{
-			name: "upload",
+			name: "downoad",
 			impl: job.storage.Download,
 		}
 		downloaders = append(downloaders, downloader)
