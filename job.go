@@ -21,11 +21,11 @@ import (
 
 type (
 	CommandConfig struct {
-		Template  []string            `json:"-"`
-		Options   map[string][]string `json:"options,omitempty"`
-		Dryrun    bool                `json:"dryrun,omitempty"`
-		Uploaders int                 `json:"uploaders,omitempty"`
-		Downloaders int               `json:"downloaders,omitempty"`
+		Template    []string            `json:"-"`
+		Options     map[string][]string `json:"options,omitempty"`
+		Dryrun      bool                `json:"dryrun,omitempty"`
+		Uploaders   int                 `json:"uploaders,omitempty"`
+		Downloaders int                 `json:"downloaders,omitempty"`
 	}
 
 	Job struct {

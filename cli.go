@@ -49,10 +49,10 @@ func main() {
 					files = append(files, arg)
 				}
 				job := &Job{
-					config:      config.Command,
-					downloads_dir: c.String("downloads_dir"),
+					config:              config.Command,
+					downloads_dir:       c.String("downloads_dir"),
 					remoteDownloadFiles: files,
-					storage:     p.storage,
+					storage:             p.storage,
 				}
 				err := job.setupDownloadFiles()
 				if err != nil {
