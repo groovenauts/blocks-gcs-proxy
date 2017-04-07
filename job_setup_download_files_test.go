@@ -46,6 +46,7 @@ func TestJobSetupCase1(t *testing.T) {
 		uploads_dir:   uploads_dir,
 	}
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err := job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -102,6 +103,7 @@ func TestJobSetupCase2(t *testing.T) {
 		uploads_dir:   uploads_dir,
 	}
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err := job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -180,6 +182,7 @@ func TestJobSetupCase3(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -259,6 +262,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, attrs["foo"], val)
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -301,6 +305,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		downloads_dir: downloads_dir,
 		uploads_dir:   uploads_dir,
 	}
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -344,6 +349,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 		uploads_dir:   uploads_dir,
 	}
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 
@@ -401,6 +407,7 @@ func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, url1, job.message.raw.Message.Attributes["foo"])
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	assert.NoError(t, err)
 

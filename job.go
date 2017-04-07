@@ -126,6 +126,7 @@ func (job *Job) prepare() error {
 		return err
 	}
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	if err != nil {
 		return err
@@ -216,7 +217,6 @@ func (job *Job) useDataAsAttributesIfPossible() error {
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
-	job.remoteDownloadFiles = job.message.DownloadFiles()
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
