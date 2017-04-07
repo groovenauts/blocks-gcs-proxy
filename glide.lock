@@ -1,5 +1,5 @@
-hash: 2bcad2a5c6c4598559a5fd13ad38b0817eefa567cd1e71f837d7f9bf05c605b5
-updated: 2017-03-17T18:55:08.231159+09:00
+hash: bf87879ced09f19ce67bb399ef94042e2c1bbd0ad6986bff00564dd3aecf16eb
+updated: 2017-04-05T17:04:20.624985192+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -16,6 +16,8 @@ imports:
   version: 833d2f1e70b82c8a0a1149827906ab32aed40276
 - name: github.com/Sirupsen/logrus
   version: 547e984ad93a90192134fc0fdb57a468edb514fe
+- name: github.com/urfave/cli
+  version: 347a9884a87374d000eec7e6445a34487c1f4a2b
 - name: golang.org/x/net
   version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
   subpackages:
@@ -34,6 +36,10 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/sys
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  subpackages:
+  - unix
 - name: google.golang.org/api
   version: b9d03e6e091e36f9a089515bc84cf14c2d199c4c
   subpackages:
