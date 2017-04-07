@@ -5,6 +5,7 @@
       "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]
     },
     "dryrun": true,
+    "downloaders": 5,
     "uploaders": 8
   },
   "job": {
