@@ -10,7 +10,7 @@ import (
 
 type DummyPullerForJobSubscription struct {
 	callCount int
-	result *pubsub.Subscription
+	result    *pubsub.Subscription
 }
 
 func (p *DummyPullerForJobSubscription) Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error) {
@@ -29,12 +29,12 @@ func (p *DummyPullerForJobSubscription) Get(subscription string) (*pubsub.Subscr
 
 func TestJobConfigSetupSustainer(t *testing.T) {
 	puller := &DummyPullerForJobSubscription{}
-	
+
 	jc := &JobConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 		Sustainer: &JobSustainerConfig{
-			Delay: 600,
+			Delay:    600,
 			Interval: 480,
 		},
 	}
