@@ -35,6 +35,45 @@ func main() {
 			},
 		},
 		{
+			Name:  "download",
+			Usage: "Download the files under downloads directory",
+			Action: func(c *cli.Context) error {
+				config := &ProcessConfig{}
+				config.Log = &LogConfig{Level: "debug"}
+				config.setup([]string{})
+				config.Command.Downloaders = c.Int("downloaders")
+				p := setupProcess(config)
+				p.setup()
+				files := []interface{}{}
+				for _, arg := range c.Args() {
+					files = append(files, arg)
+				}
+				job := &Job{
+					config:      config.Command,
+					downloads_dir: c.String("downloads_dir"),
+					remoteDownloadFiles: files,
+					storage:     p.storage,
+				}
+				err := job.setupDownloadFiles()
+				if err != nil {
+					return err
+				}
+				err = job.downloadFiles()
+				return err
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "downloads_dir, d",
+					Usage: "Path to the directory which has bucket_name/path/to/file",
+				},
+				cli.IntFlag{
+					Name:  "downloaders, n",
+					Usage: "Number of downloaders",
+					Value: 6,
+				},
+			},
+		},
+		{
 			Name:  "upload",
 			Usage: "Upload the files under uploads directory",
 			Action: func(c *cli.Context) error {
