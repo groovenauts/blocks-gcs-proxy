@@ -45,6 +45,44 @@ type JobConfig struct {
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
+func (c *JobConfig) setupSustainer(service *pubsub.Service) error {
+	flds := log.Fields{"subscription": c.Subscription}
+	if c.Sustainer != nil {
+		cs := c.Sustainer
+		if cs.Delay > 0 && cs.Interval > 0 {
+			flds["delay"] = cs.Delay
+			flds["interval"] = cs.Interval
+			log.WithFields(flds).Infoln("Sustainer config OK")
+			return nil
+		}
+	} else {
+		c.Sustainer = &JobSustainerConfig{}
+	}
+
+	srv := service.Projects.Subscriptions
+	subscription, err := srv.Get(c.Subscription).Do()
+	if err != nil {
+		flds["error"] = err
+		log.WithFields(flds).Errorln("Failed to get subscription")
+		return err
+	}
+	deadline := subscription.AckDeadlineSeconds
+	flds["AckDeadline"] = deadline
+	log.WithFields(flds).Infoln("AckDeadlineSeconds")
+
+	cs := c.Sustainer
+	if cs.Delay == 0 {
+		cs.Delay = float64(deadline)
+	}
+	if cs.Interval == 0 {
+		cs.Interval = float64(deadline) * 0.8
+	}
+	flds["delay"] = cs.Delay
+	flds["interval"] = cs.Interval
+	log.WithFields(flds).Infoln("Sustainer config OK")
+	return nil
+}
+
 type JobSubscription struct {
 	config *JobConfig
 	puller Puller
