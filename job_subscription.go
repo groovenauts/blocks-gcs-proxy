@@ -13,6 +13,7 @@ type (
 		Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error)
 		Acknowledge(subscription, ackId string) (*pubsub.Empty, error)
 		ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error)
+		Get(subscription string) (*pubsub.Subscription, error)
 	}
 
 	pubsubPuller struct {
@@ -39,18 +40,57 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
 }
 
-type (
-	JobConfig struct {
-		Subscription string              `json:"subscription,omitempty"`
-		PullInterval int                 `json:"pull_interval,omitempty"`
-		Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
+func (pp *pubsubPuller) Get(subscription string) (*pubsub.Subscription, error) {
+	return pp.subscriptionsService.Get(subscription).Do()
+}
+
+type JobConfig struct {
+	Subscription string              `json:"subscription,omitempty"`
+	PullInterval int                 `json:"pull_interval,omitempty"`
+	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
+}
+
+func (c *JobConfig) setupSustainer(puller Puller) error {
+	flds := log.Fields{"subscription": c.Subscription}
+	if c.Sustainer != nil {
+		cs := c.Sustainer
+		if cs.Delay > 0 && cs.Interval > 0 {
+			flds["delay"] = cs.Delay
+			flds["interval"] = cs.Interval
+			log.WithFields(flds).Infoln("Sustainer config OK")
+			return nil
+		}
+	} else {
+		c.Sustainer = &JobSustainerConfig{}
 	}
 
-	JobSubscription struct {
-		config *JobConfig
-		puller Puller
+	subscription, err := puller.Get(c.Subscription)
+	if err != nil {
+		flds["error"] = err
+		log.WithFields(flds).Errorln("Failed to get subscription")
+		return err
 	}
-)
+	deadline := subscription.AckDeadlineSeconds
+	flds["AckDeadline"] = deadline
+	log.WithFields(flds).Infoln("AckDeadlineSeconds")
+
+	cs := c.Sustainer
+	if cs.Delay == 0 {
+		cs.Delay = float64(deadline)
+	}
+	if cs.Interval == 0 {
+		cs.Interval = float64(deadline) * 0.8
+	}
+	flds["delay"] = cs.Delay
+	flds["interval"] = cs.Interval
+	log.WithFields(flds).Infoln("Sustainer config OK")
+	return nil
+}
+
+type JobSubscription struct {
+	config *JobConfig
+	puller Puller
+}
 
 func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 	for {
