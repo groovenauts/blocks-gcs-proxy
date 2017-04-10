@@ -21,10 +21,11 @@ import (
 
 type (
 	CommandConfig struct {
-		Template  []string            `json:"-"`
-		Options   map[string][]string `json:"options,omitempty"`
-		Dryrun    bool                `json:"dryrun,omitempty"`
-		Uploaders int                 `json:"uploaders,omitempty"`
+		Template    []string            `json:"-"`
+		Options     map[string][]string `json:"options,omitempty"`
+		Dryrun      bool                `json:"dryrun,omitempty"`
+		Uploaders   int                 `json:"uploaders,omitempty"`
+		Downloaders int                 `json:"downloaders,omitempty"`
 	}
 
 	Job struct {
@@ -125,6 +126,7 @@ func (job *Job) prepare() error {
 		return err
 	}
 
+	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
 	if err != nil {
 		return err
@@ -215,7 +217,6 @@ func (job *Job) useDataAsAttributesIfPossible() error {
 
 func (job *Job) setupDownloadFiles() error {
 	job.downloadFileMap = map[string]string{}
-	job.remoteDownloadFiles = job.message.DownloadFiles()
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
@@ -367,6 +368,7 @@ func (job *Job) convertError(src error) error {
 }
 
 func (job *Job) downloadFiles() error {
+	targets := []*Target{}
 	for remoteURL, destPath := range job.downloadFileMap {
 		url, err := url.Parse(remoteURL)
 		if err != nil {
@@ -380,12 +382,31 @@ func (job *Job) downloadFiles() error {
 			return err
 		}
 
-		err = job.storage.Download(url.Host, url.Path[1:], destPath)
-		if err != nil {
-			return err
+		t := Target{
+			Bucket:    url.Host,
+			Object:    url.Path[1:],
+			LocalPath: destPath,
 		}
+		targets = append(targets, &t)
+		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
 	}
-	return nil
+
+	if job.config.Downloaders < 1 {
+		job.config.Downloaders = 1
+	}
+	downloaders := TargetWorkers{}
+	for i := 0; i < job.config.Downloaders; i++ {
+		downloader := &TargetWorker{
+			name: "downoad",
+			impl: job.storage.Download,
+		}
+		downloaders = append(downloaders, downloader)
+	}
+	log.WithFields(log.Fields{"downloaders": len(downloaders)}).Debugln("Downloaders are running")
+
+	log.WithFields(log.Fields{"targets": targets}).Debugln("downloaders processing")
+	err := downloaders.process(targets)
+	return err
 }
 
 func (job *Job) execute() error {
