@@ -5,5 +5,8 @@
   "job": {
     "subscription": "projects/{{ .PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription",
     "pull_interval": {{ or .BLOCKS_BATCH_PULL_INTERVAL 20 }}
+  },
+  "log": {
+    "level": "debug"
   }
 }

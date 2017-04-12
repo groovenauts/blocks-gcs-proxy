@@ -31,6 +31,10 @@ func main() {
 			Name: "number, n",
 			Usage: "Number of go routine to publish",
 		},
+		cli.StringFlag{
+			Name:  "loglevel, l",
+			Usage: "Log level: debug info warn error fatal panic",
+		},
 	}
 
 	app.Action = run
@@ -38,6 +42,18 @@ func main() {
 }
 
 func run(c *cli.Context) error {
+	loglevel := c.String("loglevel")
+	if loglevel != "" {
+		level, err := log.ParseLevel(loglevel)
+		if err != nil {
+			log.SetLevel(log.DebugLevel)
+			log.Warnf("Invalid log level: %v\n", loglevel)
+		} else {
+			log.Debugf("Log level: %v\n", loglevel)
+			log.SetLevel(level)
+		}
+	}
+
 	pubsubService, err := NewPubsubService()
 	if err != nil {
 		return err
