@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 
 	pubsub "google.golang.org/api/pubsub/v1"
@@ -9,8 +10,8 @@ import (
 )
 
 type Message struct {
-	Data string
-	Attributes map[string]string
+	Data string `json:"data,omitempty"`
+	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 type Worker struct {
@@ -65,17 +66,17 @@ func (w *Worker) process(line []byte) error {
 		Messages: []*pubsub.PubsubMessage{
 			&pubsub.PubsubMessage{
 				Attributes: msg.Attributes,
-				Data: msg.Data,
+				Data: base64.StdEncoding.EncodeToString([]byte(msg.Data)),
 			},
 		},
 	})
 	res, err := call.Do()
 	if err != nil {
-		flds := log.Fields{"attributes": msg.Attributes, "data": msg.Data}
+		flds := log.Fields{"attributes": msg.Attributes, "data": msg.Data, "error": err}
 		log.WithFields(flds).Errorln("Publish error")
 		return err
 	}
-	
+
 	flds := log.Fields{"MessageIds": res.MessageIds}
 	log.WithFields(flds).Infoln("Publish successfully")
 	
