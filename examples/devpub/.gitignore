@@ -1,3 +1,4 @@
 /pkg
 /vendor
 /devpub
+/pipeline.json
