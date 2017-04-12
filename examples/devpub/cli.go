@@ -23,10 +23,6 @@ func main() {
 			Name:  "filepath, f",
 			Usage: "Messages filepath (.jsonl JSON Lines format)",
 		},
-		cli.StringFlag{
-			Name:  "topic, t",
-			Usage: "Topic to publish",
-		},
 		cli.IntFlag{
 			Name: "number, n",
 			Usage: "Number of go routine to publish",
@@ -59,12 +55,10 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	topic := c.String("topic")
 	workers := Workers{}
 	for i := 0; i < c.Int("number"); i++ {
 		worker := &Worker{
 			service: pubsubService,
-			topic: topic,
 		}
 		workers = append(workers, worker)
 	}

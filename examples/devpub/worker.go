@@ -10,13 +10,13 @@ import (
 )
 
 type Message struct {
+	Topic string `json:"topic"`
 	Data string `json:"data,omitempty"`
 	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 type Worker struct {
 	service *pubsub.Service
-	topic string
 	lines chan string
 	done    bool
 	error   error
@@ -65,11 +65,10 @@ func (w *Worker) process(line string) error {
 	}
 
 	flds["message"] = msg
-	flds["topic"] = w.topic
 	log.WithFields(flds).Debugln("Publishing message")
 
 	topic := w.service.Projects.Topics
-	call := topic.Publish(w.topic, &pubsub.PublishRequest{
+	call := topic.Publish(msg.Topic, &pubsub.PublishRequest{
 		Messages: []*pubsub.PubsubMessage{
 			&pubsub.PubsubMessage{
 				Attributes: msg.Attributes,
