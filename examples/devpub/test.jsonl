@@ -1,0 +1,4 @@
+{"attributes":{"download_files":"[\"gs://bucket1/path/to/file1\"]"}}
+{"attributes":{"download_files":"[\"gs://bucket1/path/to/file2\"]"}}
+{"attributes":{"download_files":"[\"gs://bucket1/path/to/file3\"]"}}
+{"attributes":{"download_files":"[\"gs://bucket1/path/to/file4\"]"}, "data": "some text message"}
