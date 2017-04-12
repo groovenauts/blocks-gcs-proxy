@@ -17,7 +17,7 @@ type Message struct {
 type Worker struct {
 	service *pubsub.Service
 	topic string
-	lines chan []byte
+	lines chan string
 	done    bool
 	error   error
 }
@@ -26,22 +26,22 @@ func (w *Worker) run() {
 	for {
 		flds := log.Fields{}
 		log.Debugln("Getting a target")
-		var line []byte
+		var line string
 		select {
 		case line = <-w.lines:
 		default: // Do nothing to break
 		}
-		if line == nil {
+		if line == "" {
 			log.Debugln("No target found any more")
 			w.done = true
 			w.error = nil
 			break
 		}
 
-		flds["line"] = string(line)
+		flds["line"] = line
 		log.WithFields(flds).Debugln("Job Start")
 
-		err := w.process(line)
+		err := w.process([]byte(line))
 		flds["error"] = err
 		if err != nil {
 			w.done = true

@@ -7,34 +7,41 @@ import (
 	"strings"
 	"time"
 
-	// log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 type Workers []*Worker
 
 func (ws Workers) process(filepath string) error {
+	flds := log.Fields{"filepath": filepath}
+	log.WithFields(flds).Debugln("Workers processing")
+
 	f, err := os.Open(filepath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	lines := [][]byte{}
+	log.WithFields(flds).Debugln("Workers scanning")
+	lines := []string{}
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		lines = append(lines, scanner.Bytes())
+		lines = append(lines, scanner.Text())
 	}
 
-	c := make(chan []byte, len(lines))
+	log.WithFields(flds).Debugln("Workers sending lines to channel")
+	c := make(chan string, len(lines))
 	for _, line := range lines {
 		c <- line
 	}
 
+	log.WithFields(flds).Debugln("Workers starting each worker")
 	for _, w := range ws {
 		w.lines = c
 		go w.run()
 	}
 
+	log.WithFields(flds).Debugln("Workers waiting")
 	for {
 		time.Sleep(100 * time.Millisecond)
 		if ws.done() {
@@ -42,6 +49,7 @@ func (ws Workers) process(filepath string) error {
 		}
 	}
 
+	log.WithFields(flds).Debugln("Workers finishing")
 	return ws.error()
 }
 
