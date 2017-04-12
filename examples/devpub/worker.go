@@ -41,7 +41,7 @@ func (w *Worker) run() {
 		flds["line"] = line
 		log.WithFields(flds).Debugln("Job Start")
 
-		err := w.process([]byte(line))
+		err := w.process(line)
 		flds["error"] = err
 		if err != nil {
 			w.done = true
@@ -52,14 +52,21 @@ func (w *Worker) run() {
 	}
 }
 
-func (w *Worker) process(line []byte) error {
+func (w *Worker) process(line string) error {
+	flds := log.Fields{"line": line}
+	log.WithFields(flds).Debugln("Processing line")
+
 	var msg Message
-	err := json.Unmarshal(line, &msg)
+	err := json.Unmarshal([]byte(line), &msg)
 	if err != nil {
-		flds := log.Fields{"error": err, "line": string(line)}
+		flds := log.Fields{"error": err, "line": line}
 		log.WithFields(flds).Errorln("JSON parse error")
 		return err
 	}
+
+	flds["message"] = msg
+	flds["topic"] = w.topic
+	log.WithFields(flds).Debugln("Publishing message")
 
 	topic := w.service.Projects.Topics
 	call := topic.Publish(w.topic, &pubsub.PublishRequest{
@@ -70,14 +77,17 @@ func (w *Worker) process(line []byte) error {
 			},
 		},
 	})
+
 	res, err := call.Do()
 	if err != nil {
-		flds := log.Fields{"attributes": msg.Attributes, "data": msg.Data, "error": err}
+		flds["attributes"] = msg.Attributes
+		flds["data"] = msg.Data
+		flds["error"] = err
 		log.WithFields(flds).Errorln("Publish error")
 		return err
 	}
 
-	flds := log.Fields{"MessageIds": res.MessageIds}
+	flds["MessageIds"] = res.MessageIds
 	log.WithFields(flds).Infoln("Publish successfully")
 	
 	return nil
