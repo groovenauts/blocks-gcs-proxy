@@ -26,6 +26,7 @@ func main() {
 		cli.IntFlag{
 			Name: "number, n",
 			Usage: "Number of go routine to publish",
+			Value: 10,
 		},
 		cli.StringFlag{
 			Name:  "loglevel, l",

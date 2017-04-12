@@ -21,4 +21,4 @@ RUN mkdir -p /usr/app && \
 ENV WORKERS 10
 ENV TOPIC projects/proj-dummy-999/topics/topic-test
 
-CMD ["./blocks-gcs-proxy", "./devpub", "--filepath", "%{download_files.0}", "--topic", "${TOPIC}", "--number", "${WORKERS}", "--loglevel", "debug"]
+CMD ["./blocks-gcs-proxy", "./devpub", "--filepath", "%{download_files.0}", "--loglevel", "debug"]
