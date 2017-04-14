@@ -12,7 +12,7 @@ WORKDIR $APP_HOME
 ADD pkg/devpub_linux_amd64 $APP_HOME/devpub
 ADD config.json $APP_HOME/config.json
 
-ENV BLOCKS_GCS_PROXY_VERSION 0.5.2-alpha1
+ENV BLOCKS_GCS_PROXY_VERSION 0.5.2
 RUN mkdir -p /usr/app && \
     curl -L --output ${APP_HOME}/blocks-gcs-proxy \
          https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
