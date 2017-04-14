@@ -1,5 +1,30 @@
 # block-gcs-proxy devpub example
 
+## Overview
+
+This devpub example shows you to publish a lot of message to a topic by using
+`blocks-gcs-proxy` and `blocks-concurrent-batch-agent`.
+
+If you have some [JSON lines](http://jsonlines.org/) files like the following on Google Cloud Storage,
+you can publish messages for each line of the file by the application named `devpub`.
+
+```
+{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000001\"]"}}
+{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000002\"]"}}
+{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000003\"]"}}
+{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000004\"]"}}
+{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000005\"]"}}
+(snip)
+```
+
+You can run the application with `blocks-gcs-proxy` as Docker container on GCE VMs
+which are managed by `blocks-concurrent-batch-agent`.
+
+If you run this application with 2 VMs, 5 containers and 10 workers,
+you can get 2 * 5 * 10 = 100 workers.
+
+
+
 ## Setup blocks-concurrent-batch-agent
 
 See https://github.com/groovenauts/blocks-concurrent-batch-agent
@@ -24,6 +49,11 @@ Make `pipeline.json` like this:
   ]
 }
 ```
+
+Change `target_size` for more VMs.
+Change `container_size` to run more containers on each VMs.
+
+
 
 ```bash
 $ export TOKEN=....
