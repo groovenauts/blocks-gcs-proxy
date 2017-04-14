@@ -68,9 +68,9 @@ $ gcloud --project $PROJECT beta pubsub subscriptions create $TARGET_SUB --topic
 
 ```
 $ export BUCKET=bucket1
-$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1..1000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test1.jsonl
-$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1001..2000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test2.jsonl
-$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (2001..3000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test3.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/topics/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1..1000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_TOPIC"], ENV["BUCKET"], i]}' > test1.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/topics/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1001..2000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_TOPIC"], ENV["BUCKET"], i]}' > test2.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/topics/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (2001..3000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_TOPIC"], ENV["BUCKET"], i]}' > test3.jsonl
 $ gsutil cp ./test*.jsonl gs://$BUCKET/
 ```
 
