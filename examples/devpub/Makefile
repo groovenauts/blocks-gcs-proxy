@@ -32,12 +32,6 @@ build:
 		gox -output="${PKGDIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="$$x" -arch="${ARCH}" ; \
 	done
 
-release: build
-	ghr -u groovenauts -r blocks-concurrent-subscriber --replace --draft ${VERSION} pkg
-
-prerelease: build
-	ghr -u groovenauts -r blocks-concurrent-subscriber --replace --draft --prerelease ${VERSION} pkg
-
 version:
 	echo ${VERSION}
 
