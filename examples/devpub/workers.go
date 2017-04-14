@@ -29,6 +29,7 @@ func (ws Workers) process(filepath string) error {
 		lines = append(lines, scanner.Text())
 	}
 
+	flds["line_counts"] = len(lines)
 	log.WithFields(flds).Debugln("Workers sending lines to channel")
 	c := make(chan string, len(lines))
 	for _, line := range lines {
