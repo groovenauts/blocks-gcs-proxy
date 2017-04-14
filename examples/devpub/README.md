@@ -17,7 +17,7 @@ Make `pipeline.json` like this:
   "machine_type":"f1-micro",
   "target_size":1,
   "container_size":1,
-  "container_name":"groovenauts/concurrent_batch_devpub_example:0.0.1",
+  "container_name":"groovenauts/concurrent_batch_devpub_example:0.5.1",
   "command":"",
   "run_options": [
     "-e", "TOPIC=projects/proj-dummy-999/topics/test-topic01"
@@ -55,20 +55,51 @@ $ curl -v -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' 
 $ curl -H "Authorization: Bearer $TOKEN" http://$AEHOST/pipelines
 ```
 
+## Create target topic and subscription
+
+```
+$ export TARGET_TOPIC=devpub-target-topic
+$ export TARGET_SUB=devpub-target-subscription
+$ gcloud --project $PROJECT beta pubsub topics create $TARGET_TOPIC
+$ gcloud --project $PROJECT beta pubsub subscriptions create $TARGET_SUB --topic=$TARGET_TOPIC
+```
+
 ## Generate and upload jsonl file
 
 ```
 $ export BUCKET=bucket1
-$ ruby -r json -e 'tmpl = JSON.generate({"attributes":{"download_files":"[\"gs://bucket1/path/to/file%06d\"]"}}); (1..1000).each{|i| puts tmpl % i}' > test1.jsonl
-$ ruby -r json -e 'tmpl = JSON.generate({"attributes":{"download_files":"[\"gs://bucket1/path/to/file%06d\"]"}}); (1001..2000).each{|i| puts tmpl % i}' > test2.jsonl
-$ ruby -r json -e 'tmpl = JSON.generate({"attributes":{"download_files":"[\"gs://bucket1/path/to/file%06d\"]"}}); (2001..3000).each{|i| puts tmpl % i}' > test3.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1..1000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test1.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (1001..2000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test2.jsonl
+$ ruby -r json -e 'tmpl = JSON.generate({"topic":"projects/%s/subscriptions/%s", "attributes":{"download_files":"[\"gs://%s/path/to/file%06d\"]"}}); (2001..3000).each{|i| puts tmpl % [ENV["PROJECT"], ENV["TARGET_SUB"], ENV["BUCKET"], i]}' > test3.jsonl
 $ gsutil cp ./test*.jsonl gs://$BUCKET/
 ```
+
+## Subscribe progress
+
+Open another terminal
+
+```
+$ export PROJECT=proj-dummy-999
+$ export PIPELINE=devpub-pipeline01
+$ pubsub-devsub --project $PROJECT --subscription $PIPELINE-progress-subscription
+```
+
+## Subscribe target
+
+Open another terminal
+
+```
+$ export PROJECT=proj-dummy-999
+$ export TARGET_SUB=devpub-target-subscription
+$ pubsub-devsub --project $PROJECT --subscription $TARGET_SUB
+```
+
 
 ## Publish job messages
 
 ```
-$ gcloud beta pubsub topics publish devpub-pipeline01-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test1.jsonl"]'
-$ gcloud beta pubsub topics publish devpub-pipeline01-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test2.jsonl"]'
-$ gcloud beta pubsub topics publish devpub-pipeline01-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test3.jsonl"]'
+$ export PIPELINE=devpub-pipeline01
+$ gcloud beta pubsub topics publish $PIPELINE-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test1.jsonl"]'
+$ gcloud beta pubsub topics publish $PIPELINE-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test2.jsonl"]'
+$ gcloud beta pubsub topics publish $PIPELINE-job-topic '' --attribute='download_files=["gs://'$BUCKET'/test3.jsonl"]'
 ```
