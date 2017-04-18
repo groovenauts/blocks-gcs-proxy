@@ -136,6 +136,9 @@ func (s *JobSubscription) waitForMessage() (*pubsub.ReceivedMessage, error) {
 		log.WithFields(log.Fields{"subscription": s.config.Subscription, "error": err}).Errorln("Failed to pull")
 		return nil, err
 	}
+	if res == nil {
+		return nil, nil
+	}
 	if len(res.ReceivedMessages) == 0 {
 		return nil, nil
 	}
