@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -410,13 +409,12 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) execute() error {
-	var out bytes.Buffer
-	job.cmd.Stdout = &out
-	job.cmd.Stderr = &out
+	job.cmd.Stdout = os.Stdout
+	job.cmd.Stderr = os.Stderr
 	log.WithFields(log.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
 	err := job.cmd.Run()
 	if err != nil {
-		log.WithFields(log.Fields{"cmd": job.cmd, "error": err, "outputs": out.String()}).Errorln("Command returned error")
+		log.WithFields(log.Fields{"cmd": job.cmd, "error": err}).Errorln("Command returned error")
 		return err
 	}
 	return nil

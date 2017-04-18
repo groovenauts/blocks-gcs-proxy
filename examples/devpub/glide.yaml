@@ -1,0 +1,13 @@
+package: github.com/groovenauts/blocks-gcs-proxy/examples/devpub
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/urfave/cli
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: golang.org/x/oauth2
+  subpackages:
+  - google
+- package: google.golang.org/api
+  subpackages:
+  - pubsub/v1
