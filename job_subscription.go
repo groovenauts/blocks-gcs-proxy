@@ -94,21 +94,23 @@ type JobSubscription struct {
 
 func (s *JobSubscription) listen(f func(*JobMessage) error) error {
 	for {
-		err := s.process(f)
+		executed, err := s.process(f)
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Duration(s.config.PullInterval) * time.Second)
+		if !executed {
+			time.Sleep(time.Duration(s.config.PullInterval) * time.Second)
+		}
 	}
 }
 
-func (s *JobSubscription) process(f func(*JobMessage) error) error {
+func (s *JobSubscription) process(f func(*JobMessage) error) (bool, error) {
 	msg, err := s.waitForMessage()
 	if err != nil {
-		return err
+		return false, err
 	}
 	if msg == nil {
-		return nil
+		return false, nil
 	}
 
 	log.WithFields(log.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
@@ -121,7 +123,7 @@ func (s *JobSubscription) process(f func(*JobMessage) error) error {
 		status: running,
 	}
 
-	return f(jobMsg)
+	return true, f(jobMsg)
 }
 
 func (s *JobSubscription) waitForMessage() (*pubsub.ReceivedMessage, error) {
