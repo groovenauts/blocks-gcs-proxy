@@ -89,7 +89,6 @@ func TestJobConfigSetupSustainer(t *testing.T) {
 	assert.Equal(t, float64(320), jc.Sustainer.Interval)
 }
 
-
 type DummyPuller struct {
 	responses []*pubsub.PullResponse
 }
@@ -121,7 +120,7 @@ func TestJobSubscriptionProcess(t *testing.T) {
 					&pubsub.ReceivedMessage{
 						AckId: "dummy-ack-id1",
 						Message: &pubsub.PubsubMessage{
-							Attributes: map[string]string {
+							Attributes: map[string]string{
 								"foo": "A",
 							},
 							MessageId: "dummy-msg-id1",
