@@ -72,12 +72,13 @@ func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobSte
 	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
 }
 
-func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level, data string) error {
+func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
+
 	opts := map[string]string{
 		"progress":       strconv.Itoa(int(progress)),
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
-		"level":          level,
+		"level":          level.String(),
 	}
 	logAttrs := log.Fields{}
 	for k, v := range opts {

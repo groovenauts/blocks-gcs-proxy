@@ -199,7 +199,7 @@ func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimi
 		log.WithFields(logAttrs).Errorln("waitAndSendMAD ModifyAckDeadline")
 		msg := fmt.Sprintf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
 		log.WithFields(logAttrs).Fatalf(msg)
-		notification.notifyProgress(m.MessageId(), WORKING, false, "error", msg)
+		notification.notifyProgress(m.MessageId(), WORKING, false, log.ErrorLevel, msg)
 	}
 	return nil
 }
