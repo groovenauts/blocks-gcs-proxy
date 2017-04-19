@@ -41,12 +41,14 @@ const (
 
 type (
 	ProgressConfig struct {
-		Topic string `json:"topic"`
+		Topic    string `json:"topic"`
+		LogLevel string `json:"log_level"`
 	}
 
 	ProgressNotification struct {
 		config    *ProgressConfig
 		publisher Publisher
+		logLevel  log.Level
 	}
 )
 
