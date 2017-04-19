@@ -127,9 +127,7 @@ func (p *Process) setup() error {
 		puller: puller,
 	}
 
-	if p.config.Progress.LogLevel == "" {
-		p.config.Progress.LogLevel = log.InfoLevel.String()
-	}
+	p.config.Progress.setup()
 	level, err := log.ParseLevel(p.config.Progress.LogLevel)
 	if err != nil {
 		logAttrs := log.Fields{"log_level": p.config.Progress.LogLevel}

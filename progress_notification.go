@@ -44,6 +44,12 @@ type ProgressConfig struct {
 	LogLevel string `json:"log_level"`
 }
 
+func (c *ProgressConfig) setup() {
+	if c.LogLevel == "" {
+		c.LogLevel = log.InfoLevel.String()
+	}
+}
+
 type ProgressNotification struct {
 	config    *ProgressConfig
 	publisher Publisher
