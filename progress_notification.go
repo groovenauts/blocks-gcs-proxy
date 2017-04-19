@@ -39,18 +39,16 @@ const (
 	COMPLETED
 )
 
-type (
-	ProgressConfig struct {
-		Topic    string `json:"topic"`
-		LogLevel string `json:"log_level"`
-	}
+type ProgressConfig struct {
+	Topic    string `json:"topic"`
+	LogLevel string `json:"log_level"`
+}
 
-	ProgressNotification struct {
-		config    *ProgressConfig
-		publisher Publisher
-		logLevel  log.Level
-	}
-)
+type ProgressNotification struct {
+	config    *ProgressConfig
+	publisher Publisher
+	logLevel  log.Level
+}
 
 func (pn *ProgressNotification) wrap(msg_id string, step JobStep, f func() error) func() error {
 	return func() error {
