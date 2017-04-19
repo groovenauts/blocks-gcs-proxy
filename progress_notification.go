@@ -41,7 +41,7 @@ const (
 
 type (
 	ProgressConfig struct {
-		Topic string
+		Topic string `json:"topic"`
 	}
 
 	ProgressNotification struct {
