@@ -6,7 +6,7 @@ This devpub example shows you to publish a lot of message to a topic by using
 `blocks-gcs-proxy` and `blocks-concurrent-batch-agent`.
 
 If you have some [JSON lines](http://jsonlines.org/) files like the following on Google Cloud Storage,
-you can publish messages for each line of the file by the application named `devpub`.
+you can publish messages for each line of the file by using [pubsub-devpub](https://github.com/groovenauts/pubsub-devpub).
 
 ```
 {"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000001\"]"}}
