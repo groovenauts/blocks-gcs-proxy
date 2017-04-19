@@ -25,6 +25,7 @@ type (
 	JobStep    int
 	JobStepDef struct {
 		name            string
+		successLogLevel string
 		failureLogLevel string
 		baseProgress    Progress
 	}
@@ -43,19 +44,22 @@ const (
 
 var (
 	JOB_STEP_DEFS = map[JobStep]JobStepDef{
-		INITIALIZING: JobStepDef{"INITIALIZING", "error", PREPARING},
-		DOWNLOADING:  JobStepDef{"DOWNLOADING", "error", WORKING},
-		EXECUTING:    JobStepDef{"EXECUTING", "error", WORKING},
-		UPLOADING:    JobStepDef{"UPLOADING", "error", WORKING},
-		CLEANUP:      JobStepDef{"CLEANUP", "warn", WORKING},
-		NACKSENDING:  JobStepDef{"NACKSENDING", "warn", RETRYING},
-		CANCELLING:   JobStepDef{"CANCELLING", "fatal", INVALID_JOB},
-		ACKSENDING:   JobStepDef{"ACKSENDING", "fatal", COMPLETED},
+		INITIALIZING: JobStepDef{"INITIALIZING", "info", "error", PREPARING},
+		DOWNLOADING:  JobStepDef{"DOWNLOADING", "debug", "error", WORKING},
+		EXECUTING:    JobStepDef{"EXECUTING", "debug", "error", WORKING},
+		UPLOADING:    JobStepDef{"UPLOADING", "debug", "error", WORKING},
+		CLEANUP:      JobStepDef{"CLEANUP", "debug", "warn", WORKING},
+		NACKSENDING:  JobStepDef{"NACKSENDING", "warn", "error", RETRYING},
+		CANCELLING:   JobStepDef{"CANCELLING", "error", "fatal", INVALID_JOB},
+		ACKSENDING:   JobStepDef{"ACKSENDING", "info", "fatal", COMPLETED},
 	}
 )
 
 func (js JobStep) String() string {
 	return JOB_STEP_DEFS[js].name
+}
+func (js JobStep) successLogLevel() string {
+	return JOB_STEP_DEFS[js].successLogLevel
 }
 func (js JobStep) failureLogLevel() string {
 	return JOB_STEP_DEFS[js].failureLogLevel
@@ -69,8 +73,10 @@ func (js JobStep) completed(st JobStepStatus) bool {
 }
 func (js JobStep) logLevelFor(st JobStepStatus) string {
 	switch st {
-	// case STARTING: return "info"
-	// case SUCCESS: return js.successLogLevel()
+	case STARTING:
+		return "debug"
+	case SUCCESS:
+		return js.successLogLevel()
 	case FAILURE:
 		return js.failureLogLevel()
 	default:
