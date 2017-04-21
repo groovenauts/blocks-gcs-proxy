@@ -53,7 +53,7 @@ specified by `job.subscription` in `config.json`.
 | command.dryrun | bool | False | |
 | command.downloaders | int | False | The number of thread to download. Default: 1.|
 | command.uploaders | int | False | The number of thread to upload. Default: 1.|
-| command.options | map[key][]string | False | Define if you have to run one of multiple command. See [Multiple command options] for more detail/ |
+| command.options | map[key][]string | False | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
 
 
 ### Multiple command options
