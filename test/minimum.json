@@ -1,0 +1,8 @@
+{
+  "job": {
+    "subscription": "projects/proj-dummy-999/subscriptions/pipeline01-job-subscription"
+  },
+  "progress": {
+    "topic": "projects/proj-dummy-999/topics/pipeline01-progress-topic"
+  }
+}
