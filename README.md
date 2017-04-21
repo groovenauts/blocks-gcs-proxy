@@ -50,7 +50,7 @@ specified by `job.subscription` in `config.json`.
 | log       | map    | False | |
 | log.level | string | False | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | command   | map | False |  |
-| command.dryrun | bool | False | |
+| command.dryrun | bool | False | Don't run the command if this is true. |
 | command.downloaders | int | False | The number of thread to download. Default: 1.|
 | command.uploaders | int | False | The number of thread to upload. Default: 1.|
 | command.options | map[key][]string | False | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
