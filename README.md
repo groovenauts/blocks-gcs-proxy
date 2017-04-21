@@ -84,3 +84,58 @@ you can choose which command is executed by message attribute named `foo` at run
 | `{"foo": "key2"}`  | `cmd2 %{download_files.bar} %{uploads_dir} %{download_files.baz}` |
 
 If the attribute value is not defined in commands keys, the message is ignored with error message.
+
+## blocks-gcs-proxy check
+
+Check the `config.json` is valid.
+You can give other file with `--config` or `-c` option.
+
+```bash
+$ ./blocks-gcs-proxy check -c config2.json
+Error to load config.json.bak cause of invalid character '}' looking for beginning of object key string
+```
+
+
+## blocks-gcs-proxy download
+
+```bash
+NAME:
+   blocks-gcs-proxy download - Download the files from GCS to downloads directory
+
+USAGE:
+   blocks-gcs-proxy download [command options] [arguments...]
+
+OPTIONS:
+   --downloads_dir value, -d value  Path to the directory which has bucket_name/path/to/file
+   --downloaders value, -n value    Number of downloaders (default: 6)
+$ ./blocks-gcs-proxy download --help
+
+```
+
+### Example
+
+```bash
+$ ./blocks-gcs-proxy download -d tmp/downloads -n 5 gs://bucket1/path/to/file1  gs://bucket1/path/to/file2  gs://bucket1/path/to/file3
+```
+
+
+## blocks-gcs-proxy upload
+
+```bash
+$ ./blocks-gcs-proxy upload --help
+NAME:
+   blocks-gcs-proxy upload - Upload the files under uploads directory
+
+USAGE:
+   blocks-gcs-proxy upload [command options] [arguments...]
+
+OPTIONS:
+   --uploads_dir value, -d value  Path to the directory which has bucket_name/path/to/file
+   --uploaders value, -n value    Number of uploaders (default: 6)
+```
+
+### Example
+
+```bash
+$ ./blocks-gcs-proxy upload -d tmp/uploads -n 5
+```
