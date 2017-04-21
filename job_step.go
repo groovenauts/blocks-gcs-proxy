@@ -4,7 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-
 type JobStepStatus int
 
 const (

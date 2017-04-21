@@ -137,7 +137,7 @@ func (p *Process) setup() error {
 	p.notification = &ProgressNotification{
 		config:    p.config.Progress,
 		publisher: &pubsubPublisher{pubsubService.Projects.Topics},
-		logLevel: level,
+		logLevel:  level,
 	}
 	return nil
 }
