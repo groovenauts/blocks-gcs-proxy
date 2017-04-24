@@ -18,8 +18,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type (
-	CommandConfig struct {
+type CommandConfig struct {
 		Template    []string            `json:"-"`
 		Options     map[string][]string `json:"options,omitempty"`
 		Dryrun      bool                `json:"dryrun,omitempty"`
@@ -27,7 +26,7 @@ type (
 		Downloaders int                 `json:"downloaders,omitempty"`
 	}
 
-	Job struct {
+type Job struct {
 		config *CommandConfig
 		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 		message      *JobMessage
@@ -46,7 +45,6 @@ type (
 
 		cmd *exec.Cmd
 	}
-)
 
 func (job *Job) run() error {
 	err := job.runWithoutErrorHandling()
