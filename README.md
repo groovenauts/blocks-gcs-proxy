@@ -42,8 +42,8 @@ specified by `job.subscription` in `config.json`.
 | job.subscription | string | True | - | The subscription name to pull job messages |
 | job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
 | job.sustainer     | map | False |  |  |
-| job.sustainer.delay | int | False | *1 | The new deadline in second to extend deadline to ack |
-| job.sustainer.interval | int | False | *1 | The interval in second to send the message which extends deadline to ack |
+| job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
+| job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
 | progress | map | True |  |  |
 | progress.topic | string | True | - | The topic name to publish job progress messages |
 | progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
@@ -139,3 +139,15 @@ OPTIONS:
 ```bash
 $ ./blocks-gcs-proxy upload -d tmp/uploads -n 5
 ```
+
+## Sustainer
+
+When your command takes longer time than `AckDeadline` of the pipeline job subscription,
+Sustainer sends requests to the subscription to expand the deadline.
+If you don't set `job.sustainer` in your `config.json`, `blocks-gcs-proxy` sets them
+from the subscription's `AckDeadline`.
+
+| Key                    | Default   |
+|------------------------|-----------|
+| job.sustainer.delay    | Subscription's `AckDeadline` |
+| job.sustainer.interval | Subscription's `AckDeadline` * 0.8 |
