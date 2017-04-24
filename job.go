@@ -19,32 +19,32 @@ import (
 )
 
 type CommandConfig struct {
-		Template    []string            `json:"-"`
-		Options     map[string][]string `json:"options,omitempty"`
-		Dryrun      bool                `json:"dryrun,omitempty"`
-		Uploaders   int                 `json:"uploaders,omitempty"`
-		Downloaders int                 `json:"downloaders,omitempty"`
-	}
+	Template    []string            `json:"-"`
+	Options     map[string][]string `json:"options,omitempty"`
+	Dryrun      bool                `json:"dryrun,omitempty"`
+	Uploaders   int                 `json:"uploaders,omitempty"`
+	Downloaders int                 `json:"downloaders,omitempty"`
+}
 
 type Job struct {
-		config *CommandConfig
-		// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
-		message      *JobMessage
-		notification *ProgressNotification
-		storage      Storage
+	config *CommandConfig
+	// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
+	message      *JobMessage
+	notification *ProgressNotification
+	storage      Storage
 
-		// These are set at at setupWorkspace
-		workspace     string
-		downloads_dir string
-		uploads_dir   string
+	// These are set at at setupWorkspace
+	workspace     string
+	downloads_dir string
+	uploads_dir   string
 
-		// These are set at setupDownloadFiles
-		downloadFileMap     map[string]string
-		remoteDownloadFiles interface{}
-		localDownloadFiles  interface{}
+	// These are set at setupDownloadFiles
+	downloadFileMap     map[string]string
+	remoteDownloadFiles interface{}
+	localDownloadFiles  interface{}
 
-		cmd *exec.Cmd
-	}
+	cmd *exec.Cmd
+}
 
 func (job *Job) run() error {
 	err := job.runWithoutErrorHandling()
