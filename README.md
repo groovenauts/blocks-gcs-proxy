@@ -85,6 +85,20 @@ you can choose which command is executed by message attribute named `foo` at run
 
 If the attribute value is not defined in commands keys, the message is ignored with error message.
 
+
+### Sustainer
+
+When your command takes longer time than `AckDeadline` of the pipeline job subscription,
+Sustainer sends requests to the subscription to expand the deadline.
+If you don't set `job.sustainer` in your `config.json`, `blocks-gcs-proxy` sets them
+from the subscription's `AckDeadline`.
+
+| Key                    | Default   |
+|------------------------|-----------|
+| job.sustainer.delay    | Subscription's `AckDeadline` |
+| job.sustainer.interval | Subscription's `AckDeadline` * 0.8 |
+
+
 ## blocks-gcs-proxy check
 
 Check the `config.json` is valid.
@@ -139,15 +153,3 @@ OPTIONS:
 ```bash
 $ ./blocks-gcs-proxy upload -d tmp/uploads -n 5
 ```
-
-## Sustainer
-
-When your command takes longer time than `AckDeadline` of the pipeline job subscription,
-Sustainer sends requests to the subscription to expand the deadline.
-If you don't set `job.sustainer` in your `config.json`, `blocks-gcs-proxy` sets them
-from the subscription's `AckDeadline`.
-
-| Key                    | Default   |
-|------------------------|-----------|
-| job.sustainer.delay    | Subscription's `AckDeadline` |
-| job.sustainer.interval | Subscription's `AckDeadline` * 0.8 |
