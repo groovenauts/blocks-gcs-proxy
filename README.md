@@ -36,24 +36,24 @@ specified by `job.subscription` in `config.json`.
 
 ## config.json
 
-| Key     | Type | Required | Description  |
+| Key     | Type | Required | Default | Description  |
 |---------|------|----------|--------------|
-| job     | map | True |   |
-| job.subscription | string | True | The subscription name to pull job messages |
-| job.pull_interval | int | False | The interval time in second to pull when it gets no job message. Default 0 |
-| job.sustainer     | map | False |
-| job.sustainer.delay | int | False | The new deadline in second to extend deadline to ack |
-| job.sustainer.interval | int | False | The interval in second to send the message which extends deadline to ack |
-| progress | map | True |
-| progress.topic | string | True | The topic name to publish job progress messages |
-| progress.level | string | False | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
-| log       | map    | False | |
-| log.level | string | False | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
-| command   | map | False |  |
-| command.dryrun | bool | False | Don't run the command if this is true. |
-| command.downloaders | int | False | The number of thread to download. Default: 1.|
-| command.uploaders | int | False | The number of thread to upload. Default: 1.|
-| command.options | map[key][]string | False | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
+| job     | map | True |  |  |
+| job.subscription | string | True | - | The subscription name to pull job messages |
+| job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
+| job.sustainer     | map | False |  |  |
+| job.sustainer.delay | int | False | *1 | The new deadline in second to extend deadline to ack |
+| job.sustainer.interval | int | False | *1 | The interval in second to send the message which extends deadline to ack |
+| progress | map | True |  |  |
+| progress.topic | string | True | - | The topic name to publish job progress messages |
+| progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| log       | map    | False |  |  |
+| log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| command   | map | False |  |  |
+| command.dryrun | bool | False | `false` | Don't run the command if this is true. |
+| command.downloaders | int | False | 1 | The number of thread to download. |
+| command.uploaders | int | False | 1 | The number of thread to upload. |
+| command.options | map[key][]string | False |  | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
 
 
 ### Multiple command options
