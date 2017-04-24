@@ -26,6 +26,15 @@ type CommandConfig struct {
 	Downloaders int                 `json:"downloaders,omitempty"`
 }
 
+func (c *CommandConfig) setup() {
+	if c.Downloaders < 1 {
+		c.Downloaders = 1
+	}
+	if c.Uploaders < 1 {
+		c.Uploaders = 1
+	}
+}
+
 type Job struct {
 	config *CommandConfig
 	// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
@@ -390,9 +399,6 @@ func (job *Job) downloadFiles() error {
 		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
 	}
 
-	if job.config.Downloaders < 1 {
-		job.config.Downloaders = 1
-	}
 	downloaders := TargetWorkers{}
 	for i := 0; i < job.config.Downloaders; i++ {
 		downloader := &TargetWorker{
@@ -445,9 +451,6 @@ func (job *Job) uploadFiles() error {
 		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
 	}
 
-	if job.config.Uploaders < 1 {
-		job.config.Uploaders = 1
-	}
 	uploaders := TargetWorkers{}
 	for i := 0; i < job.config.Uploaders; i++ {
 		uploader := &TargetWorker{
