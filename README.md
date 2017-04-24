@@ -37,7 +37,7 @@ specified by `job.subscription` in `config.json`.
 ## config.json
 
 | Key     | Type | Required | Default | Description  |
-|---------|------|----------|--------------|
+|---------|------|----------|---------|---------------|
 | job     | map | True |  |  |
 | job.subscription | string | True | - | The subscription name to pull job messages |
 | job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
