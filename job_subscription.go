@@ -50,6 +50,12 @@ type JobConfig struct {
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
+func (c *JobConfig) setup() {
+	if c.PullInterval == 0 {
+		c.PullInterval = 10
+	}
+}
+
 func (c *JobConfig) setupSustainer(puller Puller) error {
 	flds := log.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
