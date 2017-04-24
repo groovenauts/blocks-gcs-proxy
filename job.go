@@ -332,6 +332,8 @@ func (job *Job) build() error {
 	logAttrs["command"] = values
 	log.WithFields(logAttrs).Debugln("")
 	job.cmd = exec.Command(values[0], values[1:]...)
+	job.cmd.Stdout = os.Stdout
+	job.cmd.Stderr = os.Stderr
 	return nil
 }
 
@@ -409,8 +411,9 @@ func (job *Job) downloadFiles() error {
 }
 
 func (job *Job) execute() error {
-	job.cmd.Stdout = os.Stdout
-	job.cmd.Stderr = os.Stderr
+	if job.config.Dryrun {
+		return nil
+	}
 	log.WithFields(log.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
 	err := job.cmd.Run()
 	if err != nil {
