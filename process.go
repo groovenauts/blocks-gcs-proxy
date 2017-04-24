@@ -126,9 +126,18 @@ func (p *Process) setup() error {
 		config: p.config.Job,
 		puller: puller,
 	}
+
+	p.config.Progress.setup()
+	level, err := log.ParseLevel(p.config.Progress.LogLevel)
+	if err != nil {
+		logAttrs := log.Fields{"log_level": p.config.Progress.LogLevel}
+		log.WithFields(logAttrs).Fatalln("Failed to parse log_level")
+		return err
+	}
 	p.notification = &ProgressNotification{
 		config:    p.config.Progress,
 		publisher: &pubsubPublisher{pubsubService.Projects.Topics},
+		logLevel:  level,
 	}
 	return nil
 }

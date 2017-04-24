@@ -17,7 +17,8 @@
     }
   },
   "progress": {
-    "topic": "projects/dummy-gcp-proj/topics/test-progress-topic"
+    "topic": "projects/dummy-gcp-proj/topics/test-progress-topic",
+    "log_level": "info"
   },
   "log": {
     "level": "debug"

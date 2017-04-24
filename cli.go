@@ -36,7 +36,7 @@ func main() {
 		},
 		{
 			Name:  "download",
-			Usage: "Download the files under downloads directory",
+			Usage: "Download the files from GCS to downloads directory",
 			Action: func(c *cli.Context) error {
 				config := &ProcessConfig{}
 				config.Log = &LogConfig{Level: "debug"}

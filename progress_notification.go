@@ -39,16 +39,22 @@ const (
 	COMPLETED
 )
 
-type (
-	ProgressConfig struct {
-		Topic string
-	}
+type ProgressConfig struct {
+	Topic    string `json:"topic"`
+	LogLevel string `json:"log_level"`
+}
 
-	ProgressNotification struct {
-		config    *ProgressConfig
-		publisher Publisher
+func (c *ProgressConfig) setup() {
+	if c.LogLevel == "" {
+		c.LogLevel = log.InfoLevel.String()
 	}
-)
+}
+
+type ProgressNotification struct {
+	config    *ProgressConfig
+	publisher Publisher
+	logLevel  log.Level
+}
 
 func (pn *ProgressNotification) wrap(msg_id string, step JobStep, f func() error) func() error {
 	return func() error {
@@ -72,12 +78,17 @@ func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobSte
 	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
 }
 
-func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level, data string) error {
+func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
+	// https://godoc.org/github.com/sirupsen/logrus#Level
+	// log.InfoLevel < log.DebugLevel => true
+	if pn.logLevel < level {
+		return nil
+	}
 	opts := map[string]string{
 		"progress":       strconv.Itoa(int(progress)),
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
-		"level":          level,
+		"level":          level.String(),
 	}
 	logAttrs := log.Fields{}
 	for k, v := range opts {
