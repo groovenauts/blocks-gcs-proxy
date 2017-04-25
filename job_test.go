@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -101,5 +103,30 @@ func TestJobBuildWithInvalidDownloadFilesReference(t *testing.T) {
 		}
 		assert.Regexp(t, "No value found", err.Error())
 		assert.Regexp(t, "download_files", err.Error())
+	}
+}
+
+func TestJobExecuteWithDryrun(t *testing.T) {
+	patterns := []struct {
+		dryrun   bool
+		expected string
+	}{
+		{dryrun: false, expected: "foo\n"},
+		{dryrun: true, expected: ""},
+	}
+	for _, ptn := range patterns {
+		b := new(bytes.Buffer)
+		cmd := exec.Command("echo", "foo")
+		cmd.Stdout = b
+		cmd.Stderr = b
+		job := &Job{
+			cmd: cmd,
+			config: &CommandConfig{
+				Dryrun: ptn.dryrun,
+			},
+		}
+		err := job.execute()
+		assert.NoError(t, err)
+		assert.Equal(t, ptn.expected, b.String())
 	}
 }
