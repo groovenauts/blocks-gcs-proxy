@@ -42,6 +42,9 @@ func main() {
 				config.Log = &LogConfig{Level: "debug"}
 				config.setup([]string{})
 				config.Command.Downloaders = c.Int("downloaders")
+				config.Job.Sustainer = &JobSustainerConfig{
+					Disabled: true,
+				}
 				p := setupProcess(config)
 				p.setup()
 				files := []interface{}{}
@@ -77,10 +80,14 @@ func main() {
 			Name:  "upload",
 			Usage: "Upload the files under uploads directory",
 			Action: func(c *cli.Context) error {
+				fmt.Printf("Uploading files\n")
 				config := &ProcessConfig{}
 				config.Log = &LogConfig{Level: "debug"}
 				config.setup([]string{})
 				config.Command.Uploaders = c.Int("uploaders")
+				config.Job.Sustainer = &JobSustainerConfig{
+					Disabled: true,
+				}
 				p := setupProcess(config)
 				p.setup()
 				job := &Job{
@@ -88,6 +95,7 @@ func main() {
 					uploads_dir: c.String("uploads_dir"),
 					storage:     p.storage,
 				}
+				fmt.Printf("Uploading files under %v\n", job.uploads_dir)
 				err := job.uploadFiles()
 				return err
 			},
@@ -131,6 +139,7 @@ func setupProcess(config *ProcessConfig) *Process {
 	}
 	return p
 }
+
 
 func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
 	path := configPath(c)
