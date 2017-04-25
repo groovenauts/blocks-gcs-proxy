@@ -12,6 +12,7 @@ import:
   - pubsub/v1
   - iterator
 - package: github.com/Sirupsen/logrus
+- package: github.com/cenkalti/backoff
 testImport:
 - package: github.com/stretchr/testify
   subpackages:
