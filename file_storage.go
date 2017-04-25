@@ -9,8 +9,8 @@ import (
 
 	storage "google.golang.org/api/storage/v1"
 
-	"github.com/cenkalti/backoff"
 	log "github.com/Sirupsen/logrus"
+	"github.com/cenkalti/backoff"
 )
 
 type (

@@ -140,7 +140,6 @@ func setupProcess(config *ProcessConfig) *Process {
 	return p
 }
 
-
 func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
 	path := configPath(c)
 	config, err := LoadProcessConfig(path)
