@@ -35,6 +35,7 @@ func (s JobMessageStatus) String() string {
 
 type (
 	JobSustainerConfig struct {
+		Disabled bool    `json:"disabled,omitempty"`
 		Delay    float64 `json:"delay,omitempty"`
 		Interval float64 `json:"interval,omitempty"`
 	}
@@ -141,6 +142,9 @@ func (m *JobMessage) running() bool {
 }
 
 func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) error {
+	if m.config.Disabled {
+		return nil
+	}
 	log.Printf("sendMADPeriodically start\n")
 	for {
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)

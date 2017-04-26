@@ -10,6 +10,7 @@ import (
 	storage "google.golang.org/api/storage/v1"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/cenkalti/backoff"
 )
 
 type (
@@ -105,7 +106,13 @@ func (w *TargetWorker) run() {
 		flds["target"] = t
 		log.WithFields(flds).Debugf("Start to %v\n", w.name)
 
-		err := w.impl(t.Bucket, t.Object, t.LocalPath)
+		f := func() error {
+			return w.impl(t.Bucket, t.Object, t.LocalPath)
+		}
+
+		eb := backoff.NewExponentialBackOff()
+		eb.InitialInterval = 30 * time.Second
+		err := backoff.Retry(f, eb)
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Failed to %v\n", w.name)
