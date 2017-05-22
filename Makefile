@@ -1,7 +1,7 @@
 PKGDIR=./pkg
 BASENAME=blocks-gcs-proxy
 VERSION=`grep VERSION version.go | cut -f2 -d\"`
-OS=linux
+OS_LIST=linux darwin
 ARCH=amd64
 UNFORMATTED=$(shell gofmt -l *.go)
 
@@ -28,7 +28,9 @@ endif
 
 build:
 	mkdir -p ${PKGDIR}
-	gox -output="${PKGDIR}/{{.Dir}}_${OS}_${ARCH}" -os="${OS}" -arch="${ARCH}"
+	for x in "$(OS_LIST)" ; do \
+		gox -output="${PKGDIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="$$x" -arch="${ARCH}" ; \
+	done
 
 release: build
 	ghr -u groovenauts -r blocks-gcs-proxy --replace --draft ${VERSION} pkg
