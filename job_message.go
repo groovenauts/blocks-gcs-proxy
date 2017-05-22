@@ -72,7 +72,7 @@ func (m *JobMessage) DownloadFiles() interface{} {
 			return nil
 		}
 		url := "gs://" + bucketId + "/" + objectId
-		return url
+		return []interface{}{url}
 	}
 
 	str, ok := m.raw.Message.Attributes["download_files"]

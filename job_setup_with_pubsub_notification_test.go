@@ -78,8 +78,8 @@ func TestJobSetupWithPubSubNotification1(t *testing.T) {
 		url1: local1,
 	}, job.downloadFileMap)
 
-	assert.Equal(t, url1, job.remoteDownloadFiles)
-	assert.Equal(t, local1, job.localDownloadFiles)
+	assert.Equal(t, []interface{}{url1}, job.remoteDownloadFiles)
+	assert.Equal(t, []interface{}{local1}, job.localDownloadFiles)
 
 	err = job.build()
 	assert.NoError(t, err)
