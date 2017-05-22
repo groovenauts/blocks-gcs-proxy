@@ -62,6 +62,19 @@ func (m *JobMessage) MessageId() string {
 }
 
 func (m *JobMessage) DownloadFiles() interface{} {
+	// See Cloud Pub/Sub Notifications for Google Cloud Storage
+	// https://cloud.google.com/storage/docs/pubsub-notifications
+	eventType, ok1 := m.raw.Message.Attributes["eventType"]
+	bucketId, ok2 := m.raw.Message.Attributes["bucketId"]
+	objectId, ok3 := m.raw.Message.Attributes["objectId"]
+	if ok1 && ok2 && ok3 {
+		if eventType != "OBJECT_FINALIZE" {
+			return nil
+		}
+		url := "gs://" + bucketId + "/" + objectId
+		return url
+	}
+
 	str, ok := m.raw.Message.Attributes["download_files"]
 	if !ok {
 		return nil
