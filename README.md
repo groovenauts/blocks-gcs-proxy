@@ -4,6 +4,11 @@
 
 blocks-gcs-proxy is a proxy for MAGELLAN BLOCKS `concurrent batch board`.
 
+## Features
+
+- [Multiple commands support](#multiple-command-options)
+- [Work with Cloud Pub/Sub Notifications](./doc/pubsub_notification.md)
+
 
 ## Installation
 
