@@ -42,6 +42,9 @@ $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
 $ export TOPIC="projects/${PROJECT}/topics/${PIPELINE}-job-topic"
 $ export BUCKET="your-bucket"
-$ gsutil notification create -t $TOPIC -f json gs://$BUCKET
+$ gsutil notification create -t $TOPIC -f json -e OBJECT_FINALIZE gs://$BUCKET
 $ gsutil cp [path/to/localFile] $BUCKET/path/to/remoteFile
 ```
+
+gsutil notification create -t projects/scenic-doodad-617/topics/akm-pipeline01-job-topic                -f json gs://blocks-gcs-proxy-test -e OBJECT_FINALIZE
+gsutil notification create -t projects/scenic-doodad-617/topics/akm-test-gcs-pubsub-notifications-topic -f json gs://akm-test

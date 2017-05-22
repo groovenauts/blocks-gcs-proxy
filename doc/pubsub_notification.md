@@ -17,15 +17,10 @@ run your command.
 ### Create notification config to your bucket
 
 ```
-gsutil notification create -t projects/[Your-Project]/topics/[Your-Pipeline-Job-Topic] -f json gs://[Your-Bucket]
-```
-
-If you need the notification whose `eventType` is `OBJECT_FINALIZE`, you can add `-e OBJECT_FINALIZE` option to the
-above command like this:
-
-```
 gsutil notification create -t projects/[Your-Project]/topics/[Your-Pipeline-Job-Topic] -f json gs://[Your-Bucket] -e OBJECT_FINALIZE
 ```
+
+`blocks-gcs-proxy` doesn't support `OBJECT_DELETE` yet. So dont't forget append `-e OBJECT_FINALIZE`.
 
 You can see other eventTypes at https://cloud.google.com/storage/docs/pubsub-notifications#events .
 Type `gsutil notification create --help` for more detail.
