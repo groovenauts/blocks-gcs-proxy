@@ -40,6 +40,7 @@ For example, the following command shows you them.
 
 ```
 $ blocks-gcs-proxy echo "%{attrs.eventType}" "%{attrs.bucketId}" "%{attrs.objectId}"
+```
 
 You can see other attributes at https://cloud.google.com/storage/docs/pubsub-notifications#format .
 
