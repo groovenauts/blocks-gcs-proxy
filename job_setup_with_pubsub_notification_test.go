@@ -10,23 +10,22 @@ import (
 	pubsub "google.golang.org/api/pubsub/v1"
 )
 
-
 const (
 	bucket = "bucket1"
-	path1 = "path/to/file1"
-	url1 = "gs://" + bucket + "/" + path1
+	path1  = "path/to/file1"
+	url1   = "gs://" + bucket + "/" + path1
 	local1 = downloads_dir + "/" + bucket + "/" + path1
 )
 
 var (
-	BaseNotificationAttrs = map[string]string {
-		"objectId" : "path/to/file1",
-		"payloadFormat": "JSON_API_V1",
-		"resource": "projects/_/buckets/bucket1/objects/path/to/file1#1495443037537696",
-		"bucketId": "bucket1",
-		"eventType": "OBJECT_FINALIZE",
+	BaseNotificationAttrs = map[string]string{
+		"objectId":           "path/to/file1",
+		"payloadFormat":      "JSON_API_V1",
+		"resource":           "projects/_/buckets/bucket1/objects/path/to/file1#1495443037537696",
+		"bucketId":           "bucket1",
+		"eventType":          "OBJECT_FINALIZE",
 		"notificationConfig": "projects/_/buckets/bucket1/notificationConfigs/3",
-		"objectGeneration": "1495443037537696",
+		"objectGeneration":   "1495443037537696",
 	}
 
 	BaseNotificationData = `{
@@ -59,9 +58,9 @@ func TestJobSetupWithPubSubNotification1(t *testing.T) {
 			raw: &pubsub.ReceivedMessage{
 				AckId: "test-ack1",
 				Message: &pubsub.PubsubMessage{
-					Data: BaseNotificationData,
+					Data:       BaseNotificationData,
 					Attributes: BaseNotificationAttrs,
-					MessageId: "test-message1",
+					MessageId:  "test-message1",
 				},
 			},
 		},
