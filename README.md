@@ -73,7 +73,7 @@ If you have commands data in your config.json like the following:
 
 And when you run the command by
 ```
-$ bundle exec magellan-gcs-proxy %{attrs.foo}
+$ blocks-gcs-proxy %{attrs.foo}
 ```
 
 you can choose which command is executed by message attribute named `foo` at runtime.

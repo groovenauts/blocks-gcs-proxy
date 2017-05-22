@@ -6,7 +6,6 @@
 $ cd path/to/workspace
 $ git clone https://github.com/groovenauts/blocks-gcs-proxy.git
 $ cd blocks-gcs-proxy
-$ bundle
 $ export PIPELINE=akm-pipeline01
 $ gcloud deployment-manager deployments create $PIPELINE --config test/pubsub.jinja
 ```
