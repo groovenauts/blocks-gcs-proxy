@@ -28,9 +28,7 @@ endif
 
 build:
 	mkdir -p ${PKGDIR}
-	for x in "$(OS_LIST)" ; do \
-		gox -output="${PKGDIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="$$x" -arch="${ARCH}" ; \
-	done
+	gox -output="${PKGDIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="${OS_LIST}" -arch="${ARCH}" ; \
 
 release: build
 	ghr -u groovenauts -r blocks-gcs-proxy --replace --draft ${VERSION} pkg
