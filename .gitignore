@@ -1,10 +1,4 @@
-/.bundle/
-/.yardoc
-/Gemfile.lock
-/_yardoc/
-/coverage/
 /pkg/
-/spec/reports/
 /tmp/
 /.env
 /config.yml

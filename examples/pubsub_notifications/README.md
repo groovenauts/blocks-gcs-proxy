@@ -1,4 +1,7 @@
-# blocks-gcs-proxy basic example
+# blocks-gcs-proxy example with Cloud Pub/Sub Notifications
+
+See [Use blocks-gcs-proxy with Cloud Pub/Sub Notifications](../../doc/pubsub_notification.md)
+for more detail about background.
 
 ## How to run application locally
 
@@ -26,18 +29,19 @@ Download [blocks-gcs-proxy](https://github.com/groovenauts/blocks-gcs-proxy/rele
 
 ```
 $ cd path/to/workspace/blocks-gcs-proxy
-$ cd examples/basic
+$ cd examples/pubsub_notifications
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
-$ blocks-gcs-proxy ./app.sh %{download_files.0} %{downloads_dir} %{uploads_dir} test
+$ blocks-gcs-proxy echo %{attrs.eventType} gs://%{attrs.bucketId}/%{attrs.objectId} %{download_files.0} %{downloads_dir}
 ```
 
-### Terminal 3 Publish message
+### Terminal 3 Setup notification and upload files
 
 ```
 $ export PIPELINE=pipeline01
 $ export PROJECT=your-gcp-project
 $ export TOPIC="projects/${PROJECT}/topics/${PIPELINE}-job-topic"
-$ gcloud beta pubsub topics publish $TOPIC "" --attribute='download_files=["gs://bucket1/path/to/file"]'
-messageIds: '49718447408725'
+$ export BUCKET="your-bucket"
+$ gsutil notification create -t $TOPIC -f json -e OBJECT_FINALIZE gs://$BUCKET
+$ gsutil cp [path/to/localFile] $BUCKET/path/to/remoteFile
 ```
