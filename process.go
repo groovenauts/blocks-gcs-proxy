@@ -19,10 +19,10 @@ import (
 
 type (
 	ProcessConfig struct {
-		Command  *CommandConfig  `json:"command,omitempty"`
+		Command  *CommandConfig              `json:"command,omitempty"`
 		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
-		Log      *LogConfig      `json:"log,omitempty"`
+		Log      *LogConfig                  `json:"log,omitempty"`
 	}
 )
 
