@@ -57,18 +57,18 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 	if pn.logLevel < level {
 		return nil
 	}
-	opts := map[string]string{
+	attrs := map[string]string{
 		"progress":       strconv.Itoa(int(progress)),
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
 		"level":          level.String(),
 	}
 	logAttrs := log.Fields{}
-	for k, v := range opts {
+	for k, v := range attrs {
 		logAttrs[k] = v
 	}
 	log.WithFields(logAttrs).Debugln("Publishing notification")
-	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: opts}
+	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: attrs}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
 		logAttrs["error"] = err
