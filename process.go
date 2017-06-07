@@ -21,7 +21,7 @@ type (
 	ProcessConfig struct {
 		Command  *CommandConfig  `json:"command,omitempty"`
 		Job      *JobConfig      `json:"job,omitempty"`
-		Progress *ProgressConfig `json:"progress,omitempty"`
+		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig      `json:"log,omitempty"`
 	}
 )
@@ -39,7 +39,7 @@ func (c *ProcessConfig) setup(args []string) error {
 	c.Job.setup()
 
 	if c.Progress == nil {
-		c.Progress = &ProgressConfig{}
+		c.Progress = &ProgressNotificationConfig{}
 	}
 	if c.Log == nil {
 		c.Log = &LogConfig{}

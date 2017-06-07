@@ -22,19 +22,19 @@ const (
 	COMPLETED
 )
 
-type ProgressConfig struct {
+type ProgressNotificationConfig struct {
 	Topic    string `json:"topic"`
 	LogLevel string `json:"log_level"`
 }
 
-func (c *ProgressConfig) setup() {
+func (c *ProgressNotificationConfig) setup() {
 	if c.LogLevel == "" {
 		c.LogLevel = log.InfoLevel.String()
 	}
 }
 
 type ProgressNotification struct {
-	config    *ProgressConfig
+	config    *ProgressNotificationConfig
 	publisher Publisher
 	logLevel  log.Level
 }
