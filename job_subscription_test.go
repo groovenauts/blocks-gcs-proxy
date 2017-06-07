@@ -27,10 +27,10 @@ func (p *DummyPullerForJobSubscription) Get(subscription string) (*pubsub.Subscr
 	return p.result, nil
 }
 
-func TestJobConfigSetupSustainer(t *testing.T) {
+func TestJobSubscriptionConfigSetupSustainer(t *testing.T) {
 	puller := &DummyPullerForJobSubscription{}
 
-	jc := &JobConfig{
+	jc := &JobSubscriptionConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 		Sustainer: &JobSustainerConfig{
@@ -45,7 +45,7 @@ func TestJobConfigSetupSustainer(t *testing.T) {
 	puller = &DummyPullerForJobSubscription{
 		result: &pubsub.Subscription{AckDeadlineSeconds: 300},
 	}
-	jc = &JobConfig{
+	jc = &JobSubscriptionConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 		Sustainer: &JobSustainerConfig{
@@ -62,7 +62,7 @@ func TestJobConfigSetupSustainer(t *testing.T) {
 	puller = &DummyPullerForJobSubscription{
 		result: &pubsub.Subscription{AckDeadlineSeconds: 300},
 	}
-	jc = &JobConfig{
+	jc = &JobSubscriptionConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 		Sustainer: &JobSustainerConfig{
@@ -79,7 +79,7 @@ func TestJobConfigSetupSustainer(t *testing.T) {
 	puller = &DummyPullerForJobSubscription{
 		result: &pubsub.Subscription{AckDeadlineSeconds: 400},
 	}
-	jc = &JobConfig{
+	jc = &JobSubscriptionConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 	}
@@ -134,7 +134,7 @@ func TestJobSubscriptionProcess(t *testing.T) {
 		},
 	}
 
-	jc := &JobConfig{
+	jc := &JobSubscriptionConfig{
 		Subscription: "projects/dummy-proj-999/subscriptions/test01-job-subscription",
 		PullInterval: 10,
 		Sustainer: &JobSustainerConfig{

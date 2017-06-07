@@ -20,7 +20,7 @@ import (
 type (
 	ProcessConfig struct {
 		Command  *CommandConfig  `json:"command,omitempty"`
-		Job      *JobConfig      `json:"job,omitempty"`
+		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig      `json:"log,omitempty"`
 	}
@@ -34,7 +34,7 @@ func (c *ProcessConfig) setup(args []string) error {
 
 	c.Command.Template = args
 	if c.Job == nil {
-		c.Job = &JobConfig{}
+		c.Job = &JobSubscriptionConfig{}
 	}
 	c.Job.setup()
 

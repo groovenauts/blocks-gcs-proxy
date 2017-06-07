@@ -8,19 +8,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type JobConfig struct {
+type JobSubscriptionConfig struct {
 	Subscription string              `json:"subscription,omitempty"`
 	PullInterval int                 `json:"pull_interval,omitempty"`
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
-func (c *JobConfig) setup() {
+func (c *JobSubscriptionConfig) setup() {
 	if c.PullInterval == 0 {
 		c.PullInterval = 10
 	}
 }
 
-func (c *JobConfig) setupSustainer(puller Puller) error {
+func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
 	flds := log.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
 		cs := c.Sustainer
@@ -58,7 +58,7 @@ func (c *JobConfig) setupSustainer(puller Puller) error {
 }
 
 type JobSubscription struct {
-	config *JobConfig
+	config *JobSubscriptionConfig
 	puller Puller
 }
 
