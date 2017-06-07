@@ -28,7 +28,7 @@ type DummyPublisher struct {
 
 func (dp *DummyPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pubsub.PublishResponse, error) {
 	dp.Invocations = append(dp.Invocations, &PublishInvocation{
-		Topic: topic,
+		Topic:   topic,
 		Message: msg,
 	})
 	return nil, nil
@@ -47,15 +47,15 @@ func TestProgressNotificationNotify(t *testing.T) {
 	publisher := DummyPublisher{}
 
 	config := ProgressNotificationConfig{
-		Topic: DummyTopic,
+		Topic:    DummyTopic,
 		LogLevel: "info",
 		Hostname: DummyHost,
 	}
 
 	notification := ProgressNotification{
-		config: &config,
+		config:    &config,
 		publisher: &publisher,
-		logLevel: log.InfoLevel,
+		logLevel:  log.InfoLevel,
 	}
 
 	// Normal Pattern
