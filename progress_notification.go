@@ -12,16 +12,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type Progress int
-
-const (
-	PREPARING Progress = 1 + iota
-	WORKING
-	RETRYING
-	INVALID_JOB
-	COMPLETED
-)
-
 type ProgressNotificationConfig struct {
 	Topic    string `json:"topic"`
 	LogLevel string `json:"log_level"`
