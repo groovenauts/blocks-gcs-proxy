@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strconv"
 
 	// "golang.org/x/net/context"
@@ -15,11 +16,21 @@ import (
 type ProgressNotificationConfig struct {
 	Topic    string `json:"topic"`
 	LogLevel string `json:"log_level"`
+	Hostname string `json:"hostname"`
 }
 
 func (c *ProgressNotificationConfig) setup() {
 	if c.LogLevel == "" {
 		c.LogLevel = log.InfoLevel.String()
+	}
+
+	if c.Hostname == "" {
+		h, err := os.Hostname()
+		if err != nil {
+			c.Hostname = "Unknown"
+		} else {
+			c.Hostname = h
+		}
 	}
 }
 
@@ -70,6 +81,7 @@ func (pn *ProgressNotification) notifyProgressWithOpts(job_msg_id string, progre
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
 		"level":          level.String(),
+		"host":           pn.config.Hostname,
 	}
 	for k, v := range opts {
 		attrs[k] = v
