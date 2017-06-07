@@ -52,6 +52,10 @@ func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobSte
 }
 
 func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
+	return pn.notifyProgressWithOpts(job_msg_id, progress, completed, level, data, map[string]string{})
+}
+
+func (pn *ProgressNotification) notifyProgressWithOpts(job_msg_id string, progress Progress, completed bool, level log.Level, data string, opts map[string]string) error {
 	// https://godoc.org/github.com/sirupsen/logrus#Level
 	// log.InfoLevel < log.DebugLevel => true
 	if pn.logLevel < level {
@@ -62,6 +66,9 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
 		"level":          level.String(),
+	}
+	for k, v := range opts {
+		attrs[k] = v
 	}
 	logAttrs := log.Fields{}
 	for k, v := range attrs {
