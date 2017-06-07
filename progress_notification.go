@@ -48,7 +48,11 @@ func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobSt
 }
 
 func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
-	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
+	opts := map[string]string{
+		"step":        step.String(),
+		"step_status": st.String(),
+	}
+	return pn.notifyProgressWithOpts(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg, opts)
 }
 
 func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
