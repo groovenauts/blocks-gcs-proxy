@@ -8,55 +8,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type (
-	Puller interface {
-		Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error)
-		Acknowledge(subscription, ackId string) (*pubsub.Empty, error)
-		ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error)
-		Get(subscription string) (*pubsub.Subscription, error)
-	}
-
-	pubsubPuller struct {
-		subscriptionsService *pubsub.ProjectsSubscriptionsService
-	}
-)
-
-func (pp *pubsubPuller) Pull(subscription string, pullrequest *pubsub.PullRequest) (*pubsub.PullResponse, error) {
-	return pp.subscriptionsService.Pull(subscription, pullrequest).Do()
-}
-
-func (pp *pubsubPuller) Acknowledge(subscription, ackId string) (*pubsub.Empty, error) {
-	ackRequest := &pubsub.AcknowledgeRequest{
-		AckIds: []string{ackId},
-	}
-	return pp.subscriptionsService.Acknowledge(subscription, ackRequest).Do()
-}
-
-func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (*pubsub.Empty, error) {
-	req := &pubsub.ModifyAckDeadlineRequest{
-		AckDeadlineSeconds: ackDeadlineSeconds,
-		AckIds:             ackIds,
-	}
-	return pp.subscriptionsService.ModifyAckDeadline(subscription, req).Do()
-}
-
-func (pp *pubsubPuller) Get(subscription string) (*pubsub.Subscription, error) {
-	return pp.subscriptionsService.Get(subscription).Do()
-}
-
-type JobConfig struct {
+type JobSubscriptionConfig struct {
 	Subscription string              `json:"subscription,omitempty"`
 	PullInterval int                 `json:"pull_interval,omitempty"`
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
-func (c *JobConfig) setup() {
+func (c *JobSubscriptionConfig) setup() {
 	if c.PullInterval == 0 {
 		c.PullInterval = 10
 	}
 }
 
-func (c *JobConfig) setupSustainer(puller Puller) error {
+func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
 	flds := log.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
 		cs := c.Sustainer
@@ -94,7 +58,7 @@ func (c *JobConfig) setupSustainer(puller Puller) error {
 }
 
 type JobSubscription struct {
-	config *JobConfig
+	config *JobSubscriptionConfig
 	puller Puller
 }
 

@@ -12,46 +12,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type (
-	Publisher interface {
-		Publish(topic string, msg *pubsub.PubsubMessage) (*pubsub.PublishResponse, error)
-	}
-
-	pubsubPublisher struct {
-		topicsService *pubsub.ProjectsTopicsService
-	}
-)
-
-func (pp *pubsubPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pubsub.PublishResponse, error) {
-	req := &pubsub.PublishRequest{
-		Messages: []*pubsub.PubsubMessage{msg},
-	}
-	return pp.topicsService.Publish(topic, req).Do()
-}
-
-type Progress int
-
-const (
-	PREPARING Progress = 1 + iota
-	WORKING
-	RETRYING
-	INVALID_JOB
-	COMPLETED
-)
-
-type ProgressConfig struct {
+type ProgressNotificationConfig struct {
 	Topic    string `json:"topic"`
 	LogLevel string `json:"log_level"`
 }
 
-func (c *ProgressConfig) setup() {
+func (c *ProgressNotificationConfig) setup() {
 	if c.LogLevel == "" {
 		c.LogLevel = log.InfoLevel.String()
 	}
 }
 
 type ProgressNotification struct {
-	config    *ProgressConfig
+	config    *ProgressNotificationConfig
 	publisher Publisher
 	logLevel  log.Level
 }
