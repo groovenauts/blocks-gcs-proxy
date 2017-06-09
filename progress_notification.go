@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strconv"
 
 	// "golang.org/x/net/context"
@@ -12,46 +13,29 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type (
-	Publisher interface {
-		Publish(topic string, msg *pubsub.PubsubMessage) (*pubsub.PublishResponse, error)
-	}
-
-	pubsubPublisher struct {
-		topicsService *pubsub.ProjectsTopicsService
-	}
-)
-
-func (pp *pubsubPublisher) Publish(topic string, msg *pubsub.PubsubMessage) (*pubsub.PublishResponse, error) {
-	req := &pubsub.PublishRequest{
-		Messages: []*pubsub.PubsubMessage{msg},
-	}
-	return pp.topicsService.Publish(topic, req).Do()
-}
-
-type Progress int
-
-const (
-	PREPARING Progress = 1 + iota
-	WORKING
-	RETRYING
-	INVALID_JOB
-	COMPLETED
-)
-
-type ProgressConfig struct {
+type ProgressNotificationConfig struct {
 	Topic    string `json:"topic"`
 	LogLevel string `json:"log_level"`
+	Hostname string `json:"hostname"`
 }
 
-func (c *ProgressConfig) setup() {
+func (c *ProgressNotificationConfig) setup() {
 	if c.LogLevel == "" {
 		c.LogLevel = log.InfoLevel.String()
+	}
+
+	if c.Hostname == "" {
+		h, err := os.Hostname()
+		if err != nil {
+			c.Hostname = "Unknown"
+		} else {
+			c.Hostname = h
+		}
 	}
 }
 
 type ProgressNotification struct {
-	config    *ProgressConfig
+	config    *ProgressNotificationConfig
 	publisher Publisher
 	logLevel  log.Level
 }
@@ -75,27 +59,39 @@ func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobSt
 }
 
 func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
-	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg)
+	opts := map[string]string{
+		"step":        step.String(),
+		"step_status": st.String(),
+	}
+	return pn.notifyProgressWithOpts(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg, opts)
 }
 
 func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
+	return pn.notifyProgressWithOpts(job_msg_id, progress, completed, level, data, map[string]string{})
+}
+
+func (pn *ProgressNotification) notifyProgressWithOpts(job_msg_id string, progress Progress, completed bool, level log.Level, data string, opts map[string]string) error {
 	// https://godoc.org/github.com/sirupsen/logrus#Level
 	// log.InfoLevel < log.DebugLevel => true
 	if pn.logLevel < level {
 		return nil
 	}
-	opts := map[string]string{
+	attrs := map[string]string{
 		"progress":       strconv.Itoa(int(progress)),
 		"completed":      strconv.FormatBool(completed),
 		"job_message_id": job_msg_id,
 		"level":          level.String(),
+		"host":           pn.config.Hostname,
+	}
+	for k, v := range opts {
+		attrs[k] = v
 	}
 	logAttrs := log.Fields{}
-	for k, v := range opts {
+	for k, v := range attrs {
 		logAttrs[k] = v
 	}
 	log.WithFields(logAttrs).Debugln("Publishing notification")
-	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: opts}
+	m := &pubsub.PubsubMessage{Data: base64.StdEncoding.EncodeToString([]byte(data)), Attributes: attrs}
 	_, err := pn.publisher.Publish(pn.config.Topic, m)
 	if err != nil {
 		logAttrs["error"] = err
