@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
@@ -128,8 +127,11 @@ func main() {
 				workspace := c.String("workspace")
 
 				type Msg struct {
-					Attributes map[string]string `json:"attributes"`
-					Data       string            `json:"data"`
+					Attributes  map[string]string `json:"attributes"`
+					Data        string            `json:"data"`
+					MessageId   string            `json:"messageId"`
+					PublishTime string            `json:"publishTime"`
+					AckId       string            `json:"ackId"`
 				}
 				var msg Msg
 
@@ -150,12 +152,13 @@ func main() {
 					config:    config.Command,
 					message: &JobMessage{
 						raw: &pubsub.ReceivedMessage{
-							AckId: "DummyAckId",
+							AckId: msg.AckId,
 							Message: &pubsub.PubsubMessage{
-								Attributes:  msg.Attributes,
-								Data:        msg.Data,
-								MessageId:   "DummyMessageId",
-								PublishTime: time.Now().Format(time.RFC3339),
+								Attributes: msg.Attributes,
+								Data:       msg.Data,
+								MessageId:  msg.MessageId,
+								// PublishTime: time.Now().Format(time.RFC3339),
+								PublishTime: msg.PublishTime,
 							},
 						},
 					},
@@ -165,6 +168,7 @@ func main() {
 				return err
 			},
 			Flags: []cli.Flag{
+				configFlag,
 				cli.StringFlag{
 					Name:  "message, m",
 					Usage: "Path to the message json file which has attributes and data",
