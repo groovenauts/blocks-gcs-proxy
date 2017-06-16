@@ -150,6 +150,9 @@ func (job *Job) prepare() error {
 }
 
 func (job *Job) setupWorkspace() error {
+	if job.workspace != "" {
+		return nil
+	}
 	dir, err := ioutil.TempDir("", "workspace")
 	if err != nil {
 		log.Fatal(err)

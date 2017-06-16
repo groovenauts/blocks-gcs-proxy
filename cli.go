@@ -1,8 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"time"
+
+	pubsub "google.golang.org/api/pubsub/v1"
 
 	"github.com/urfave/cli"
 )
@@ -108,6 +113,65 @@ func main() {
 					Name:  "uploaders, n",
 					Usage: "Number of uploaders",
 					Value: 6,
+				},
+			},
+		},
+
+		{
+			Name:  "exec",
+			Usage: "Execute job without download nor upload",
+			Action: func(c *cli.Context) error {
+				config := &ProcessConfig{}
+				config.Log = &LogConfig{Level: "debug"}
+				config.setup([]string{})
+				msg_file := c.String("message")
+				workspace := c.String("workspace")
+
+				type Msg struct {
+					Attributes map[string]string `json:"attributes"`
+					Data       string            `json:"data"`
+				}
+				var msg Msg
+
+				data, err := ioutil.ReadFile(msg_file)
+				if err != nil {
+					fmt.Printf("Error to read file %v because of %v\n", msg_file, err)
+					os.Exit(1)
+				}
+
+				err = json.Unmarshal(data, &msg)
+				if err != nil {
+					fmt.Printf("Error to parse json file %v because of %v\n", msg_file, err)
+					os.Exit(1)
+				}
+
+				job := &Job{
+					workspace: workspace,
+					config:    config.Command,
+					message: &JobMessage{
+						raw: &pubsub.ReceivedMessage{
+							AckId: "DummyAckId",
+							Message: &pubsub.PubsubMessage{
+								Attributes:  msg.Attributes,
+								Data:        msg.Data,
+								MessageId:   "DummyMessageId",
+								PublishTime: time.Now().Format(time.RFC3339),
+							},
+						},
+					},
+				}
+				fmt.Printf("Executing job %v\n", job.workspace)
+				err = job.uploadFiles()
+				return err
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "message, m",
+					Usage: "Path to the message json file which has attributes and data",
+				},
+				cli.StringFlag{
+					Name:  "workspace, w",
+					Usage: "Path to workspace directory which has downloads and uploads",
 				},
 			},
 		},
