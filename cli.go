@@ -120,9 +120,8 @@ func main() {
 			Name:  "exec",
 			Usage: "Execute job without download nor upload",
 			Action: func(c *cli.Context) error {
-				config := &ProcessConfig{}
-				config.Log = &LogConfig{Level: "debug"}
-				config.setup([]string{})
+				config := LoadAndSetupProcessConfig(c)
+
 				msg_file := c.String("message")
 				workspace := c.String("workspace")
 
