@@ -49,10 +49,7 @@ messageIds: '49718447408725'
 $ cd blocks-gcs-proxy/examples/basic
 
 $ export WORKSPACE=$PWD/tmp/workspace
-$ export UPLOADS_DIR=$WORKSPACE/uploads
 $ export DOWNLOADS_DIR=$WORKSPACE/downloads
-$ mkdir -p $DOWNLOADS_DIR
-$ mkdir -p $UPLOADS_DIR
 $ mkdir -p $DOWNLOADS_DIR/bucket1/dir1
 $ echo "test1" > $DOWNLOADS_DIR/bucket1/dir1/test.txt
 
@@ -66,5 +63,6 @@ $ docker run \
         -w /usr/app/batch_type_example/tmp \
         -m /usr/app/batch_type_example/tmp/test_message.json
 
-$ find $UPLOADS_DIR
+$ find $WORKSPACE/uploads
+$ cat $WORKSPACE/uploads/**/*.*
 ```
