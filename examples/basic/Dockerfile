@@ -14,6 +14,7 @@ ENV BLOCKS_GCS_PROXY_VERSION 0.6.2-alpha1
 RUN mkdir -p /usr/app && \
     curl -L --output ${APP_HOME}/blocks-gcs-proxy \
          https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
-    chmod +x ${APP_HOME}/blocks-gcs-proxy
+    chmod +x ${APP_HOME}/blocks-gcs-proxy && \
+    ./blocks-gcs-proxy --version
 
 CMD ["./blocks-gcs-proxy", "./app.sh", "%{download_files.0}", "%{downloads_dir}", "%{uploads_dir}", "test"]
