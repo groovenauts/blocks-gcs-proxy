@@ -219,7 +219,7 @@ func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
 		fmt.Printf("Error to load %v cause of %v\n", path, err)
 		os.Exit(1)
 	}
-	err = config.setup(os.Args[1:])
+	err = config.setup(c.Args())
 	if err != nil {
 		fmt.Printf("Error to setup %v cause of %v\n", path, err)
 		os.Exit(1)
