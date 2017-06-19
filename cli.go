@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func main() {
+func newApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = "blocks-gcs-proxy"
 	app.Usage = "github.com/groovenauts/blocks-gcs-proxy"
@@ -186,7 +186,11 @@ func main() {
 	}
 
 	app.Action = run
+	return app
+}
 
+func main() {
+	app := newApp()
 	app.Run(os.Args)
 }
 
