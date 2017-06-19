@@ -162,8 +162,13 @@ func main() {
 						},
 					},
 				}
-				fmt.Printf("Executing job %v\n", job.workspace)
-				err = job.uploadFiles()
+				fmt.Printf("Preparing job\n")
+				err = job.prepare()
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Executing job\n")
+				err = job.execute()
 				return err
 			},
 			Flags: []cli.Flag{
