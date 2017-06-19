@@ -66,3 +66,14 @@ $ docker run \
 $ find $WORKSPACE/uploads
 $ cat $WORKSPACE/uploads/**/*.*
 ```
+
+### How to execute command locally
+
+Download `blocks-gcs-proxy` to somewhere.
+
+```
+$ path/to/blocks-gcs-proxy exec \
+    ./app.sh %{download_files.0} %{downloads_dir} %{uploads_dir} test \
+    -w $WORKSPACE \
+    -m $WORKSPACE/test_message.json
+```
