@@ -1,7 +1,0 @@
-{
-  "attributes": {
-    "download_files": [
-      "gs://bucket1/dir1/test.txt"
-    ]
-  }
-}

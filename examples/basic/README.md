@@ -56,7 +56,7 @@ $ mkdir -p $UPLOADS_DIR
 $ mkdir -p $DOWNLOADS_DIR/bucket1/dir1
 $ echo "test1" > $DOWNLOADS_DIR/bucket1/dir1/test.txt
 
-$ cp exec_test.json $WORKSPACE
+$ cp test_message.json $WORKSPACE
 
 $ docker run \
     -v $WORKSPACE:/usr/app/batch_type_example/tmp \
@@ -64,7 +64,7 @@ $ docker run \
     ./blocks-gcs-proxy exec \
         ./app.sh %{download_files.0} %{downloads_dir} %{uploads_dir} test \
         -w /usr/app/batch_type_example/tmp \
-        -m /usr/app/batch_type_example/tmp/exec_test.json
+        -m /usr/app/batch_type_example/tmp/test_message.json
 
 $ find $UPLOADS_DIR
 ```
