@@ -57,7 +57,7 @@ $ cp test_message.json $WORKSPACE
 
 $ docker run \
     -v $WORKSPACE:/usr/app/batch_type_example/tmp \
-    groovenauts/concurrent_batch_basic_example:0.6.2-alpha1 \
+    groovenauts/concurrent_batch_basic_example:0.6.2-alpha3 \
     ./blocks-gcs-proxy exec \
         ./app.sh %{download_files.0} %{downloads_dir} %{uploads_dir} test \
         -w /usr/app/batch_type_example/tmp \
