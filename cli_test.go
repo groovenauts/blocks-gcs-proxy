@@ -9,7 +9,7 @@ import (
 )
 
 type TestAppInvocation struct {
-	Cmd string
+	Cmd  string
 	Args []string
 }
 
@@ -18,7 +18,7 @@ func NewAppTestRun(args []string) []*TestAppInvocation {
 	return AppTestRun(app, args)
 }
 
-func AppTestRun(app *cli.App, args []string) []*TestAppInvocation  {
+func AppTestRun(app *cli.App, args []string) []*TestAppInvocation {
 	invocations := []*TestAppInvocation{}
 
 	newCommands := []cli.Command{}
@@ -31,7 +31,7 @@ func AppTestRun(app *cli.App, args []string) []*TestAppInvocation  {
 		newCommands = append(newCommands, newCmd)
 	}
 	app.Commands = newCommands
-	
+
 	app.Action = func(c *cli.Context) error {
 		invocations = append(invocations, &TestAppInvocation{"main", []string(c.Args())})
 		return nil
