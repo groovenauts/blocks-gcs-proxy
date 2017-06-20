@@ -150,12 +150,15 @@ func (job *Job) prepare() error {
 }
 
 func (job *Job) setupWorkspace() error {
-	dir, err := ioutil.TempDir("", "workspace")
-	if err != nil {
-		log.Fatal(err)
-		return err
+	dir := job.workspace
+	if dir == "" {
+		var err error
+		dir, err = ioutil.TempDir("", "workspace")
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
 	}
-
 	subdirs := []string{
 		filepath.Join(dir, "downloads"),
 		filepath.Join(dir, "uploads"),

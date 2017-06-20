@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+
+	pubsub "google.golang.org/api/pubsub/v1"
 
 	"github.com/urfave/cli"
 )
 
-func main() {
+func newApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = "blocks-gcs-proxy"
 	app.Usage = "github.com/groovenauts/blocks-gcs-proxy"
@@ -111,10 +115,82 @@ func main() {
 				},
 			},
 		},
+
+		{
+			Name:  "exec",
+			Usage: "Execute job without download nor upload",
+			Action: func(c *cli.Context) error {
+				config := LoadAndSetupProcessConfig(c)
+
+				msg_file := c.String("message")
+				workspace := c.String("workspace")
+
+				type Msg struct {
+					Attributes  map[string]string `json:"attributes"`
+					Data        string            `json:"data"`
+					MessageId   string            `json:"messageId"`
+					PublishTime string            `json:"publishTime"`
+					AckId       string            `json:"ackId"`
+				}
+				var msg Msg
+
+				data, err := ioutil.ReadFile(msg_file)
+				if err != nil {
+					fmt.Printf("Error to read file %v because of %v\n", msg_file, err)
+					os.Exit(1)
+				}
+
+				err = json.Unmarshal(data, &msg)
+				if err != nil {
+					fmt.Printf("Error to parse json file %v because of %v\n", msg_file, err)
+					os.Exit(1)
+				}
+
+				job := &Job{
+					workspace: workspace,
+					config:    config.Command,
+					message: &JobMessage{
+						raw: &pubsub.ReceivedMessage{
+							AckId: msg.AckId,
+							Message: &pubsub.PubsubMessage{
+								Attributes: msg.Attributes,
+								Data:       msg.Data,
+								MessageId:  msg.MessageId,
+								// PublishTime: time.Now().Format(time.RFC3339),
+								PublishTime: msg.PublishTime,
+							},
+						},
+					},
+				}
+				fmt.Printf("Preparing job\n")
+				err = job.prepare()
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Executing job\n")
+				err = job.execute()
+				return err
+			},
+			Flags: []cli.Flag{
+				configFlag,
+				cli.StringFlag{
+					Name:  "message, m",
+					Usage: "Path to the message json file which has attributes and data",
+				},
+				cli.StringFlag{
+					Name:  "workspace, w",
+					Usage: "Path to workspace directory which has downloads and uploads",
+				},
+			},
+		},
 	}
 
 	app.Action = run
+	return app
+}
 
+func main() {
+	app := newApp()
 	app.Run(os.Args)
 }
 
@@ -147,7 +223,7 @@ func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
 		fmt.Printf("Error to load %v cause of %v\n", path, err)
 		os.Exit(1)
 	}
-	err = config.setup(os.Args[1:])
+	err = config.setup(c.Args())
 	if err != nil {
 		fmt.Printf("Error to setup %v cause of %v\n", path, err)
 		os.Exit(1)
