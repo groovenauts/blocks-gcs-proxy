@@ -76,16 +76,15 @@ func (pn *ProgressNotification) notifyProgressWithOpts(job_msg_id string, progre
 	if pn.logLevel < level {
 		return nil
 	}
-	attrs := map[string]string{
-		"progress":       strconv.Itoa(int(progress)),
-		"completed":      strconv.FormatBool(completed),
-		"job_message_id": job_msg_id,
-		"level":          level.String(),
-		"host":           pn.config.Hostname,
-	}
+	attrs := map[string]string{}
 	for k, v := range opts {
 		attrs[k] = v
 	}
+	attrs["progress"] = strconv.Itoa(int(progress))
+	attrs["completed"] = strconv.FormatBool(completed)
+	attrs["job_message_id"] = job_msg_id
+	attrs["level"] = level.String()
+	attrs["host"] = pn.config.Hostname
 	logAttrs := log.Fields{}
 	for k, v := range attrs {
 		logAttrs[k] = v
