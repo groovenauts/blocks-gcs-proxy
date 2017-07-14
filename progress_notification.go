@@ -40,37 +40,35 @@ type ProgressNotification struct {
 	logLevel  log.Level
 }
 
-func (pn *ProgressNotification) wrap(msg_id string, step JobStep, f func() error) func() error {
+func (pn *ProgressNotification) wrap(msg_id string, step JobStep, attrs map[string]string, f func() error) func() error {
 	return func() error {
-		pn.notify(msg_id, step, STARTING)
+		pn.notify(msg_id, step, STARTING, attrs)
 		err := f()
 		if err != nil {
-			pn.notifyWithMessage(msg_id, step, FAILURE, err.Error())
+			pn.notifyWithMessage(msg_id, step, FAILURE, attrs, err.Error())
 			return err
 		}
-		pn.notify(msg_id, step, SUCCESS)
+		pn.notify(msg_id, step, SUCCESS, attrs)
 		return nil
 	}
 }
 
-func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobStepStatus) error {
+func (pn *ProgressNotification) notify(job_msg_id string, step JobStep, st JobStepStatus, attrs map[string]string) error {
 	msg := fmt.Sprintf("%v %v", step, st)
-	return pn.notifyWithMessage(job_msg_id, step, st, msg)
+	return pn.notifyWithMessage(job_msg_id, step, st, attrs, msg)
 }
 
-func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, msg string) error {
-	opts := map[string]string{
-		"step":        step.String(),
-		"step_status": st.String(),
+func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobStep, st JobStepStatus, opts map[string]string, msg string) error {
+	attrs := map[string]string{}
+	for k, v := range opts {
+		attrs[k] = v
 	}
-	return pn.notifyProgressWithOpts(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), msg, opts)
+	attrs["step"] = step.String()
+	attrs["step_status"] = st.String()
+	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), attrs, msg)
 }
 
-func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, data string) error {
-	return pn.notifyProgressWithOpts(job_msg_id, progress, completed, level, data, map[string]string{})
-}
-
-func (pn *ProgressNotification) notifyProgressWithOpts(job_msg_id string, progress Progress, completed bool, level log.Level, data string, opts map[string]string) error {
+func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, opts map[string]string, data string) error {
 	// https://godoc.org/github.com/sirupsen/logrus#Level
 	// log.InfoLevel < log.DebugLevel => true
 	if pn.logLevel < level {

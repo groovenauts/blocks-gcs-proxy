@@ -109,7 +109,7 @@ func (job *Job) runWithoutErrorHandling() error {
 }
 
 func (job *Job) withNotify(step JobStep, f func() error) func() error {
-	return job.notification.wrap(job.message.MessageId(), step, f)
+	return job.notification.wrap(job.message.MessageId(), step, job.message.raw.Message.Attributes, f)
 }
 
 func (job *Job) prepare() error {
