@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/groovenauts/blocks-variable"
+	"github.com/satori/go.uuid"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -51,6 +52,9 @@ type Job struct {
 	downloadFileMap     map[string]string
 	remoteDownloadFiles interface{}
 	localDownloadFiles  interface{}
+
+	// This is set at setupExecUUID
+	execUUID string
 
 	cmd *exec.Cmd
 }
@@ -122,6 +126,8 @@ func (job *Job) prepare() error {
 		return err
 	}
 
+	job.message.InsertExecUUID()
+
 	err = job.setupWorkspace()
 	if err != nil {
 		return err
@@ -147,6 +153,11 @@ func (job *Job) prepare() error {
 		return err
 	}
 	return nil
+}
+
+func (job *Job) setupExecUUID() {
+	job.execUUID = uuid.NewV4().String()
+	job.message.raw.Message.Attributes[ExecUUIDKey] = job.execUUID
 }
 
 func (job *Job) setupWorkspace() error {

@@ -39,6 +39,15 @@ func NewBasicJob() *Job {
 	}
 }
 
+func TestJobSetupExecUUIDNormal(t *testing.T) {
+	job := NewBasicJob()
+	assert.Empty(t, job.execUUID)
+	assert.Empty(t, job.message.raw.Message.Attributes[ExecUUIDKey])
+	job.setupExecUUID()
+	assert.NotEmpty(t, job.execUUID)
+	assert.Equal(t, job.execUUID, job.message.raw.Message.Attributes[ExecUUIDKey])
+}
+
 func TestJobBuildNormal(t *testing.T) {
 	job := NewBasicJob()
 	err := job.build()

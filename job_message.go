@@ -50,6 +50,8 @@ type (
 	}
 )
 
+const ExecUUIDKey = "concurrent-batch.exec-uuid"
+
 func (m *JobMessage) Validate() error {
 	if m.MessageId() == "" {
 		return &InvalidJobError{msg: "no MessageId is given"}
@@ -59,6 +61,9 @@ func (m *JobMessage) Validate() error {
 
 func (m *JobMessage) MessageId() string {
 	return m.raw.Message.MessageId
+}
+
+func (m *JobMessage) InsertExecUUID() {
 }
 
 func (m *JobMessage) DownloadFiles() interface{} {
