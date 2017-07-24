@@ -61,21 +61,26 @@ type Job struct {
 
 func (job *Job) run() error {
 	err := job.runWithoutErrorHandling()
+	var f func() error
+	if job.retryable(err) {
+		f = job.withNotify(NACKSENDING, job.message.Nack)
+	} else {
+		f = job.withNotify(CANCELLING, job.message.Ack)
+	}
+	e := f()
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func (job *Job) retryable(err error) bool {
 	switch err.(type) {
 	case RetryableError:
-		var f func() error
 		e := err.(RetryableError)
-		if e.Retryable() {
-			f = job.withNotify(NACKSENDING, job.message.Nack)
-		} else {
-			f = job.withNotify(CANCELLING, job.message.Ack)
-		}
-		err := f()
-		if err != nil {
-			return err
-		}
+		return e.Retryable()
 	}
-	return err
+	return true
 }
 
 func (job *Job) runWithoutErrorHandling() error {
