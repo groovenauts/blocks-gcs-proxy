@@ -114,7 +114,7 @@ func (job *Job) runWithoutErrorHandling() error {
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (job *Job) withNotify(step JobStep, f func() error) func() error {
