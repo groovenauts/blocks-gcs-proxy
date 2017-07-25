@@ -61,6 +61,9 @@ type Job struct {
 
 func (job *Job) run() error {
 	err := job.runWithoutErrorHandling()
+	if err == nil {
+		return nil
+	}
 	var f func() error
 	if job.retryable(err) {
 		f = job.withNotify(NACKSENDING, job.message.Nack)
