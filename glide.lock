@@ -1,5 +1,5 @@
-hash: 9d940b97492ab84644b47000b006c4f408bf1baa0717590911cd2200abb6c6d8
-updated: 2017-04-25T20:13:49.943036478+09:00
+hash: 153035d07a06439b8ab4e5b2e8e3bb9980a6b3d062804a4260c9d5e094ac10b2
+updated: 2017-07-14T18:27:00.438286103+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -16,10 +16,12 @@ imports:
   version: da06d194a00e19ce00d9011a13931c3f6f6887c7
 - name: github.com/groovenauts/blocks-variable
   version: 833d2f1e70b82c8a0a1149827906ab32aed40276
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
-  version: 547e984ad93a90192134fc0fdb57a468edb514fe
+  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
 - name: github.com/urfave/cli
-  version: 347a9884a87374d000eec7e6445a34487c1f4a2b
+  version: 4b90d79a682b4bf685762c7452db20f2a676ecb2
 - name: golang.org/x/net
   version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
   subpackages:
@@ -39,7 +41,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sys
-  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
   - unix
 - name: google.golang.org/api
@@ -87,6 +89,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
   subpackages:
   - assert

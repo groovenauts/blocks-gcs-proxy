@@ -58,21 +58,25 @@ func TestProgressNotificationNotify(t *testing.T) {
 		logLevel:  log.InfoLevel,
 	}
 
+	baseAttrs := map[string]string{
+		"msg_id": "1234",
+	}
+
 	// Normal Pattern
 	publisher.Invocations = []*PublishInvocation{}
 
-	notification.notify(DummyJobID, INITIALIZING, STARTING)
-	notification.notify(DummyJobID, INITIALIZING, SUCCESS)
-	notification.notify(DummyJobID, DOWNLOADING, STARTING)
-	notification.notify(DummyJobID, DOWNLOADING, SUCCESS)
-	notification.notify(DummyJobID, EXECUTING, STARTING)
-	notification.notify(DummyJobID, EXECUTING, SUCCESS)
-	notification.notify(DummyJobID, UPLOADING, STARTING)
-	notification.notify(DummyJobID, UPLOADING, SUCCESS)
-	notification.notify(DummyJobID, CLEANUP, STARTING)
-	notification.notify(DummyJobID, CLEANUP, SUCCESS)
-	notification.notify(DummyJobID, ACKSENDING, STARTING)
-	notification.notify(DummyJobID, ACKSENDING, SUCCESS)
+	notification.notify(DummyJobID, INITIALIZING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, INITIALIZING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, DOWNLOADING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, DOWNLOADING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, EXECUTING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, EXECUTING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, UPLOADING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, UPLOADING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, CLEANUP, STARTING, baseAttrs)
+	notification.notify(DummyJobID, CLEANUP, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, ACKSENDING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, ACKSENDING, SUCCESS, baseAttrs)
 
 	assert.Equal(t, len(publisher.Invocations), 2)
 
@@ -106,22 +110,25 @@ func TestProgressNotificationNotify(t *testing.T) {
 		assert.Equal(t, expected.progress, attrs["progress"])
 		assert.Equal(t, expected.completed, attrs["completed"])
 		assert.Equal(t, expected.level, attrs["level"])
+		for k, v := range baseAttrs {
+			assert.Equal(t, v, attrs[k])
+		}
 	}
 
 	// Executing failure pattern
 
 	publisher.Invocations = []*PublishInvocation{}
 
-	notification.notify(DummyJobID, INITIALIZING, STARTING)
-	notification.notify(DummyJobID, INITIALIZING, SUCCESS)
-	notification.notify(DummyJobID, DOWNLOADING, STARTING)
-	notification.notify(DummyJobID, DOWNLOADING, SUCCESS)
-	notification.notify(DummyJobID, EXECUTING, STARTING)
-	notification.notify(DummyJobID, EXECUTING, FAILURE)
-	notification.notify(DummyJobID, CLEANUP, STARTING)
-	notification.notify(DummyJobID, CLEANUP, SUCCESS)
-	notification.notify(DummyJobID, NACKSENDING, STARTING)
-	notification.notify(DummyJobID, NACKSENDING, SUCCESS)
+	notification.notify(DummyJobID, INITIALIZING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, INITIALIZING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, DOWNLOADING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, DOWNLOADING, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, EXECUTING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, EXECUTING, FAILURE, baseAttrs)
+	notification.notify(DummyJobID, CLEANUP, STARTING, baseAttrs)
+	notification.notify(DummyJobID, CLEANUP, SUCCESS, baseAttrs)
+	notification.notify(DummyJobID, NACKSENDING, STARTING, baseAttrs)
+	notification.notify(DummyJobID, NACKSENDING, SUCCESS, baseAttrs)
 
 	assert.Equal(t, len(publisher.Invocations), 3)
 
@@ -164,5 +171,8 @@ func TestProgressNotificationNotify(t *testing.T) {
 		assert.Equal(t, expected.progress, attrs["progress"])
 		assert.Equal(t, expected.completed, attrs["completed"])
 		assert.Equal(t, expected.level, attrs["level"])
+		for k, v := range baseAttrs {
+			assert.Equal(t, v, attrs[k])
+		}
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/groovenauts/blocks-variable"
+	"github.com/satori/go.uuid"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -52,26 +53,37 @@ type Job struct {
 	remoteDownloadFiles interface{}
 	localDownloadFiles  interface{}
 
+	// This is set at setupExecUUID
+	execUUID string
+
 	cmd *exec.Cmd
 }
 
 func (job *Job) run() error {
 	err := job.runWithoutErrorHandling()
+	if err == nil {
+		return nil
+	}
+	var f func() error
+	if job.retryable(err) {
+		f = job.withNotify(NACKSENDING, job.message.Nack)
+	} else {
+		f = job.withNotify(CANCELLING, job.message.Ack)
+	}
+	e := f()
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func (job *Job) retryable(err error) bool {
 	switch err.(type) {
 	case RetryableError:
-		var f func() error
 		e := err.(RetryableError)
-		if e.Retryable() {
-			f = job.withNotify(NACKSENDING, job.message.Nack)
-		} else {
-			f = job.withNotify(CANCELLING, job.message.Ack)
-		}
-		err := f()
-		if err != nil {
-			return err
-		}
+		return e.Retryable()
 	}
-	return err
+	return true
 }
 
 func (job *Job) runWithoutErrorHandling() error {
@@ -105,11 +117,11 @@ func (job *Job) runWithoutErrorHandling() error {
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (job *Job) withNotify(step JobStep, f func() error) func() error {
-	return job.notification.wrap(job.message.MessageId(), step, f)
+	return job.notification.wrap(job.message.MessageId(), step, job.message.raw.Message.Attributes, f)
 }
 
 func (job *Job) prepare() error {
@@ -121,6 +133,8 @@ func (job *Job) prepare() error {
 		log.WithFields(logAttrs).Errorf("Invalid Message")
 		return err
 	}
+
+	job.message.InsertExecUUID()
 
 	err = job.setupWorkspace()
 	if err != nil {
@@ -147,6 +161,11 @@ func (job *Job) prepare() error {
 		return err
 	}
 	return nil
+}
+
+func (job *Job) setupExecUUID() {
+	job.execUUID = uuid.NewV4().String()
+	job.message.raw.Message.Attributes[ExecUUIDKey] = job.execUUID
 }
 
 func (job *Job) setupWorkspace() error {
