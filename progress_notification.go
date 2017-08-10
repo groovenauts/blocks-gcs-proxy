@@ -76,7 +76,12 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 	}
 	attrs := map[string]string{}
 	for k, v := range opts {
-		attrs[k] = v
+		buf := []byte(v)
+		if len(buf) > 1024 {
+			attrs[k] = string(buf[0:1024])
+		} else {
+			attrs[k] = v
+		}
 	}
 	attrs["progress"] = strconv.Itoa(int(progress))
 	attrs["completed"] = strconv.FormatBool(completed)
