@@ -23,6 +23,8 @@ type (
 		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig                  `json:"log,omitempty"`
+		Download *WorkerConfig               `json:"download"`
+		Upload   *WorkerConfig               `json:"upload"`
 	}
 )
 

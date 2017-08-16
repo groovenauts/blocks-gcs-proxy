@@ -9,6 +9,17 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
+type WorkerConfig struct {
+	Workers  int `json:"workers,omitempty"`
+	MaxTries int `json:"max_tries,omitempty"`
+}
+
+func (c *WorkerConfig) setup(){
+	if c.Workers < 1 {
+		c.Workers = 1
+	}
+}
+
 type Target struct {
 	Bucket    string
 	Object    string
