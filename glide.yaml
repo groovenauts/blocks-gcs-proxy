@@ -12,9 +12,10 @@ import:
   - pubsub/v1
   - iterator
 - package: github.com/Sirupsen/logrus
-- package: github.com/cenkalti/backoff
 - package: github.com/satori/go.uuid
   version: ~1.1.0
+- package: github.com/cenkalti/backoff
+  repo: https://github.com/cenkalti/backoff.git
 testImport:
 - package: github.com/stretchr/testify
   subpackages:
