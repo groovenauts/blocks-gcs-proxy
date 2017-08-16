@@ -3,8 +3,7 @@
     "options": {
       "key1": ["./cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"],
       "key2": ["./cmd2", "%{uploads_dir}", "%{download_files}"]
-    },
-    "uploaders": {{ or .UPLOADERS 8}}
+    }
   },
   "job": {
     "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ or .PIPELINE "pipeline01" }}-job-subscription",
@@ -16,5 +15,8 @@
   },
   "progress": {
     "topic": "projects/{{ .GCP_PROJECT }}/topics/{{ or .PIPELINE "pipeline01" }}-progress-topic"
+  },
+  "upload": {
+    "workers": {{ or .UPLOADERS 8}}
   }
 }
