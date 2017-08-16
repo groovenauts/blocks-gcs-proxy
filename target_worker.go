@@ -14,7 +14,7 @@ type WorkerConfig struct {
 	MaxTries int `json:"max_tries,omitempty"`
 }
 
-func (c *WorkerConfig) setup(){
+func (c *WorkerConfig) setup() {
 	if c.Workers < 1 {
 		c.Workers = 1
 	}
@@ -27,11 +27,11 @@ type Target struct {
 }
 
 type TargetWorker struct {
-	name    string
-	targets chan *Target
-	impl    func(bucket, object, srcPath string) error
-	done    bool
-	error   error
+	name     string
+	targets  chan *Target
+	impl     func(bucket, object, srcPath string) error
+	done     bool
+	error    error
 	maxTries int
 }
 

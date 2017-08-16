@@ -20,9 +20,9 @@ import (
 )
 
 type CommandConfig struct {
-	Template    []string            `json:"-"`
-	Options     map[string][]string `json:"options,omitempty"`
-	Dryrun      bool                `json:"dryrun,omitempty"`
+	Template []string            `json:"-"`
+	Options  map[string][]string `json:"options,omitempty"`
+	Dryrun   bool                `json:"dryrun,omitempty"`
 }
 
 type Job struct {
@@ -417,8 +417,8 @@ func (job *Job) downloadFiles() error {
 	downloaders := TargetWorkers{}
 	for i := 0; i < job.downloadConfig.Workers; i++ {
 		downloader := &TargetWorker{
-			name: "downoad",
-			impl: job.storage.Download,
+			name:     "downoad",
+			impl:     job.storage.Download,
 			maxTries: job.downloadConfig.MaxTries,
 		}
 		downloaders = append(downloaders, downloader)
@@ -470,8 +470,8 @@ func (job *Job) uploadFiles() error {
 	uploaders := TargetWorkers{}
 	for i := 0; i < job.uploadConfig.Workers; i++ {
 		uploader := &TargetWorker{
-			name: "upload",
-			impl: job.storage.Upload,
+			name:     "upload",
+			impl:     job.storage.Upload,
 			maxTries: job.uploadConfig.MaxTries,
 		}
 		uploaders = append(uploaders, uploader)

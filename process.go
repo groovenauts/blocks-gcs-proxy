@@ -173,12 +173,12 @@ func (p *Process) run() error {
 	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
-			config:       p.config.Command,
+			config:         p.config.Command,
 			downloadConfig: p.config.Download,
-			uploadConfig: p.config.Upload,
-			message:      msg,
-			notification: p.notification,
-			storage:      p.storage,
+			uploadConfig:   p.config.Upload,
+			message:        msg,
+			notification:   p.notification,
+			storage:        p.storage,
 		}
 		err := job.run()
 		if err != nil {
