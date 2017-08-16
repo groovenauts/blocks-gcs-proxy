@@ -32,6 +32,7 @@ type TargetWorker struct {
 	impl    func(bucket, object, srcPath string) error
 	done    bool
 	error   error
+	maxTries int
 }
 
 func (w *TargetWorker) run() {
@@ -59,7 +60,8 @@ func (w *TargetWorker) run() {
 
 		eb := backoff.NewExponentialBackOff()
 		eb.InitialInterval = 30 * time.Second
-		err := backoff.Retry(f, eb)
+		b := backoff.WithMaxTries(eb, uint64(w.maxTries))
+		err := backoff.Retry(f, b)
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Failed to %v\n", w.name)

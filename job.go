@@ -36,6 +36,10 @@ func (c *CommandConfig) setup() {
 
 type Job struct {
 	config *CommandConfig
+
+	downloadConfig *WorkerConfig
+	uploadConfig   *WorkerConfig
+
 	// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 	message      *JobMessage
 	notification *ProgressNotification
@@ -420,10 +424,11 @@ func (job *Job) downloadFiles() error {
 	}
 
 	downloaders := TargetWorkers{}
-	for i := 0; i < job.config.Downloaders; i++ {
+	for i := 0; i < job.downloadConfig.Workers; i++ {
 		downloader := &TargetWorker{
 			name: "downoad",
 			impl: job.storage.Download,
+			maxTries: job.downloadConfig.MaxTries,
 		}
 		downloaders = append(downloaders, downloader)
 	}
@@ -472,10 +477,11 @@ func (job *Job) uploadFiles() error {
 	}
 
 	uploaders := TargetWorkers{}
-	for i := 0; i < job.config.Uploaders; i++ {
+	for i := 0; i < job.uploadConfig.Workers; i++ {
 		uploader := &TargetWorker{
 			name: "upload",
 			impl: job.storage.Upload,
+			maxTries: job.uploadConfig.MaxTries,
 		}
 		uploaders = append(uploaders, uploader)
 	}

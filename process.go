@@ -50,6 +50,16 @@ func (c *ProcessConfig) setup(args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if c.Download == nil {
+		c.Download = &WorkerConfig{}
+	}
+	c.Download.setup()
+
+	if c.Upload == nil {
+		c.Upload = &WorkerConfig{}
+	}
+	c.Upload.setup()
 	return nil
 }
 
@@ -165,6 +175,8 @@ func (p *Process) run() error {
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
 			config:       p.config.Command,
+			downloadConfig: p.config.Download,
+			uploadConfig: p.config.Upload,
 			message:      msg,
 			notification: p.notification,
 			storage:      p.storage,
