@@ -1,5 +1,5 @@
-hash: 153035d07a06439b8ab4e5b2e8e3bb9980a6b3d062804a4260c9d5e094ac10b2
-updated: 2017-07-14T18:27:00.438286103+09:00
+hash: 4700d53109e387685ad644c032f07400bb2356439a0ed088aa8fccb960618a57
+updated: 2017-08-16T14:52:24.202421095+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -7,7 +7,8 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/cenkalti/backoff
-  version: b02f2bbce11d7ea6b97f282ef1771b0fe2f65ef3
+  version: 61153c768f31ee5f130071d08fc82b85208528de
+  repo: https://github.com/cenkalti/backoff.git
 - name: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
