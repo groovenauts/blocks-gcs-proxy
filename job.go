@@ -25,15 +25,6 @@ type CommandConfig struct {
 	Dryrun      bool                `json:"dryrun,omitempty"`
 }
 
-func (c *CommandConfig) setup() {
-	if c.Downloaders < 1 {
-		c.Downloaders = 1
-	}
-	if c.Uploaders < 1 {
-		c.Uploaders = 1
-	}
-}
-
 type Job struct {
 	config *CommandConfig
 
