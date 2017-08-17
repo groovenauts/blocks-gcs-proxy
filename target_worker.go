@@ -14,10 +14,11 @@ type WorkerConfig struct {
 	MaxTries int `json:"max_tries,omitempty"`
 }
 
-func (c *WorkerConfig) setup() {
+func (c *WorkerConfig) setup() *ConfigError {
 	if c.Workers < 1 {
 		c.Workers = 1
 	}
+	return nil
 }
 
 type Target struct {

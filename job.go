@@ -25,6 +25,10 @@ type CommandConfig struct {
 	Dryrun   bool                `json:"dryrun,omitempty"`
 }
 
+func (c *CommandConfig) setup() *ConfigError {
+	return nil
+}
+
 type Job struct {
 	config *CommandConfig
 

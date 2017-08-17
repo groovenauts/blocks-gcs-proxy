@@ -32,18 +32,28 @@ func (c *ProcessConfig) setup(args []string) error {
 	if c.Command == nil {
 		c.Command = &CommandConfig{}
 	}
+	err := c.Command.setup()
+	if err != nil {
+		err.Add("command")
+		return err
+	}
 
 	c.Command.Template = args
 	if c.Job == nil {
 		c.Job = &JobSubscriptionConfig{}
 	}
-	c.Job.setup()
+	err = c.Job.setup()
+	if err != nil {
+		err.Add("job")
+		return err
+	}
 
 	if c.Progress == nil {
 		c.Progress = &ProgressNotificationConfig{}
 	}
-	err := c.Progress.setup()
+	err = c.Progress.setup()
 	if err != nil {
+		err.Add("progress")
 		return err
 	}
 
@@ -52,18 +62,28 @@ func (c *ProcessConfig) setup(args []string) error {
 	}
 	err = c.Log.setup()
 	if err != nil {
+		err.Add("log")
 		return err
 	}
 
 	if c.Download == nil {
 		c.Download = &WorkerConfig{}
 	}
-	c.Download.setup()
+	err = c.Download.setup()
+	if err != nil {
+		err.Add("download")
+		return err
+	}
 
 	if c.Upload == nil {
 		c.Upload = &WorkerConfig{}
 	}
-	c.Upload.setup()
+	err = c.Upload.setup()
+	if err != nil {
+		err.Add("upload")
+		return err
+	}
+
 	return nil
 }
 

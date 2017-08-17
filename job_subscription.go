@@ -14,10 +14,11 @@ type JobSubscriptionConfig struct {
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 }
 
-func (c *JobSubscriptionConfig) setup() {
+func (c *JobSubscriptionConfig) setup() *ConfigError {
 	if c.PullInterval == 0 {
 		c.PullInterval = 10
 	}
+	return nil
 }
 
 func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
