@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
+	logging "google.golang.org/api/logging/v2beta1"
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
 
@@ -134,11 +135,21 @@ func (p *Process) setup() error {
 	ctx := context.Background()
 
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
-	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope)
+	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope, logging.LoggingWriteScope)
 
 	if err != nil {
 		log.Fatalln("Failed to create DefaultClient")
 		return err
+	}
+
+	// Add stackdriver logging
+	if p.config.Log.Stackdriver != nil {
+		err = p.config.Log.Stackdriver.setupSdHook(client)
+		if err != nil {
+			logAttrs := log.Fields{"client": client, "error": err}
+			log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
+			return err
+		}
 	}
 
 	// Create a storageService

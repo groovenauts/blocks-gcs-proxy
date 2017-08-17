@@ -1,5 +1,12 @@
 package main
 
+import (
+	"net/http"
+
+	"github.com/knq/sdhook"
+	log "github.com/sirupsen/logrus"
+)
+
 type LoggingConfig struct {
 	ProjectID       string						`json:"project_id"`
 	LogName		      string						`json:"log_name"`
@@ -18,5 +25,19 @@ func (c *LoggingConfig) setup() *ConfigError {
 			return &ConfigError{Name: name, Message: "is required"}
 		}
 	}
+	return nil
+}
+
+func (c *LoggingConfig) setupSdHook(client *http.Client) error {
+	hook, err := sdhook.New(
+		sdhook.HTTPClient(client),
+		sdhook.ProjectID(c.ProjectID),
+		sdhook.LogName(c.LogName),
+		sdhook.Resource(sdhook.ResType(c.Type), c.Labels),
+	)
+	if err != nil {
+		return err
+	}
+	log.AddHook(hook)
 	return nil
 }
