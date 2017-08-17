@@ -8,20 +8,20 @@ import (
 )
 
 type LoggingConfig struct {
-	ProjectID       string						`json:"project_id"`
-	LogName		      string						`json:"log_name"`
-	Type            string            `json:"type"`
-	Labels          map[string]string `json:"labels"`
-	ErrorReportingService string      `json:"error_reporting_service"`
+	ProjectID             string            `json:"project_id"`
+	LogName               string            `json:"log_name"`
+	Type                  string            `json:"type"`
+	Labels                map[string]string `json:"labels"`
+	ErrorReportingService string            `json:"error_reporting_service"`
 }
 
 func (c *LoggingConfig) setup() *ConfigError {
-	for name, blank := range map[string]bool {
+	for name, blank := range map[string]bool{
 		"project_id": c.ProjectID == "",
-		"log_name": c.LogName == "",
-		"type": c.Type == "",
-		"labels": c.Labels == nil,
-	}{
+		"log_name":   c.LogName == "",
+		"type":       c.Type == "",
+		"labels":     c.Labels == nil,
+	} {
 		if blank {
 			return &ConfigError{Name: name, Message: "is required"}
 		}

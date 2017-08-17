@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cenkalti/backoff"
+	log "github.com/sirupsen/logrus"
 )
 
 type WorkerConfig struct {
