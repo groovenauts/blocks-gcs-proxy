@@ -1,5 +1,5 @@
-hash: 8adcc5132c3de8fd9deead6e757f35e3965988cae27a92790eefb309cb58e3e0
-updated: 2017-08-17T14:58:57.244011327+09:00
+hash: c3180688ac2158da5cb46749c5907b30e7c61c01cf1597d75b3b1852634c2fe2
+updated: 2017-08-17T21:20:44.068678884+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -23,6 +23,8 @@ imports:
   version: da06d194a00e19ce00d9011a13931c3f6f6887c7
 - name: github.com/groovenauts/blocks-variable
   version: 833d2f1e70b82c8a0a1149827906ab32aed40276
+- name: github.com/Gurpartap/logrus-stack
+  version: 89c00d8a28f43c567d92eb81a2945301a6a9fbb9
 - name: github.com/knq/jwt
   version: 0d31af81a9cbb15756a576eef5054666a1266bb6
   subpackages:
@@ -31,14 +33,14 @@ imports:
 - name: github.com/knq/pemutil
   version: 081cdad14f5c576eab309c0de751d5f7ce4019d4
 - name: github.com/knq/sdhook
-  version: a1cc31916315b2c1a96042e3e84aa011e818dc25
-  repo: https://github.com/knq/sdhook.git
+  version: c63826842414963a8d536e33d13817e89fa23160
+  repo: https://github.com/groovenauts/sdhook.git
 - name: github.com/philhofer/fwd
   version: 1612a298117663d7bc9a760ae20d383413859798
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/sirupsen/logrus
-  version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+  version: 68806b4b77355d6c8577a2c8bbc6d547a5272491
   repo: https://github.com/sirupsen/logrus.git
 - name: github.com/tinylib/msgp
   version: 701aacd80f9ace06ea698bd7801c361fb7fe580b
