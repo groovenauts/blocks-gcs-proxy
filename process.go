@@ -42,10 +42,15 @@ func (c *ProcessConfig) setup(args []string) error {
 	if c.Progress == nil {
 		c.Progress = &ProgressNotificationConfig{}
 	}
+	err := c.Progress.setup()
+	if err != nil {
+		return err
+	}
+
 	if c.Log == nil {
 		c.Log = &LogConfig{}
 	}
-	err := c.Log.setup()
+	err = c.Log.setup()
 	if err != nil {
 		return err
 	}

@@ -19,7 +19,7 @@ type ProgressNotificationConfig struct {
 	Hostname string `json:"hostname"`
 }
 
-func (c *ProgressNotificationConfig) setup() {
+func (c *ProgressNotificationConfig) setup() *ConfigError {
 	if c.LogLevel == "" {
 		c.LogLevel = log.InfoLevel.String()
 	}
@@ -27,11 +27,12 @@ func (c *ProgressNotificationConfig) setup() {
 	if c.Hostname == "" {
 		h, err := os.Hostname()
 		if err != nil {
-			c.Hostname = "Unknown"
+			return &ConfigError{Name: "hostname", Message: "failed to get from OS"}
 		} else {
 			c.Hostname = h
 		}
 	}
+	return nil
 }
 
 type ProgressNotification struct {
