@@ -123,4 +123,4 @@ func (e *ConfigError) Error() string {
 	return fmt.Sprintf("%s %s", strings.Join(e.Ancestors, "."), e.Message)
 }
 
-type ConfigSetup func()*ConfigError
+type ConfigSetup func() *ConfigError

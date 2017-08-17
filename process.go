@@ -30,14 +30,14 @@ type (
 
 func (c *ProcessConfig) setup(args []string) error {
 	setups := map[string]ConfigSetup{
-		"command": func()*ConfigError{
+		"command": func() *ConfigError {
 			return c.setupCommand(args)
 		},
-		"job": c.setupJob,
+		"job":      c.setupJob,
 		"progress": c.setupProgress,
-		"log": c.setupLog,
+		"log":      c.setupLog,
 		"download": c.setupDownload,
-		"upload": c.setupUpload,
+		"upload":   c.setupUpload,
 	}
 	for key, setup := range setups {
 		err := setup()
