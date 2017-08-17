@@ -13,6 +13,7 @@ type LogConfig struct {
 func (c *LogConfig) setup() *ConfigError {
 	setups := []ConfigSetup{
 		c.setupLevel,
+		c.setupStackdriver,
 	}
 	for _, setup := range setups {
 		err := setup()
@@ -33,5 +34,16 @@ func (c *LogConfig) setupLevel() *ConfigError {
 		return &ConfigError{Name: "level", Message: fmt.Sprintf("is invalid because of %v", err)}
 	}
 	log.SetLevel(level)
+	return nil
+}
+
+func (c *LogConfig) setupStackdriver() *ConfigError {
+	if c.Stackdriver != nil {
+		err := c.Stackdriver.setup()
+		if err != nil {
+			err.Add("stackdriver")
+			return err
+		}
+	}
 	return nil
 }
