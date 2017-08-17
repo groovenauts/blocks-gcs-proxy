@@ -45,7 +45,7 @@ func newApp() *cli.App {
 				config := &ProcessConfig{}
 				config.Log = &LogConfig{Level: "debug"}
 				config.setup([]string{})
-				config.Command.Downloaders = c.Int("downloaders")
+				config.Download.Workers = c.Int("downloaders")
 				config.Job.Sustainer = &JobSustainerConfig{
 					Disabled: true,
 				}
@@ -88,7 +88,7 @@ func newApp() *cli.App {
 				config := &ProcessConfig{}
 				config.Log = &LogConfig{Level: "debug"}
 				config.setup([]string{})
-				config.Command.Uploaders = c.Int("uploaders")
+				config.Upload.Workers = c.Int("uploaders")
 				config.Job.Sustainer = &JobSustainerConfig{
 					Disabled: true,
 				}

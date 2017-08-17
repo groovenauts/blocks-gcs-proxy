@@ -20,24 +20,17 @@ import (
 )
 
 type CommandConfig struct {
-	Template    []string            `json:"-"`
-	Options     map[string][]string `json:"options,omitempty"`
-	Dryrun      bool                `json:"dryrun,omitempty"`
-	Uploaders   int                 `json:"uploaders,omitempty"`
-	Downloaders int                 `json:"downloaders,omitempty"`
-}
-
-func (c *CommandConfig) setup() {
-	if c.Downloaders < 1 {
-		c.Downloaders = 1
-	}
-	if c.Uploaders < 1 {
-		c.Uploaders = 1
-	}
+	Template []string            `json:"-"`
+	Options  map[string][]string `json:"options,omitempty"`
+	Dryrun   bool                `json:"dryrun,omitempty"`
 }
 
 type Job struct {
 	config *CommandConfig
+
+	downloadConfig *WorkerConfig
+	uploadConfig   *WorkerConfig
+
 	// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 	message      *JobMessage
 	notification *ProgressNotification
@@ -422,10 +415,11 @@ func (job *Job) downloadFiles() error {
 	}
 
 	downloaders := TargetWorkers{}
-	for i := 0; i < job.config.Downloaders; i++ {
+	for i := 0; i < job.downloadConfig.Workers; i++ {
 		downloader := &TargetWorker{
-			name: "downoad",
-			impl: job.storage.Download,
+			name:     "downoad",
+			impl:     job.storage.Download,
+			maxTries: job.downloadConfig.MaxTries,
 		}
 		downloaders = append(downloaders, downloader)
 	}
@@ -474,10 +468,11 @@ func (job *Job) uploadFiles() error {
 	}
 
 	uploaders := TargetWorkers{}
-	for i := 0; i < job.config.Uploaders; i++ {
+	for i := 0; i < job.uploadConfig.Workers; i++ {
 		uploader := &TargetWorker{
-			name: "upload",
-			impl: job.storage.Upload,
+			name:     "upload",
+			impl:     job.storage.Upload,
+			maxTries: job.uploadConfig.MaxTries,
 		}
 		uploaders = append(uploaders, uploader)
 	}

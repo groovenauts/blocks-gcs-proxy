@@ -23,6 +23,8 @@ type (
 		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig                  `json:"log,omitempty"`
+		Download *WorkerConfig               `json:"download"`
+		Upload   *WorkerConfig               `json:"upload"`
 	}
 )
 
@@ -30,7 +32,6 @@ func (c *ProcessConfig) setup(args []string) error {
 	if c.Command == nil {
 		c.Command = &CommandConfig{}
 	}
-	c.Command.setup()
 
 	c.Command.Template = args
 	if c.Job == nil {
@@ -48,6 +49,16 @@ func (c *ProcessConfig) setup(args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if c.Download == nil {
+		c.Download = &WorkerConfig{}
+	}
+	c.Download.setup()
+
+	if c.Upload == nil {
+		c.Upload = &WorkerConfig{}
+	}
+	c.Upload.setup()
 	return nil
 }
 
@@ -162,10 +173,12 @@ func (p *Process) run() error {
 	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
-			config:       p.config.Command,
-			message:      msg,
-			notification: p.notification,
-			storage:      p.storage,
+			config:         p.config.Command,
+			downloadConfig: p.config.Download,
+			uploadConfig:   p.config.Upload,
+			message:        msg,
+			notification:   p.notification,
+			storage:        p.storage,
 		}
 		err := job.run()
 		if err != nil {

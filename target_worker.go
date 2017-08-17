@@ -9,6 +9,17 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
+type WorkerConfig struct {
+	Workers  int `json:"workers,omitempty"`
+	MaxTries int `json:"max_tries,omitempty"`
+}
+
+func (c *WorkerConfig) setup() {
+	if c.Workers < 1 {
+		c.Workers = 1
+	}
+}
+
 type Target struct {
 	Bucket    string
 	Object    string
@@ -16,11 +27,12 @@ type Target struct {
 }
 
 type TargetWorker struct {
-	name    string
-	targets chan *Target
-	impl    func(bucket, object, srcPath string) error
-	done    bool
-	error   error
+	name     string
+	targets  chan *Target
+	impl     func(bucket, object, srcPath string) error
+	done     bool
+	error    error
+	maxTries int
 }
 
 func (w *TargetWorker) run() {
@@ -48,7 +60,8 @@ func (w *TargetWorker) run() {
 
 		eb := backoff.NewExponentialBackOff()
 		eb.InitialInterval = 30 * time.Second
-		err := backoff.Retry(f, eb)
+		b := backoff.WithMaxTries(eb, uint64(w.maxTries))
+		err := backoff.Retry(f, b)
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Failed to %v\n", w.name)
