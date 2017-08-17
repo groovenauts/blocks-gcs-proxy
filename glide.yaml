@@ -12,6 +12,7 @@ import:
   - pubsub/v1
   - iterator
 - package: github.com/Sirupsen/logrus
+- package: github.com/knq/sdhook
 - package: github.com/satori/go.uuid
   version: ~1.1.0
 - package: github.com/cenkalti/backoff
