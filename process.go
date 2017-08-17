@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
+	errorReporting "google.golang.org/api/clouderrorreporting/v1beta1"
 	logging "google.golang.org/api/logging/v2beta1"
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
@@ -135,7 +136,7 @@ func (p *Process) setup() error {
 	ctx := context.Background()
 
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
-	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope, logging.LoggingWriteScope)
+	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope, logging.LoggingWriteScope, errorReporting.CloudPlatformScope)
 
 	if err != nil {
 		log.Fatalln("Failed to create DefaultClient")

@@ -12,6 +12,7 @@ type LoggingConfig struct {
 	LogName		      string						`json:"log_name"`
 	Type            string            `json:"type"`
 	Labels          map[string]string `json:"labels"`
+	ErrorReportingService string      `json:"error_reporting_service"`
 }
 
 func (c *LoggingConfig) setup() *ConfigError {
@@ -34,6 +35,9 @@ func (c *LoggingConfig) setupSdHook(client *http.Client) error {
 		sdhook.ProjectID(c.ProjectID),
 		sdhook.LogName(c.LogName),
 		sdhook.Resource(sdhook.ResType(c.Type), c.Labels),
+	}
+	if c.ErrorReportingService != "" {
+		options = append(options, sdhook.ErrorReportingService(c.ErrorReportingService))
 	}
 	hook, err := sdhook.New(options...)
 	if err != nil {
