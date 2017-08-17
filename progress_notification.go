@@ -10,7 +10,7 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type ProgressNotificationConfig struct {
