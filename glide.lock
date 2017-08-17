@@ -1,5 +1,5 @@
-hash: 4700d53109e387685ad644c032f07400bb2356439a0ed088aa8fccb960618a57
-updated: 2017-08-16T14:52:24.202421095+09:00
+hash: 8adcc5132c3de8fd9deead6e757f35e3965988cae27a92790eefb309cb58e3e0
+updated: 2017-08-17T14:58:57.244011327+09:00
 imports:
 - name: cloud.google.com/go
   version: 81b7822b1e798e8f17bf64b59512a5be4097e966
@@ -9,6 +9,12 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 61153c768f31ee5f130071d08fc82b85208528de
   repo: https://github.com/cenkalti/backoff.git
+- name: github.com/facebookgo/stack
+  version: 751773369052141c013c6e827a71e8f35c07879c
+- name: github.com/fluent/fluent-logger-golang
+  version: 79368279c7a0fac229d8b29dd0e121f42d9a2cb2
+  subpackages:
+  - fluent
 - name: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
@@ -17,12 +23,33 @@ imports:
   version: da06d194a00e19ce00d9011a13931c3f6f6887c7
 - name: github.com/groovenauts/blocks-variable
   version: 833d2f1e70b82c8a0a1149827906ab32aed40276
+- name: github.com/knq/jwt
+  version: 0d31af81a9cbb15756a576eef5054666a1266bb6
+  subpackages:
+  - bearer
+  - gserviceaccount
+- name: github.com/knq/pemutil
+  version: 081cdad14f5c576eab309c0de751d5f7ce4019d4
+- name: github.com/knq/sdhook
+  version: a1cc31916315b2c1a96042e3e84aa011e818dc25
+  repo: https://github.com/knq/sdhook.git
+- name: github.com/philhofer/fwd
+  version: 1612a298117663d7bc9a760ae20d383413859798
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
-- name: github.com/Sirupsen/logrus
-  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
+- name: github.com/sirupsen/logrus
+  version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+  repo: https://github.com/sirupsen/logrus.git
+- name: github.com/tinylib/msgp
+  version: 701aacd80f9ace06ea698bd7801c361fb7fe580b
+  subpackages:
+  - msgp
 - name: github.com/urfave/cli
   version: 4b90d79a682b4bf685762c7452db20f2a676ecb2
+- name: golang.org/x/crypto
+  version: 91902e332b9d47760598861512d2ae148f94ca58
+  subpackages:
+  - ssh/terminal
 - name: golang.org/x/net
   version: 69d4b8aa71caaaa75c3dfc11211d1be495abec7c
   subpackages:
@@ -48,10 +75,12 @@ imports:
 - name: google.golang.org/api
   version: b9d03e6e091e36f9a089515bc84cf14c2d199c4c
   subpackages:
+  - clouderrorreporting/v1beta1
   - gensupport
   - googleapi
   - googleapi/internal/uritemplates
   - iterator
+  - logging/v2beta1
   - pubsub
   - pubsub/v1
   - storage/v1
