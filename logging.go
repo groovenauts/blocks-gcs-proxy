@@ -29,12 +29,13 @@ func (c *LoggingConfig) setup() *ConfigError {
 }
 
 func (c *LoggingConfig) setupSdHook(client *http.Client) error {
-	hook, err := sdhook.New(
+	options := []sdhook.Option{
 		sdhook.HTTPClient(client),
 		sdhook.ProjectID(c.ProjectID),
 		sdhook.LogName(c.LogName),
 		sdhook.Resource(sdhook.ResType(c.Type), c.Labels),
-	)
+	}
+	hook, err := sdhook.New(options...)
 	if err != nil {
 		return err
 	}
