@@ -29,62 +29,67 @@ type (
 )
 
 func (c *ProcessConfig) setup(args []string) error {
+	setups := map[string]ConfigSetup{
+		"command": func()*ConfigError{
+			return c.setupCommand(args)
+		},
+		"job": c.setupJob,
+		"progress": c.setupProgress,
+		"log": c.setupLog,
+		"download": c.setupDownload,
+		"upload": c.setupUpload,
+	}
+	for key, setup := range setups {
+		err := setup()
+		if err != nil {
+			err.Add(key)
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *ProcessConfig) setupCommand(args []string) *ConfigError {
 	if c.Command == nil {
 		c.Command = &CommandConfig{}
 	}
-	err := c.Command.setup()
-	if err != nil {
-		err.Add("command")
-		return err
-	}
-
 	c.Command.Template = args
+	return c.Command.setup()
+}
+
+func (c *ProcessConfig) setupJob() *ConfigError {
 	if c.Job == nil {
 		c.Job = &JobSubscriptionConfig{}
 	}
-	err = c.Job.setup()
-	if err != nil {
-		err.Add("job")
-		return err
-	}
+	return c.Job.setup()
+}
 
+func (c *ProcessConfig) setupProgress() *ConfigError {
 	if c.Progress == nil {
 		c.Progress = &ProgressNotificationConfig{}
 	}
-	err = c.Progress.setup()
-	if err != nil {
-		err.Add("progress")
-		return err
-	}
+	return c.Progress.setup()
+}
 
+func (c *ProcessConfig) setupLog() *ConfigError {
 	if c.Log == nil {
 		c.Log = &LogConfig{}
 	}
-	err = c.Log.setup()
-	if err != nil {
-		err.Add("log")
-		return err
-	}
+	return c.Log.setup()
+}
 
+func (c *ProcessConfig) setupDownload() *ConfigError {
 	if c.Download == nil {
 		c.Download = &WorkerConfig{}
 	}
-	err = c.Download.setup()
-	if err != nil {
-		err.Add("download")
-		return err
-	}
+	return c.Download.setup()
+}
 
+func (c *ProcessConfig) setupUpload() *ConfigError {
 	if c.Upload == nil {
 		c.Upload = &WorkerConfig{}
 	}
-	err = c.Upload.setup()
-	if err != nil {
-		err.Add("upload")
-		return err
-	}
-
-	return nil
+	return c.Upload.setup()
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {
