@@ -56,6 +56,9 @@ specified by `job.subscription` in `config.json`.
 | progress.hostname | string | False | (hostname) | Hostname attribute value of job progress message |
 | log       | map    | False |  |  |
 | log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| log.stackdriver | map | False |  |  |
+| log.stackdriver.type   | string            | True |  | The type of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
+| log.stackdriver.labels | map[string]string | True |  | The labels of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
 | command   | map | False |  |  |
 | command.dryrun | bool | False | `false` | Don't run the command if this is true. |
 | command.options | map[key][]string | False |  | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
