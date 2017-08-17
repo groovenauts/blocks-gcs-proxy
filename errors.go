@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -97,3 +99,28 @@ func (e *CompositeError) Any(f func(error) bool) bool {
 	}
 	return false
 }
+
+type ConfigError struct {
+	Name      string
+	Ancestors []string
+	Message   string
+}
+
+func (e *ConfigError) Setup() {
+	if e.Ancestors == nil {
+		e.Ancestors = []string{e.Name}
+	}
+}
+
+func (e *ConfigError) Add(ancestor string) {
+	e.Setup()
+	e.Ancestors = append(e.Ancestors, ancestor)
+}
+
+func (e *ConfigError) Error() string {
+	e.Setup()
+	sort.Sort(sort.Reverse(sort.StringSlice(e.Ancestors)))
+	return fmt.Sprintf("%s %s", strings.Join(e.Ancestors, "."), e.Message)
+}
+
+type ConfigSetup func()*ConfigError
