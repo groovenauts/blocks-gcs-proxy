@@ -6,7 +6,8 @@ import (
 )
 
 type LogConfig struct {
-	Level string `json:"level,omitempty"`
+	Level       string         `json:"level,omitempty"`
+	Stackdriver *LoggingConfig `json:"stackdriver,omitempty"`
 }
 
 func (c *LogConfig) setup() *ConfigError {
