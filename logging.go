@@ -8,17 +8,15 @@ type LoggingConfig struct {
 }
 
 func (c *LoggingConfig) setup() *ConfigError {
-	if c.ProjectID == "" {
-		return &ConfigError{Name: "project_id", Message: "is required"}
-	}
-	if c.LogName == "" {
-		return &ConfigError{Name: "log_name", Message: "is required"}
-	}
-	if c.Type == "" {
-		return &ConfigError{Name: "type", Message: "is required"}
-	}
-	if c.Labels == nil {
-		return &ConfigError{Name: "labels", Message: "are required"}
+	for name, blank := range map[string]bool {
+		"project_id": c.ProjectID == "",
+		"log_name": c.LogName == "",
+		"type": c.Type == "",
+		"labels": c.Labels == nil,
+	}{
+		if blank {
+			return &ConfigError{Name: name, Message: "is required"}
+		}
 	}
 	return nil
 }
