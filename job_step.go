@@ -29,8 +29,8 @@ type (
 	JobStep    int
 	JobStepDef struct {
 		name            string
-		successLogLevel log.Level
-		failureLogLevel log.Level
+		successLogLevel logrus.Level
+		failureLogLevel logrus.Level
 		baseProgress    Progress
 	}
 )
@@ -48,24 +48,24 @@ const (
 
 var (
 	JOB_STEP_DEFS = map[JobStep]JobStepDef{
-		INITIALIZING: JobStepDef{"INITIALIZING", log.InfoLevel, log.ErrorLevel, PREPARING},
-		DOWNLOADING:  JobStepDef{"DOWNLOADING", log.DebugLevel, log.ErrorLevel, WORKING},
-		EXECUTING:    JobStepDef{"EXECUTING", log.DebugLevel, log.ErrorLevel, WORKING},
-		UPLOADING:    JobStepDef{"UPLOADING", log.DebugLevel, log.ErrorLevel, WORKING},
-		CLEANUP:      JobStepDef{"CLEANUP", log.DebugLevel, log.WarnLevel, WORKING},
-		NACKSENDING:  JobStepDef{"NACKSENDING", log.WarnLevel, log.ErrorLevel, RETRYING},
-		CANCELLING:   JobStepDef{"CANCELLING", log.ErrorLevel, log.FatalLevel, INVALID_JOB},
-		ACKSENDING:   JobStepDef{"ACKSENDING", log.InfoLevel, log.FatalLevel, COMPLETED},
+		INITIALIZING: JobStepDef{"INITIALIZING", logrus.InfoLevel, logrus.ErrorLevel, PREPARING},
+		DOWNLOADING:  JobStepDef{"DOWNLOADING", logrus.DebugLevel, logrus.ErrorLevel, WORKING},
+		EXECUTING:    JobStepDef{"EXECUTING", logrus.DebugLevel, logrus.ErrorLevel, WORKING},
+		UPLOADING:    JobStepDef{"UPLOADING", logrus.DebugLevel, logrus.ErrorLevel, WORKING},
+		CLEANUP:      JobStepDef{"CLEANUP", logrus.DebugLevel, logrus.WarnLevel, WORKING},
+		NACKSENDING:  JobStepDef{"NACKSENDING", logrus.WarnLevel, logrus.ErrorLevel, RETRYING},
+		CANCELLING:   JobStepDef{"CANCELLING", logrus.ErrorLevel, logrus.FatalLevel, INVALID_JOB},
+		ACKSENDING:   JobStepDef{"ACKSENDING", logrus.InfoLevel, logrus.FatalLevel, COMPLETED},
 	}
 )
 
 func (js JobStep) String() string {
 	return JOB_STEP_DEFS[js].name
 }
-func (js JobStep) successLogLevel() log.Level {
+func (js JobStep) successLogLevel() logrus.Level {
 	return JOB_STEP_DEFS[js].successLogLevel
 }
-func (js JobStep) failureLogLevel() log.Level {
+func (js JobStep) failureLogLevel() logrus.Level {
 	return JOB_STEP_DEFS[js].failureLogLevel
 }
 func (js JobStep) baseProgress() Progress {
@@ -75,16 +75,16 @@ func (js JobStep) baseProgress() Progress {
 func (js JobStep) completed(st JobStepStatus) bool {
 	return (js == ACKSENDING) && (st == SUCCESS)
 }
-func (js JobStep) logLevelFor(st JobStepStatus) log.Level {
+func (js JobStep) logLevelFor(st JobStepStatus) logrus.Level {
 	switch st {
 	case STARTING:
-		return log.DebugLevel
+		return logrus.DebugLevel
 	case SUCCESS:
 		return js.successLogLevel()
 	case FAILURE:
 		return js.failureLogLevel()
 	default:
-		return log.InfoLevel
+		return logrus.InfoLevel
 	}
 }
 func (js JobStep) progressFor(st JobStepStatus) Progress {
