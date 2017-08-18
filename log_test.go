@@ -9,20 +9,20 @@ import (
 )
 
 func init() {
-	log.SetLevel(log.PanicLevel)
+	logger.SetLevel(logrus.PanicLevel)
 }
 
 func TestLogConfig(t *testing.T) {
-	backup := log.GetLevel()
+	backup := logrus.GetLevel()
 	defer func() {
-		log.SetLevel(backup)
+		logger.SetLevel(backup)
 	}()
 
 	c1 := &LogConfig{Level: "debug"}
 	c1.setup()
-	assert.Equal(t, log.DebugLevel, log.GetLevel())
+	assert.Equal(t, logrus.DebugLevel, logger.Level)
 
 	c2 := &LogConfig{Level: "warn"}
 	c2.setup()
-	assert.Equal(t, log.WarnLevel, log.GetLevel())
+	assert.Equal(t, logrus.WarnLevel, logger.Level)
 }
