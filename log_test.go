@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,4 +27,17 @@ func TestLogConfig(t *testing.T) {
 	c2 := &LogConfig{Level: "warn"}
 	c2.setup()
 	assert.Equal(t, logrus.WarnLevel, logger.Level)
+}
+
+func TestLogrusWriter(t *testing.T) {
+	var buf bytes.Buffer
+	logger := logrus.New()
+	logger.Out = &buf
+	subject := &LogrusWriter{Dest: logger, Severity: logrus.InfoLevel}
+	subject.Setup()
+
+	fmt.Fprintln(subject, "Hello world!")
+	s := buf.String()
+	assert.Contains(t, s, "level=info")
+	assert.Contains(t, s, `msg="Hello world!\n"`)
 }
