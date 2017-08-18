@@ -32,6 +32,8 @@ func (c *CommandConfig) setup() *ConfigError {
 type Job struct {
 	config *CommandConfig
 
+	commandSeverityLevel logrus.Level // From LogConfig
+
 	downloadConfig *WorkerConfig
 	uploadConfig   *WorkerConfig
 
@@ -357,9 +359,11 @@ func (job *Job) build() error {
 	}
 	logAttrs["command"] = values
 	log.WithFields(logAttrs).Debugln("")
+	w := &LogrusWriter{Dest: log, Severity: job.commandSeverityLevel}
+	w.Setup()
 	job.cmd = exec.Command(values[0], values[1:]...)
-	job.cmd.Stdout = os.Stdout
-	job.cmd.Stderr = os.Stderr
+	job.cmd.Stdout = w
+	job.cmd.Stderr = w
 	return nil
 }
 

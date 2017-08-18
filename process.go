@@ -216,6 +216,7 @@ func (p *Process) run() error {
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
 			config:         p.config.Command,
+			commandSeverityLevel: p.config.Log.commandSeverityLevel,
 			downloadConfig: p.config.Download,
 			uploadConfig:   p.config.Upload,
 			message:        msg,
