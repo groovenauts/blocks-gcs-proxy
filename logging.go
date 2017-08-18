@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knq/sdhook"
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type LoggingConfig struct {

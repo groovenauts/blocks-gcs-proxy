@@ -5,7 +5,7 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type JobSubscriptionConfig struct {

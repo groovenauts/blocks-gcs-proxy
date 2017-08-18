@@ -6,7 +6,7 @@ import (
 
 	storage "google.golang.org/api/storage/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type (
