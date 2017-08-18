@@ -66,3 +66,29 @@ func (c *LogConfig) setupStackdriver() *ConfigError {
 	}
 	return nil
 }
+
+type LogrusWriter struct {
+	Dest     logrus.FieldLogger
+	Severity logrus.Level
+	method   func(args ...interface{})
+}
+
+func (w *LogrusWriter) Setup() {
+	d := w.Dest
+	w.method = map[logrus.Level]func(args ...interface{}){
+		logrus.PanicLevel: d.Panicln,
+		logrus.FatalLevel: d.Fatalln,
+		logrus.ErrorLevel: d.Errorln,
+		logrus.WarnLevel: d.Warnln,
+		logrus.InfoLevel: d.Infoln,
+		logrus.DebugLevel:d.Debugln,
+	}[w.Severity]
+	if w.method == nil {
+		w.method = d.Debugln
+	}
+}
+
+func (w *LogrusWriter) Write(p []byte) (int, error) {
+	w.method(string(p))
+	return len(p), nil
+}
