@@ -55,7 +55,7 @@ func TestProgressNotificationNotify(t *testing.T) {
 	notification := ProgressNotification{
 		config:    &config,
 		publisher: &publisher,
-		logLevel:  log.InfoLevel,
+		logLevel:  logrus.InfoLevel,
 	}
 
 	baseAttrs := map[string]string{

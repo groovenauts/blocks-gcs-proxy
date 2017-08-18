@@ -187,7 +187,7 @@ func (p *Process) setup() error {
 	}
 
 	p.config.Progress.setup()
-	level, err := log.ParseLevel(p.config.Progress.LogLevel)
+	level, err := logrus.ParseLevel(p.config.Progress.LogLevel)
 	if err != nil {
 		logAttrs := logrus.Fields{"log_level": p.config.Progress.LogLevel}
 		log.WithFields(logAttrs).Fatalln("Failed to parse log_level")
