@@ -224,14 +224,14 @@ func (p *Process) run() error {
 		}
 		job.setupExecUUID()
 		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID})
-		err := p.replaceGlobalLog(jobLog, func() error{
-		err := job.run()
-		if err != nil {
-			logAttrs := logrus.Fields{"error": err, "msg": msg}
-			log.WithFields(logAttrs).Fatalln("Job Error")
-			return err
-		}
-		return nil
+		err := p.replaceGlobalLog(jobLog, func() error {
+			err := job.run()
+			if err != nil {
+				logAttrs := logrus.Fields{"error": err, "msg": msg}
+				log.WithFields(logAttrs).Fatalln("Job Error")
+				return err
+			}
+			return nil
 		})
 		if err != nil {
 			return err
@@ -242,10 +242,10 @@ func (p *Process) run() error {
 }
 
 func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
-	 // `log` is a global variable
+	// `log` is a global variable
 	logBackup := log
 	log = newLog
-	defer func(){
+	defer func() {
 		log = logBackup
 	}()
 	return f()
