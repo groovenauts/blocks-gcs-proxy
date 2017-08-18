@@ -22,7 +22,7 @@ func (c *JobSubscriptionConfig) setup() *ConfigError {
 }
 
 func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
-	flds := log.Fields{"subscription": c.Subscription}
+	flds := logrus.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
 		cs := c.Sustainer
 		if cs.Delay > 0 && cs.Interval > 0 {
@@ -84,7 +84,7 @@ func (s *JobSubscription) process(f func(*JobMessage) error) (bool, error) {
 		return false, nil
 	}
 
-	log.WithFields(log.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
+	log.WithFields(logrus.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
 
 	jobMsg := &JobMessage{
 		sub:    s.config.Subscription,
@@ -104,7 +104,7 @@ func (s *JobSubscription) waitForMessage() (*pubsub.ReceivedMessage, error) {
 	}
 	res, err := s.puller.Pull(s.config.Subscription, pullRequest)
 	if err != nil {
-		log.WithFields(log.Fields{"subscription": s.config.Subscription, "error": err}).Errorln("Failed to pull")
+		log.WithFields(logrus.Fields{"subscription": s.config.Subscription, "error": err}).Errorln("Failed to pull")
 		return nil, err
 	}
 	if res == nil {

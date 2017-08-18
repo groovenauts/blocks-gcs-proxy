@@ -38,7 +38,7 @@ type TargetWorker struct {
 
 func (w *TargetWorker) run() {
 	for {
-		flds := log.Fields{}
+		flds := logrus.Fields{}
 		log.Debugln("Getting a target")
 		var t *Target
 		select {

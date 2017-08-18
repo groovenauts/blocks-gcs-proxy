@@ -89,7 +89,7 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 	attrs["job_message_id"] = job_msg_id
 	attrs["level"] = level.String()
 	attrs["host"] = pn.config.Hostname
-	logAttrs := log.Fields{}
+	logAttrs := logrus.Fields{}
 	for k, v := range attrs {
 		logAttrs[k] = v
 	}
