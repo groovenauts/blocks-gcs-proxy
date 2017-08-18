@@ -10,7 +10,8 @@ type LogConfig struct {
 	Stackdriver *LoggingConfig `json:"stackdriver,omitempty"`
 }
 
-var log = logrus.New()
+var logger = logrus.New()
+var log = logger.WithFields(logrus.Fields{})
 
 func (c *LogConfig) setup() *ConfigError {
 	setups := []ConfigSetup{
@@ -35,7 +36,7 @@ func (c *LogConfig) setupLevel() *ConfigError {
 		log.Warnf("Error on log.ParseLevel level: %q because of %v\n", c.Level, err)
 		return &ConfigError{Name: "level", Message: fmt.Sprintf("is invalid because of %v", err)}
 	}
-	log.SetLevel(level)
+	logger.SetLevel(level)
 	return nil
 }
 

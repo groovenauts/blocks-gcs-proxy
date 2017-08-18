@@ -42,6 +42,6 @@ func (c *LoggingConfig) setupSdHook(client *http.Client) error {
 	if err != nil {
 		return err
 	}
-	log.Hooks.Add(hook)
+	logger.Hooks.Add(hook)
 	return nil
 }
