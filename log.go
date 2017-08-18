@@ -7,6 +7,8 @@ import (
 
 type LogConfig struct {
 	Level       string         `json:"level,omitempty"`
+	CommandSeverity string     `json:"command_severity"`
+	commandSeverityLevel logrus.Level
 	Stackdriver *LoggingConfig `json:"stackdriver,omitempty"`
 }
 
@@ -16,6 +18,7 @@ var log = logger.WithFields(logrus.Fields{})
 func (c *LogConfig) setup() *ConfigError {
 	setups := []ConfigSetup{
 		c.setupLevel,
+		c.setupCommandSeverity,
 		c.setupStackdriver,
 	}
 	for _, setup := range setups {
@@ -37,6 +40,19 @@ func (c *LogConfig) setupLevel() *ConfigError {
 		return &ConfigError{Name: "level", Message: fmt.Sprintf("is invalid because of %v", err)}
 	}
 	logger.SetLevel(level)
+	return nil
+}
+
+func (c *LogConfig) setupCommandSeverity() *ConfigError {
+	if c.CommandSeverity == "" {
+		c.CommandSeverity = "info"
+	}
+	level, err := logrus.ParseLevel(c.CommandSeverity)
+	if err != nil {
+		log.Warnf("Error on log.ParseLevel command_severity: %q because of %v\n", c.CommandSeverity, err)
+		return &ConfigError{Name: "command_severity", Message: fmt.Sprintf("is invalid because of %v", err)}
+	}
+	c.commandSeverityLevel = level
 	return nil
 }
 
