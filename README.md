@@ -56,6 +56,7 @@ specified by `job.subscription` in `config.json`.
 | progress.hostname | string | False | (hostname) | Hostname attribute value of job progress message |
 | log       | map    | False |  |  |
 | log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| log.command_severity | string | False | `info` | The Log severity of command outputs. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | log.stackdriver | map | False |  |  |
 | log.stackdriver.project_id | string        | True |  | GCP Project ID |
 | log.stackdriver.log_name   | string        | True |  | The resource name of the log that will receive the log entries |
