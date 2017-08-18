@@ -6,10 +6,10 @@ import (
 )
 
 type LogConfig struct {
-	Level       string         `json:"level,omitempty"`
-	CommandSeverity string     `json:"command_severity"`
+	Level                string `json:"level,omitempty"`
+	CommandSeverity      string `json:"command_severity"`
 	commandSeverityLevel logrus.Level
-	Stackdriver *LoggingConfig `json:"stackdriver,omitempty"`
+	Stackdriver          *LoggingConfig `json:"stackdriver,omitempty"`
 }
 
 var logger = logrus.New()
@@ -79,9 +79,9 @@ func (w *LogrusWriter) Setup() {
 		logrus.PanicLevel: d.Panicln,
 		logrus.FatalLevel: d.Fatalln,
 		logrus.ErrorLevel: d.Errorln,
-		logrus.WarnLevel: d.Warnln,
-		logrus.InfoLevel: d.Infoln,
-		logrus.DebugLevel:d.Debugln,
+		logrus.WarnLevel:  d.Warnln,
+		logrus.InfoLevel:  d.Infoln,
+		logrus.DebugLevel: d.Debugln,
 	}[w.Severity]
 	if w.method == nil {
 		w.method = d.Debugln
