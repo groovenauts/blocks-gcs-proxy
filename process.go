@@ -11,10 +11,12 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
+	errorReporting "google.golang.org/api/clouderrorreporting/v1beta1"
+	logging "google.golang.org/api/logging/v2beta1"
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type (
@@ -29,37 +31,67 @@ type (
 )
 
 func (c *ProcessConfig) setup(args []string) error {
+	setups := map[string]ConfigSetup{
+		"command": func() *ConfigError {
+			return c.setupCommand(args)
+		},
+		"job":      c.setupJob,
+		"progress": c.setupProgress,
+		"log":      c.setupLog,
+		"download": c.setupDownload,
+		"upload":   c.setupUpload,
+	}
+	for key, setup := range setups {
+		err := setup()
+		if err != nil {
+			err.Add(key)
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *ProcessConfig) setupCommand(args []string) *ConfigError {
 	if c.Command == nil {
 		c.Command = &CommandConfig{}
 	}
-
 	c.Command.Template = args
+	return c.Command.setup()
+}
+
+func (c *ProcessConfig) setupJob() *ConfigError {
 	if c.Job == nil {
 		c.Job = &JobSubscriptionConfig{}
 	}
-	c.Job.setup()
+	return c.Job.setup()
+}
 
+func (c *ProcessConfig) setupProgress() *ConfigError {
 	if c.Progress == nil {
 		c.Progress = &ProgressNotificationConfig{}
 	}
+	return c.Progress.setup()
+}
+
+func (c *ProcessConfig) setupLog() *ConfigError {
 	if c.Log == nil {
 		c.Log = &LogConfig{}
 	}
-	err := c.Log.setup()
-	if err != nil {
-		return err
-	}
+	return c.Log.setup()
+}
 
+func (c *ProcessConfig) setupDownload() *ConfigError {
 	if c.Download == nil {
 		c.Download = &WorkerConfig{}
 	}
-	c.Download.setup()
+	return c.Download.setup()
+}
 
+func (c *ProcessConfig) setupUpload() *ConfigError {
 	if c.Upload == nil {
 		c.Upload = &WorkerConfig{}
 	}
-	c.Upload.setup()
-	return nil
+	return c.Upload.setup()
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {
@@ -104,11 +136,21 @@ func (p *Process) setup() error {
 	ctx := context.Background()
 
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
-	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope)
+	client, err := google.DefaultClient(ctx, pubsub.PubsubScope, storage.DevstorageReadWriteScope, logging.LoggingWriteScope, errorReporting.CloudPlatformScope)
 
 	if err != nil {
 		log.Fatalln("Failed to create DefaultClient")
 		return err
+	}
+
+	// Add stackdriver logging
+	if p.config.Log.Stackdriver != nil {
+		err = p.config.Log.Stackdriver.setupSdHook(client)
+		if err != nil {
+			logAttrs := log.Fields{"client": client, "error": err}
+			log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
+			return err
+		}
 	}
 
 	// Create a storageService

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/cenkalti/backoff"
+	log "github.com/sirupsen/logrus"
 )
 
 type WorkerConfig struct {
@@ -14,10 +14,11 @@ type WorkerConfig struct {
 	MaxTries int `json:"max_tries,omitempty"`
 }
 
-func (c *WorkerConfig) setup() {
+func (c *WorkerConfig) setup() *ConfigError {
 	if c.Workers < 1 {
 		c.Workers = 1
 	}
+	return nil
 }
 
 type Target struct {

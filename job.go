@@ -16,13 +16,17 @@ import (
 	"github.com/groovenauts/blocks-variable"
 	"github.com/satori/go.uuid"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type CommandConfig struct {
 	Template []string            `json:"-"`
 	Options  map[string][]string `json:"options,omitempty"`
 	Dryrun   bool                `json:"dryrun,omitempty"`
+}
+
+func (c *CommandConfig) setup() *ConfigError {
+	return nil
 }
 
 type Job struct {
