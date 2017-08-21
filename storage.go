@@ -6,7 +6,7 @@ import (
 
 	storage "google.golang.org/api/storage/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type (
@@ -21,7 +21,7 @@ type (
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {
-	logAttrs := log.Fields{"url": "gs://" + bucket + "/" + object, "destPath": destPath}
+	logAttrs := logrus.Fields{"url": "gs://" + bucket + "/" + object, "destPath": destPath}
 	log.WithFields(logAttrs).Debugln("Downloading")
 	dest, err := os.Create(destPath)
 	if err != nil {
@@ -51,7 +51,7 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 }
 
 func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
-	logAttrs := log.Fields{"url": "gs://" + bucket + "/" + object, "srcPath": srcPath}
+	logAttrs := logrus.Fields{"url": "gs://" + bucket + "/" + object, "srcPath": srcPath}
 	log.WithFields(logAttrs).Debugln("Uploading")
 	f, err := os.Open(srcPath)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/knq/sdhook"
-	log "github.com/sirupsen/logrus"
 )
 
 type LoggingConfig struct {
@@ -43,6 +42,6 @@ func (c *LoggingConfig) setupSdHook(client *http.Client) error {
 	if err != nil {
 		return err
 	}
-	log.AddHook(hook)
+	logger.Hooks.Add(hook)
 	return nil
 }

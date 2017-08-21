@@ -16,7 +16,7 @@ import (
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type (
@@ -147,7 +147,7 @@ func (p *Process) setup() error {
 	if p.config.Log.Stackdriver != nil {
 		err = p.config.Log.Stackdriver.setupSdHook(client)
 		if err != nil {
-			logAttrs := log.Fields{"client": client, "error": err}
+			logAttrs := logrus.Fields{"client": client, "error": err}
 			log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
 			return err
 		}
@@ -156,7 +156,7 @@ func (p *Process) setup() error {
 	// Create a storageService
 	storageService, err := storage.New(client)
 	if err != nil {
-		logAttrs := log.Fields{"client": client, "error": err}
+		logAttrs := logrus.Fields{"client": client, "error": err}
 		log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
 		return err
 	}
@@ -165,7 +165,7 @@ func (p *Process) setup() error {
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)
 	if err != nil {
-		logAttrs := log.Fields{"client": client, "error": err}
+		logAttrs := logrus.Fields{"client": client, "error": err}
 		log.WithFields(logAttrs).Fatalln("Failed to create pubsub.Service")
 		return err
 	}
@@ -175,7 +175,7 @@ func (p *Process) setup() error {
 	if !p.config.Job.Sustainer.Disabled {
 		err = p.config.Job.setupSustainer(puller)
 		if err != nil {
-			logAttrs := log.Fields{"client": client, "error": err}
+			logAttrs := logrus.Fields{"client": client, "error": err}
 			log.WithFields(logAttrs).Fatalln("Failed to setup sustainer")
 			return err
 		}
@@ -187,9 +187,9 @@ func (p *Process) setup() error {
 	}
 
 	p.config.Progress.setup()
-	level, err := log.ParseLevel(p.config.Progress.LogLevel)
+	level, err := logrus.ParseLevel(p.config.Progress.LogLevel)
 	if err != nil {
-		logAttrs := log.Fields{"log_level": p.config.Progress.LogLevel}
+		logAttrs := logrus.Fields{"log_level": p.config.Progress.LogLevel}
 		log.WithFields(logAttrs).Fatalln("Failed to parse log_level")
 		return err
 	}
@@ -203,7 +203,7 @@ func (p *Process) setup() error {
 
 func (p *Process) run() error {
 	logAttrs :=
-		log.Fields{
+		logrus.Fields{
 			"VERSION": VERSION,
 			"config": map[string]interface{}{
 				"command":  p.config.Command,
@@ -215,20 +215,39 @@ func (p *Process) run() error {
 	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
 		job := &Job{
-			config:         p.config.Command,
-			downloadConfig: p.config.Download,
-			uploadConfig:   p.config.Upload,
-			message:        msg,
-			notification:   p.notification,
-			storage:        p.storage,
+			config:               p.config.Command,
+			commandSeverityLevel: p.config.Log.commandSeverityLevel,
+			downloadConfig:       p.config.Download,
+			uploadConfig:         p.config.Upload,
+			message:              msg,
+			notification:         p.notification,
+			storage:              p.storage,
 		}
-		err := job.run()
+		job.setupExecUUID()
+		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID})
+		err := p.replaceGlobalLog(jobLog, func() error {
+			err := job.run()
+			if err != nil {
+				logAttrs := logrus.Fields{"error": err, "msg": msg}
+				log.WithFields(logAttrs).Fatalln("Job Error")
+				return err
+			}
+			return nil
+		})
 		if err != nil {
-			logAttrs := log.Fields{"error": err, "msg": msg}
-			log.WithFields(logAttrs).Fatalln("Job Error")
 			return err
 		}
 		return nil
 	})
 	return err
+}
+
+func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
+	// `log` is a global variable
+	logBackup := log
+	log = newLog
+	defer func() {
+		log = logBackup
+	}()
+	return f()
 }

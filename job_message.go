@@ -9,7 +9,7 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type JobMessageStatus uint8
@@ -107,7 +107,7 @@ func (m *JobMessage) Ack() error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	logAttrs := log.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
+	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
 	log.WithFields(logAttrs).Debugln("Sending ACK")
 
 	_, err := m.puller.Acknowledge(m.sub, m.raw.AckId)
@@ -129,7 +129,7 @@ func (m *JobMessage) Nack() error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	logAttrs := log.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
+	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
 	log.WithFields(logAttrs).Debugln("Sending NACK")
 
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, 0)
@@ -148,7 +148,7 @@ func (m *JobMessage) Nack() error {
 }
 
 func (m *JobMessage) Done() {
-	logAttrs := log.Fields{"job_message_id": m.MessageId(), "status": m.status}
+	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "status": m.status}
 	log.WithFields(logAttrs).Debugln("Done()")
 	if m.status == running {
 		m.status = done
@@ -168,7 +168,7 @@ func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) err
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
 		err := m.waitAndSendMAD(notification, nextLimit)
 		if err != nil {
-			log.WithFields(log.Fields{"error": err}).Errorln("Error in sendMADPeriodically")
+			log.WithFields(logrus.Fields{"error": err}).Errorln("Error in sendMADPeriodically")
 			return err
 		}
 		if !m.running() {
@@ -202,7 +202,7 @@ func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimi
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	logAttrs := log.Fields{"status": m.status}
+	logAttrs := logrus.Fields{"status": m.status}
 	log.WithFields(logAttrs).Debugln("waitAndSendMAD")
 
 	// Don't send MAD after sending ACK
@@ -221,7 +221,7 @@ func (m *JobMessage) waitAndSendMAD(notification *ProgressNotification, nextLimi
 		log.WithFields(logAttrs).Errorln("waitAndSendMAD ModifyAckDeadline")
 		msg := fmt.Sprintf("Failed modifyAckDeadline %v, %v, %v cause of %v\n", m.sub, m.raw.AckId, m.config.Delay, err)
 		log.WithFields(logAttrs).Fatalf(msg)
-		notification.notifyProgress(m.MessageId(), WORKING, false, log.ErrorLevel, m.raw.Message.Attributes, msg)
+		notification.notifyProgress(m.MessageId(), WORKING, false, logrus.ErrorLevel, m.raw.Message.Attributes, msg)
 	}
 	return nil
 }

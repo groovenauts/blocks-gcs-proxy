@@ -8,7 +8,7 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 const (
@@ -55,7 +55,7 @@ func TestProgressNotificationNotify(t *testing.T) {
 	notification := ProgressNotification{
 		config:    &config,
 		publisher: &publisher,
-		logLevel:  log.InfoLevel,
+		logLevel:  logrus.InfoLevel,
 	}
 
 	baseAttrs := map[string]string{

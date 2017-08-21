@@ -16,7 +16,7 @@ import (
 	"github.com/groovenauts/blocks-variable"
 	"github.com/satori/go.uuid"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type CommandConfig struct {
@@ -31,6 +31,8 @@ func (c *CommandConfig) setup() *ConfigError {
 
 type Job struct {
 	config *CommandConfig
+
+	commandSeverityLevel logrus.Level // From LogConfig
 
 	downloadConfig *WorkerConfig
 	uploadConfig   *WorkerConfig
@@ -122,7 +124,7 @@ func (job *Job) withNotify(step JobStep, f func() error) func() error {
 }
 
 func (job *Job) prepare() error {
-	logAttrs := log.Fields{"job_message_id": job.message.MessageId()}
+	logAttrs := logrus.Fields{"job_message_id": job.message.MessageId()}
 	err := job.message.Validate()
 	if err != nil {
 		logAttrs["message"] = job.message.raw.Message
@@ -210,14 +212,14 @@ func (job *Job) useDataAsAttributesIfPossible() error {
 	}
 	decoded, err := base64.StdEncoding.DecodeString(job.message.raw.Message.Data)
 	if err != nil {
-		logAttrs := log.Fields{"error": err, "data": job.message.raw.Message.Data}
+		logAttrs := logrus.Fields{"error": err, "data": job.message.raw.Message.Data}
 		log.WithFields(logAttrs).Errorf("Failed to decode by base64")
 		return err
 	}
 	var parsed map[string]interface{}
 	err = json.Unmarshal([]byte(decoded), &parsed)
 	if err != nil {
-		logAttrs := log.Fields{"error": err, "data": job.message.raw.Message.Data}
+		logAttrs := logrus.Fields{"error": err, "data": job.message.raw.Message.Data}
 		log.WithFields(logAttrs).Errorf("Failed to json.Unmarshal")
 		return err
 	}
@@ -229,7 +231,7 @@ func (job *Job) useDataAsAttributesIfPossible() error {
 		default:
 			b, err := json.Marshal(obj)
 			if err != nil {
-				logAttrs := log.Fields{"error": err, "obj": obj}
+				logAttrs := logrus.Fields{"error": err, "obj": obj}
 				log.WithFields(logAttrs).Errorf("Failed to json.Marshal")
 				return err
 			}
@@ -249,13 +251,13 @@ func (job *Job) setupDownloadFiles() error {
 		case string:
 			remoteUrls = append(remoteUrls, obj.(string))
 		default:
-			log.WithFields(log.Fields{"url": obj}).Errorf("Invalid download file URL: %T\n", obj)
+			log.WithFields(logrus.Fields{"url": obj}).Errorf("Invalid download file URL: %T\n", obj)
 		}
 	}
 	for _, remote_url := range remoteUrls {
 		url, err := url.Parse(remote_url)
 		if err != nil {
-			log.WithFields(log.Fields{"url": remote_url}).Errorln("Invalid download file URL")
+			log.WithFields(logrus.Fields{"url": remote_url}).Errorln("Invalid download file URL")
 			return err
 		}
 		urlstr := fmt.Sprintf("gs://%v%v", url.Host, url.Path)
@@ -304,7 +306,7 @@ func (job *Job) buildVariable() *bvariable.Variable {
 }
 
 func (job *Job) build() error {
-	logAttrs := log.Fields{}
+	logAttrs := logrus.Fields{}
 	v := job.buildVariable()
 	values, err := job.extract(v, job.config.Template)
 	if len(job.config.Options) > 0 {
@@ -357,9 +359,11 @@ func (job *Job) build() error {
 	}
 	logAttrs["command"] = values
 	log.WithFields(logAttrs).Debugln("")
+	w := &LogrusWriter{Dest: log, Severity: job.commandSeverityLevel}
+	w.Setup()
 	job.cmd = exec.Command(values[0], values[1:]...)
-	job.cmd.Stdout = os.Stdout
-	job.cmd.Stderr = os.Stderr
+	job.cmd.Stdout = w
+	job.cmd.Stderr = w
 	return nil
 }
 
@@ -399,7 +403,7 @@ func (job *Job) downloadFiles() error {
 	for remoteURL, destPath := range job.downloadFileMap {
 		url, err := url.Parse(remoteURL)
 		if err != nil {
-			log.WithFields(log.Fields{"url": remoteURL, "error": err}).Errorln("Invalid URL")
+			log.WithFields(logrus.Fields{"url": remoteURL, "error": err}).Errorln("Invalid URL")
 			return err
 		}
 
@@ -415,7 +419,7 @@ func (job *Job) downloadFiles() error {
 			LocalPath: destPath,
 		}
 		targets = append(targets, &t)
-		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
+		log.WithFields(logrus.Fields{"target": t}).Debugln("Preparing targets")
 	}
 
 	downloaders := TargetWorkers{}
@@ -427,9 +431,9 @@ func (job *Job) downloadFiles() error {
 		}
 		downloaders = append(downloaders, downloader)
 	}
-	log.WithFields(log.Fields{"downloaders": len(downloaders)}).Debugln("Downloaders are running")
+	log.WithFields(logrus.Fields{"downloaders": len(downloaders)}).Debugln("Downloaders are running")
 
-	log.WithFields(log.Fields{"targets": targets}).Debugln("downloaders processing")
+	log.WithFields(logrus.Fields{"targets": targets}).Debugln("downloaders processing")
 	err := downloaders.process(targets)
 	return err
 }
@@ -438,10 +442,10 @@ func (job *Job) execute() error {
 	if job.config.Dryrun {
 		return nil
 	}
-	log.WithFields(log.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
+	log.WithFields(logrus.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
 	err := job.cmd.Run()
 	if err != nil {
-		log.WithFields(log.Fields{"cmd": job.cmd, "error": err}).Errorln("Command returned error")
+		log.WithFields(logrus.Fields{"cmd": job.cmd, "error": err}).Errorln("Command returned error")
 		return err
 	}
 	return nil
@@ -452,12 +456,12 @@ func (job *Job) uploadFiles() error {
 	if err != nil {
 		return err
 	}
-	log.WithFields(log.Fields{"files": localPaths}).Debugln("Uploading files found")
+	log.WithFields(logrus.Fields{"files": localPaths}).Debugln("Uploading files found")
 	targets := []*Target{}
 	for _, localPath := range localPaths {
 		relPath, err := filepath.Rel(job.uploads_dir, localPath)
 		if err != nil {
-			log.WithFields(log.Fields{"error": err, "localPath": localPath, "uploads_dir": job.uploads_dir}).Errorln("Failed to get relative path")
+			log.WithFields(logrus.Fields{"error": err, "localPath": localPath, "uploads_dir": job.uploads_dir}).Errorln("Failed to get relative path")
 			return err
 		}
 		sep := string([]rune{os.PathSeparator})
@@ -468,7 +472,7 @@ func (job *Job) uploadFiles() error {
 			LocalPath: localPath,
 		}
 		targets = append(targets, &t)
-		log.WithFields(log.Fields{"target": t}).Debugln("Preparing targets")
+		log.WithFields(logrus.Fields{"target": t}).Debugln("Preparing targets")
 	}
 
 	uploaders := TargetWorkers{}
@@ -480,7 +484,7 @@ func (job *Job) uploadFiles() error {
 		}
 		uploaders = append(uploaders, uploader)
 	}
-	log.WithFields(log.Fields{"uploaders": len(uploaders)}).Debugln("Uploaders are running")
+	log.WithFields(logrus.Fields{"uploaders": len(uploaders)}).Debugln("Uploaders are running")
 
 	err = uploaders.process(targets)
 	return err
@@ -495,7 +499,7 @@ func (job *Job) listFiles(dir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Errorln("Error to list upload files")
+		log.WithFields(logrus.Fields{"error": err}).Errorln("Error to list upload files")
 		return nil, err
 	}
 	return result, nil

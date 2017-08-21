@@ -10,7 +10,7 @@ import (
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 type ProgressNotificationConfig struct {
@@ -21,7 +21,7 @@ type ProgressNotificationConfig struct {
 
 func (c *ProgressNotificationConfig) setup() *ConfigError {
 	if c.LogLevel == "" {
-		c.LogLevel = log.InfoLevel.String()
+		c.LogLevel = logrus.InfoLevel.String()
 	}
 
 	if c.Hostname == "" {
@@ -38,7 +38,7 @@ func (c *ProgressNotificationConfig) setup() *ConfigError {
 type ProgressNotification struct {
 	config    *ProgressNotificationConfig
 	publisher Publisher
-	logLevel  log.Level
+	logLevel  logrus.Level
 }
 
 func (pn *ProgressNotification) wrap(msg_id string, step JobStep, attrs map[string]string, f func() error) func() error {
@@ -69,7 +69,7 @@ func (pn *ProgressNotification) notifyWithMessage(job_msg_id string, step JobSte
 	return pn.notifyProgress(job_msg_id, step.progressFor(st), step.completed(st), step.logLevelFor(st), attrs, msg)
 }
 
-func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level log.Level, opts map[string]string, data string) error {
+func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progress, completed bool, level logrus.Level, opts map[string]string, data string) error {
 	// https://godoc.org/github.com/sirupsen/logrus#Level
 	// log.InfoLevel < log.DebugLevel => true
 	if pn.logLevel < level {
@@ -89,7 +89,7 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 	attrs["job_message_id"] = job_msg_id
 	attrs["level"] = level.String()
 	attrs["host"] = pn.config.Hostname
-	logAttrs := log.Fields{}
+	logAttrs := logrus.Fields{}
 	for k, v := range attrs {
 		logAttrs[k] = v
 	}
