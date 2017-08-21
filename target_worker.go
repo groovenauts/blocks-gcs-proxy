@@ -25,6 +25,7 @@ type Target struct {
 	Bucket    string
 	Object    string
 	LocalPath string
+	error     error
 }
 
 type TargetWorker struct {
@@ -51,6 +52,9 @@ func (w *TargetWorker) run() {
 			w.error = nil
 			break
 		}
+		if t.error != nil {
+			continue
+		}
 
 		flds["target"] = t
 		log.WithFields(flds).Debugf("Worker Start to %v\n", w.name)
@@ -69,6 +73,7 @@ func (w *TargetWorker) run() {
 			w.done = true
 			w.error = err
 			break
+			t.error = err
 		}
 		log.WithFields(flds).Debugf("Worker Finished to %v\n", w.name)
 	}
