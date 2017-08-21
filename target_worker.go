@@ -72,8 +72,8 @@ func (w *TargetWorker) run() {
 			log.WithFields(flds).Errorf("Worker Failed to %v\n", w.name)
 			w.done = true
 			w.error = err
-			break
 			t.error = err
+			continue
 		}
 		log.WithFields(flds).Debugf("Worker Finished to %v\n", w.name)
 	}
