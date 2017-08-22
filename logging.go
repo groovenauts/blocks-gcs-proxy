@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/Gurpartap/logrus-stack"
 	"github.com/knq/sdhook"
 )
 
@@ -42,6 +43,8 @@ func (c *LoggingConfig) setupSdHook(client *http.Client) error {
 	if err != nil {
 		return err
 	}
+
+	logger.Hooks.Add(logrus_stack.StandardHook())
 	logger.Hooks.Add(hook)
 	return nil
 }
