@@ -109,11 +109,13 @@ func (job *Job) withNotify(step JobStep, f func() error) func() error {
 }
 
 func (job *Job) prepare() error {
-	logAttrs := logrus.Fields{"job_message_id": job.message.MessageId()}
+	log := log.WithFields(logrus.Fields{"job_message_id": job.message.MessageId()})
 	err := job.message.Validate()
 	if err != nil {
-		logAttrs["message"] = job.message.raw.Message
-		logAttrs["error"] = err
+		logAttrs := logrus.Fields{
+			"message": job.message.raw.Message,
+			"error":   err,
+		}
 		log.WithFields(logAttrs).Errorf("Invalid Message")
 		return err
 	}
@@ -138,9 +140,11 @@ func (job *Job) prepare() error {
 
 	err = job.build()
 	if err != nil {
-		logAttrs["template"] = job.config.Template
-		logAttrs["message"] = job.message
-		logAttrs["error"] = err
+		logAttrs := logrus.Fields{
+			"template": job.config.Template,
+			"message":  job.message,
+			"error":    err,
+		}
 		log.WithFields(logAttrs).Errorf("Failed to build command")
 		return err
 	}
@@ -291,27 +295,28 @@ func (job *Job) buildVariable() *bvariable.Variable {
 }
 
 func (job *Job) build() error {
-	logAttrs := logrus.Fields{}
 	v := job.buildVariable()
 	values, err := job.extract(v, job.config.Template)
 	if len(job.config.Options) > 0 {
-		logAttrs["options_key_template"] = job.config.Template
-		logAttrs["options_key_base"] = values
-		log.WithFields(logAttrs).Debugln("extracting key of options")
+		log := log.WithFields(logrus.Fields{
+			"options_key_template": job.config.Template,
+			"options_key_base":     values,
+		})
+		log.Debugln("extracting key of options")
 		if err != nil {
-			logAttrs["error"] = err
+			log = log.WithFields(logrus.Fields{"error": err})
 			switch err.(type) {
 			case NestableError:
 				ne := err.(NestableError)
 				if ne.CausedBy((*bvariable.InvalidExpression)(nil)) {
-					log.WithFields(logAttrs).Warnln("Invalid Expression to extract")
+					log.Warnln("Invalid Expression to extract")
 					values = []string{}
 				} else {
-					log.WithFields(logAttrs).Errorln("extract error")
+					log.Errorln("extract error")
 					return err
 				}
 			default:
-				log.WithFields(logAttrs).Errorln("extract error")
+				log.Errorln("extract error")
 				return err
 			}
 		}
@@ -320,35 +325,34 @@ func (job *Job) build() error {
 			key = "default"
 		}
 		t := job.config.Options[key]
-		logAttrs["options_key"] = key
-		logAttrs["command_template"] = t
-		log.WithFields(logAttrs).Debugln("extracting command of options")
+		log = log.WithFields(logrus.Fields{
+			"options_key":      key,
+			"command_template": t,
+		})
+		log.Debugln("extracting command of options")
 		if t == nil {
 			msg := fmt.Sprintf("Invalid command options key: %q", key)
-			log.WithFields(logAttrs).Errorln(msg)
+			log.Errorln(msg)
 			return &InvalidJobError{msg: msg}
 		}
 		values, err = job.extract(v, t)
 		if err != nil {
-			logAttrs["error"] = err
-			log.WithFields(logAttrs).Errorln("extract error")
+			log.WithFields(logrus.Fields{"error": err}).Errorln("extract error")
 			return err
 		}
 	} else {
-		logAttrs["command_template"] = job.config.Template
+		log := log.WithFields(logrus.Fields{"command_template": job.config.Template})
 		if err != nil {
-			logAttrs["error"] = err
-			log.WithFields(logAttrs).Errorln("extract error")
+			log.WithFields(logrus.Fields{"error": err}).Errorln("extract error")
 			return err
 		}
 	}
-	logAttrs["command"] = values
-	log.WithFields(logAttrs).Debugln("")
 	w := &LogrusWriter{Dest: log, Severity: job.commandSeverityLevel}
 	w.Setup()
 	job.cmd = exec.Command(values[0], values[1:]...)
 	job.cmd.Stdout = w
 	job.cmd.Stderr = w
+	log.WithFields(logrus.Fields{"job.cmd": job.cmd}).Debugln("Job#build has done")
 	return nil
 }
 
@@ -404,8 +408,8 @@ func (job *Job) downloadFiles() error {
 			LocalPath: destPath,
 		}
 		targets = append(targets, &t)
-		log.WithFields(logrus.Fields{"target": t}).Debugln("Preparing targets")
 	}
+	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Download Prepared")
 
 	downloaders := TargetWorkers{}
 	for i := 0; i < job.downloadConfig.Workers; i++ {
@@ -427,10 +431,11 @@ func (job *Job) execute() error {
 	if job.config.Dryrun {
 		return nil
 	}
-	log.WithFields(logrus.Fields{"cmd": job.cmd}).Debugln("EXECUTING")
+	log := log.WithFields(logrus.Fields{"cmd": job.cmd})
+	log.Debugln("EXECUTING")
 	err := job.cmd.Run()
 	if err != nil {
-		log.WithFields(logrus.Fields{"cmd": job.cmd, "error": err}).Errorln("Command returned error")
+		log.WithFields(logrus.Fields{"error": err}).Errorln("Command returned error")
 		return err
 	}
 	return nil
@@ -457,8 +462,8 @@ func (job *Job) uploadFiles() error {
 			LocalPath: localPath,
 		}
 		targets = append(targets, &t)
-		log.WithFields(logrus.Fields{"target": t}).Debugln("Preparing targets")
 	}
+	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Upload Prepared")
 
 	uploaders := TargetWorkers{}
 	for i := 0; i < job.uploadConfig.Workers; i++ {
