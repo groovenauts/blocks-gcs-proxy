@@ -26,7 +26,7 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 	dest, err := os.Create(destPath)
 	if err != nil {
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Creating dest file")
+		log.WithFields(logAttrs).Warnf("Creating dest file")
 		return err
 	}
 	defer dest.Close()
@@ -34,7 +34,7 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 	resp, err := ct.service.Get(bucket, object).Download()
 	if err != nil {
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to download")
+		log.WithFields(logAttrs).Warnf("Failed to download")
 		return err
 	}
 	defer resp.Body.Close()
@@ -42,7 +42,7 @@ func (ct *CloudStorage) Download(bucket, object, destPath string) error {
 	n, err := io.Copy(dest, resp.Body)
 	if err != nil {
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to copy")
+		log.WithFields(logAttrs).Warnf("Failed to copy")
 		return err
 	}
 	logAttrs["size"] = n
@@ -56,13 +56,13 @@ func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
 	f, err := os.Open(srcPath)
 	if err != nil {
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to open the file")
+		log.WithFields(logAttrs).Warnf("Failed to open the file")
 		return err
 	}
 	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to upload")
+		log.WithFields(logAttrs).Warnf("Failed to upload")
 		return err
 	}
 	log.WithFields(logAttrs).Debugln("Upload successfully")
