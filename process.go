@@ -48,6 +48,14 @@ func (c *ProcessConfig) setup(args []string) error {
 			return err
 		}
 	}
+
+	text, err := json.MarshalIndent(c, "", "  ")
+  if err != nil {
+		logrus.Errorf("Failed to json.MarshalIndent because of %v\n", err)
+		return err
+	}
+	logrus.Infof("ProcessConfig#setup: %v\n", string(text))
+
 	return nil
 }
 
