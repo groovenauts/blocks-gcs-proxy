@@ -91,15 +91,7 @@ func (act *CliActions) DownloadCommand() cli.Command {
 }
 
 func (act *CliActions) Download(c *cli.Context) error {
-	config_path := c.String("config")
-	var config *ProcessConfig
-	if config_path == "" {
-		config = &ProcessConfig{}
-		config.Log = &LogConfig{Level: "debug"}
-		config.setup([]string{})
-	} else {
-		config = act.LoadAndSetupProcessConfig(c)
-	}
+	config = act.LoadAndSetupProcessConfig(c)
 	config.Download.Workers = c.Int("workers")
 	config.Download.MaxTries = c.Int("max_tries")
 	config.Job.Sustainer = &JobSustainerConfig{
