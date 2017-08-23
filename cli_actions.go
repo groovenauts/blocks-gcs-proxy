@@ -26,8 +26,8 @@ var flagAliases = map[string]string{
 	flag_config: "c",
 	flag_log_config: "l",
 	flag_workers: "n",
-	flag_max_tries: "m",
-	flag_wait: "w",
+	flag_max_tries: "M",
+	flag_wait: "W",
 	// For Download only
 	flag_downloads_dir: "d",
 	// For Upload only
