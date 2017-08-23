@@ -12,21 +12,40 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	flag_config = "config"
+	flag_log_config = "log-config"
+	flag_workers = "workers"
+	flag_max_tries = "max_tries"
+	flag_wait = "wait"
+)
+
+var flagAliases = map[string]string{
+	flag_config: "c",
+	flag_log_config: "l",
+	flag_workers: "n",
+	flag_max_tries: "m",
+	flag_wait: "w",
+}
+
 type CliActions struct {
 }
 
+func (act *CliActions) flagName(flag string) string {
+	return fmt.Sprintf("%s, %s", flag, flagAliases[flag])
+}
 
-func (c *CliActions) configFlag() cli.StringFlag {
+func (act *CliActions) configFlag() cli.StringFlag {
 	return cli.StringFlag{
-		Name:  "config, c",
+		Name:  act.flagName(flag_config),
 		Usage: "`FILE` to load configuration",
 		Value: "./config.json",
 	}
 }
 
-func (c *CliActions) logConfigFlag() cli.BoolFlag {
+func (act *CliActions) logConfigFlag() cli.BoolFlag {
 	return cli.BoolFlag{
-		Name:  "log-config, l",
+		Name:  act.flagName(flag_log_config),
 		Usage: "Set to log your configuration loaded",
 	}
 }
@@ -82,17 +101,17 @@ func (act *CliActions) DownloadCommand() cli.Command {
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
 			},
 			cli.IntFlag{
-				Name:  "workers, n",
+				Name:  act.flagName(flag_workers),
 				Usage: "`NUMBER` of workers",
 				Value: 5,
 			},
 			cli.IntFlag{
-				Name:  "max_tries, m",
+				Name:  act.flagName(flag_max_tries),
 				Usage: "`NUMBER` of max tries",
 				Value: 3,
 			},
 			cli.IntFlag{
-				Name:  "wait, w",
+				Name:  act.flagName(flag_wait),
 				Usage: "`NUMBER` of seconds to wait",
 				Value: 0,
 			},
@@ -102,8 +121,8 @@ func (act *CliActions) DownloadCommand() cli.Command {
 
 func (act *CliActions) Download(c *cli.Context) error {
 	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
-		cfg.Download.Workers = c.Int("workers")
-		cfg.Download.MaxTries = c.Int("max_tries")
+		cfg.Download.Workers = c.Int(flag_workers)
+		cfg.Download.MaxTries = c.Int(flag_max_tries)
 		cfg.Job.Sustainer = &JobSustainerConfig{
 			Disabled: true,
 		}
@@ -127,7 +146,7 @@ func (act *CliActions) Download(c *cli.Context) error {
 	}
 	err = job.downloadFiles()
 
-	w := c.Int("wait")
+	w := c.Int(flag_wait)
 	if w > 0 {
 		time.Sleep(time.Duration(w) * time.Second)
 	}
@@ -256,7 +275,7 @@ func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig 
 }
 
 func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback func(*ProcessConfig) error) *ProcessConfig {
-	path := c.String("config")
+	path := c.String(flag_config)
 	config, err := LoadProcessConfig(path)
 	if err != nil {
 		fmt.Printf("Error to load %v cause of %v\n", path, err)
@@ -273,7 +292,7 @@ func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback fu
 		os.Exit(1)
 	}
 
-	if c.Bool("log-config") {
+	if c.Bool(flag_log_config) {
 		err = act.LogConfig(config)
 		if err != nil {
 			fmt.Printf("Error to log config %v cause of %v\n", path, err)
