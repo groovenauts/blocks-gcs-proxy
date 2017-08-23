@@ -35,7 +35,7 @@ func (act *CliActions) flagName(flag string) string {
 	return fmt.Sprintf("%s, %s", flag, flagAliases[flag])
 }
 
-func (act *CliActions) configFlag() cli.StringFlag {
+func (act *CliActions) flagConfig() cli.StringFlag {
 	return cli.StringFlag{
 		Name:  act.flagName(flag_config),
 		Usage: "`FILE` to load configuration",
@@ -43,7 +43,7 @@ func (act *CliActions) configFlag() cli.StringFlag {
 	}
 }
 
-func (act *CliActions) logConfigFlag() cli.BoolFlag {
+func (act *CliActions) flagLogConfig() cli.BoolFlag {
 	return cli.BoolFlag{
 		Name:  act.flagName(flag_log_config),
 		Usage: "Set to log your configuration loaded",
@@ -52,8 +52,8 @@ func (act *CliActions) logConfigFlag() cli.BoolFlag {
 
 func (act *CliActions) MainFlags() []cli.Flag {
 	return []cli.Flag{
-		act.configFlag(),
-		act.logConfigFlag(),
+		act.flagConfig(),
+		act.flagLogConfig(),
 	}
 }
 
@@ -76,8 +76,8 @@ func (act *CliActions) CheckCommand() cli.Command {
 		Usage: "Check config file is valid",
 		Action: act.Check,
 		Flags: []cli.Flag{
-			act.configFlag(),
-			act.logConfigFlag(),
+			act.flagConfig(),
+			act.flagLogConfig(),
 		},
 	}
 }
@@ -94,8 +94,8 @@ func (act *CliActions) DownloadCommand() cli.Command {
 		Usage: "Download the files from GCS to downloads directory",
 		Action: act.Download,
 		Flags: []cli.Flag{
-			act.configFlag(),
-			act.logConfigFlag(),
+			act.flagConfig(),
+			act.flagLogConfig(),
 			cli.StringFlag{
 				Name:  "downloads_dir, d",
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
@@ -202,8 +202,8 @@ func (act *CliActions) ExecCommand() cli.Command {
 		Usage: "Execute job without download nor upload",
 		Action: act.Exec,
 		Flags: []cli.Flag{
-			act.configFlag(),
-			act.logConfigFlag(),
+			act.flagConfig(),
+			act.flagLogConfig(),
 			cli.StringFlag{
 				Name:  "message, m",
 				Usage: "Path to the message json file which has attributes and data",
