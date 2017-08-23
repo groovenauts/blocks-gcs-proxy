@@ -42,14 +42,13 @@ func (pp *pubsubPuller) Get(subscription string) (*pubsub.Subscription, error) {
 	return pp.subscriptionsService.Get(subscription).Do()
 }
 
-
 type BackoffPuller struct {
-	Impl     Puller
-	Backoff  backoff.BackOff
+	Impl    Puller
+	Backoff backoff.BackOff
 }
 
 func (bp *BackoffPuller) Pull(subscription string, pullrequest *pubsub.PullRequest) (res *pubsub.PullResponse, err error) {
-	f := func() error{
+	f := func() error {
 		var e error
 		res, e = bp.Impl.Pull(subscription, pullrequest)
 		return e

@@ -66,7 +66,7 @@ func (p *Process) setup() error {
 	eb.InitialInterval = 10 * time.Second
 	b := backoff.WithMaxTries(eb, 5)
 	puller := &BackoffPuller{
-		Impl: &pubsubPuller{pubsubService.Projects.Subscriptions},
+		Impl:    &pubsubPuller{pubsubService.Projects.Subscriptions},
 		Backoff: b,
 	}
 
