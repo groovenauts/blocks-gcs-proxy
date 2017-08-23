@@ -30,7 +30,7 @@ func (act *CliActions) MainFlags() []cli.Flag {
 }
 
 func (act *CliActions) Main(c *cli.Context) error {
-	config := LoadAndSetupProcessConfig(c)
+	config := act.LoadAndSetupProcessConfig(c)
 	p := setupProcess(config)
 
 	err := p.run()
@@ -54,7 +54,7 @@ func (act *CliActions) CheckCommand() cli.Command {
 }
 
 func (act *CliActions) Check(c *cli.Context) error {
-	LoadAndSetupProcessConfig(c)
+	act.LoadAndSetupProcessConfig(c)
 	fmt.Println("OK")
 	return nil
 }
@@ -197,7 +197,7 @@ func (act *CliActions) ExecCommand() cli.Command {
 }
 
 func (act *CliActions) Exec(c *cli.Context) error {
-	config := LoadAndSetupProcessConfig(c)
+	config := act.LoadAndSetupProcessConfig(c)
 
 	msg_file := c.String("message")
 	workspace := c.String("workspace")
@@ -247,4 +247,28 @@ func (act *CliActions) Exec(c *cli.Context) error {
 	fmt.Printf("Executing job\n")
 	err = job.execute()
 	return err
+}
+
+
+func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
+	path := act.configPath(c)
+	config, err := LoadProcessConfig(path)
+	if err != nil {
+		fmt.Printf("Error to load %v cause of %v\n", path, err)
+		os.Exit(1)
+	}
+	err = config.setup(c.Args())
+	if err != nil {
+		fmt.Printf("Error to setup %v cause of %v\n", path, err)
+		os.Exit(1)
+	}
+	return config
+}
+
+func (act *CliActions) configPath(c *cli.Context) string {
+	r := c.String("config")
+	if r == "" {
+		r = "./config.json"
+	}
+	return r
 }

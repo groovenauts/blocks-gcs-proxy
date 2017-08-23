@@ -41,26 +41,3 @@ func setupProcess(config *ProcessConfig) *Process {
 	}
 	return p
 }
-
-func LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
-	path := configPath(c)
-	config, err := LoadProcessConfig(path)
-	if err != nil {
-		fmt.Printf("Error to load %v cause of %v\n", path, err)
-		os.Exit(1)
-	}
-	err = config.setup(c.Args())
-	if err != nil {
-		fmt.Printf("Error to setup %v cause of %v\n", path, err)
-		os.Exit(1)
-	}
-	return config
-}
-
-func configPath(c *cli.Context) string {
-	r := c.String("config")
-	if r == "" {
-		r = "./config.json"
-	}
-	return r
-}
