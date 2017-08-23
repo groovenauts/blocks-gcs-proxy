@@ -96,15 +96,10 @@ func (act *CliActions) Download(c *cli.Context) error {
 	if config_path == "" {
 		config = &ProcessConfig{}
 		config.Log = &LogConfig{Level: "debug"}
+		config.setup([]string{})
 	} else {
-		var err error
-		config, err = LoadProcessConfig(config_path)
-		if err != nil {
-			fmt.Printf("Failed to load config: %v because of %v\n", config_path, err)
-			os.Exit(1)
-		}
+		config = act.LoadAndSetupProcessConfig(c)
 	}
-	config.setup([]string{})
 	config.Download.Workers = c.Int("workers")
 	config.Download.MaxTries = c.Int("max_tries")
 	config.Job.Sustainer = &JobSustainerConfig{
