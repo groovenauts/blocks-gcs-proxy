@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
@@ -9,6 +11,7 @@ import (
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
 
+	"github.com/cenkalti/backoff"
 	logrus "github.com/sirupsen/logrus"
 )
 
@@ -59,7 +62,13 @@ func (p *Process) setup() error {
 		return err
 	}
 
-	puller := &pubsubPuller{pubsubService.Projects.Subscriptions}
+	eb := backoff.NewExponentialBackOff()
+	eb.InitialInterval = 10 * time.Second
+	b := backoff.WithMaxTries(eb, 5)
+	puller := &BackoffPuller{
+		Impl: &pubsubPuller{pubsubService.Projects.Subscriptions},
+		Backoff: b,
+	}
 
 	if !p.config.Job.Sustainer.Disabled {
 		err = p.config.Job.setupSustainer(puller)
