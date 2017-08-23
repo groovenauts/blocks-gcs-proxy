@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/urfave/cli"
@@ -30,14 +29,4 @@ func newApp() *cli.App {
 func main() {
 	app := newApp()
 	app.Run(os.Args)
-}
-
-func setupProcess(config *ProcessConfig) *Process {
-	p := &Process{config: config}
-	err := p.setup()
-	if err != nil {
-		fmt.Printf("Error to setup Process cause of %v\n", err)
-		os.Exit(1)
-	}
-	return p
 }

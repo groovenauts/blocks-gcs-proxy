@@ -31,7 +31,7 @@ func (act *CliActions) MainFlags() []cli.Flag {
 
 func (act *CliActions) Main(c *cli.Context) error {
 	config := act.LoadAndSetupProcessConfig(c)
-	p := setupProcess(config)
+	p := act.setupProcess(config)
 
 	err := p.run()
 	if err != nil {
@@ -109,7 +109,7 @@ func (act *CliActions) Download(c *cli.Context) error {
 	config.Job.Sustainer = &JobSustainerConfig{
 		Disabled: true,
 	}
-	p := setupProcess(config)
+	p := act.setupProcess(config)
 	files := []interface{}{}
 	for _, arg := range c.Args() {
 		files = append(files, arg)
@@ -164,7 +164,7 @@ func (act *CliActions) Upload(c *cli.Context) error {
 	config.Job.Sustainer = &JobSustainerConfig{
 		Disabled: true,
 	}
-	p := setupProcess(config)
+	p := act.setupProcess(config)
 	p.setup()
 	job := &Job{
 		config:      config.Command,
@@ -271,4 +271,14 @@ func (act *CliActions) configPath(c *cli.Context) string {
 		r = "./config.json"
 	}
 	return r
+}
+
+func (act *CliActions) setupProcess(config *ProcessConfig) *Process {
+	p := &Process{config: config}
+	err := p.setup()
+	if err != nil {
+		fmt.Printf("Error to setup Process cause of %v\n", err)
+		os.Exit(1)
+	}
+	return p
 }
