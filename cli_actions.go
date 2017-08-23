@@ -24,9 +24,17 @@ func (c *CliActions) configFlag() cli.StringFlag {
 	}
 }
 
+func (c *CliActions) logConfigFlag() cli.BoolFlag {
+	return cli.BoolFlag{
+		Name:  "log-config, l",
+		Usage: "Set to log your configuration loaded",
+	}
+}
+
 func (act *CliActions) MainFlags() []cli.Flag {
 	return []cli.Flag{
 		act.configFlag(),
+		act.logConfigFlag(),
 	}
 }
 
@@ -50,6 +58,7 @@ func (act *CliActions) CheckCommand() cli.Command {
 		Action: act.Check,
 		Flags: []cli.Flag{
 			act.configFlag(),
+			act.logConfigFlag(),
 		},
 	}
 }
@@ -67,6 +76,7 @@ func (act *CliActions) DownloadCommand() cli.Command {
 		Action: act.Download,
 		Flags: []cli.Flag{
 			act.configFlag(),
+			act.logConfigFlag(),
 			cli.StringFlag{
 				Name:  "downloads_dir, d",
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
@@ -174,6 +184,7 @@ func (act *CliActions) ExecCommand() cli.Command {
 		Action: act.Exec,
 		Flags: []cli.Flag{
 			act.configFlag(),
+			act.logConfigFlag(),
 			cli.StringFlag{
 				Name:  "message, m",
 				Usage: "Path to the message json file which has attributes and data",
@@ -261,6 +272,15 @@ func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback fu
 		fmt.Printf("Error to callback on setup %v cause of %v\n", path, err)
 		os.Exit(1)
 	}
+
+	if c.Bool("log-config") {
+		err = act.LogConfig(config)
+		if err != nil {
+			fmt.Printf("Error to log config %v cause of %v\n", path, err)
+			os.Exit(1)
+		}
+	}
+
 	return config
 }
 
@@ -272,4 +292,14 @@ func (act *CliActions) newProcess(config *ProcessConfig) *Process {
 		os.Exit(1)
 	}
 	return p
+}
+
+func (act *CliActions) LogConfig(config *ProcessConfig) error {
+	text, err := json.MarshalIndent(config, "", "  ")
+  if err != nil {
+		log.Errorf("Failed to json.MarshalIndent because of %v\n", err)
+		return err
+	}
+	log.Infof("config:\n%v\n", string(text))
+	return nil
 }

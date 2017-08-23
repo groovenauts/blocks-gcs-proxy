@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
@@ -24,13 +22,6 @@ type (
 )
 
 func (p *Process) setup() error {
-	text, err := json.MarshalIndent(p.config, "", "  ")
-  if err != nil {
-		logrus.Errorf("Failed to json.MarshalIndent because of %v\n", err)
-		return err
-	}
-	logrus.Infof("ProcessConfig#setup: %v\n", string(text))
-
 	ctx := context.Background()
 
 	// https://github.com/google/google-api-go-client#application-default-credentials-example
