@@ -13,31 +13,31 @@ import (
 )
 
 const (
-	flag_config = "config"
-	flag_log_config = "log-config"
-	flag_workers = "workers"
-	flag_max_tries = "max_tries"
-	flag_wait = "wait"
+	flag_config        = "config"
+	flag_log_config    = "log-config"
+	flag_workers       = "workers"
+	flag_max_tries     = "max_tries"
+	flag_wait          = "wait"
 	flag_downloads_dir = "downloads_dir"
-	flag_uploads_dir = "uploads_dir"
-	flag_message = "message"
-	flag_workspace = "workspace"
+	flag_uploads_dir   = "uploads_dir"
+	flag_message       = "message"
+	flag_workspace     = "workspace"
 )
 
 var flagAliases = map[string]string{
 	// For all
-	flag_config: "c",
+	flag_config:     "c",
 	flag_log_config: "l",
 	// For Download and Upload
-	flag_workers: "n",
+	flag_workers:   "n",
 	flag_max_tries: "M",
-	flag_wait: "W",
+	flag_wait:      "W",
 	// For Download only
 	flag_downloads_dir: "d",
 	// For Upload only
 	flag_uploads_dir: "d",
 	// For Exec only
-	flag_message: "m",
+	flag_message:   "m",
 	flag_workspace: "w",
 }
 
@@ -106,11 +106,10 @@ func (act *CliActions) Main(c *cli.Context) error {
 	return nil
 }
 
-
 func (act *CliActions) CheckCommand() cli.Command {
 	return cli.Command{
-		Name:  "check",
-		Usage: "Check config file is valid",
+		Name:   "check",
+		Usage:  "Check config file is valid",
 		Action: act.Check,
 		Flags: []cli.Flag{
 			act.flagConfig(),
@@ -127,8 +126,8 @@ func (act *CliActions) Check(c *cli.Context) error {
 
 func (act *CliActions) DownloadCommand() cli.Command {
 	return cli.Command{
-		Name:  "download",
-		Usage: "Download the files from GCS to downloads directory",
+		Name:   "download",
+		Usage:  "Download the files from GCS to downloads directory",
 		Action: act.Download,
 		Flags: []cli.Flag{
 			act.flagConfig(),
@@ -179,11 +178,10 @@ func (act *CliActions) Download(c *cli.Context) error {
 	return nil
 }
 
-
 func (act *CliActions) UploadCommand() cli.Command {
 	return cli.Command{
-		Name:  "upload",
-		Usage: "Upload the files under uploads directory",
+		Name:   "upload",
+		Usage:  "Upload the files under uploads directory",
 		Action: act.Upload,
 		Flags: []cli.Flag{
 			act.flagConfig(),
@@ -211,9 +209,9 @@ func (act *CliActions) Upload(c *cli.Context) error {
 	})
 	p := act.newProcess(config)
 	job := &Job{
-		config:      config.Command,
-		uploads_dir: c.String(flag_uploads_dir),
-		storage:     p.storage,
+		config:       config.Command,
+		uploads_dir:  c.String(flag_uploads_dir),
+		storage:      p.storage,
 		uploadConfig: config.Upload,
 	}
 	fmt.Printf("Uploading files under %v\n", job.uploads_dir)
@@ -227,11 +225,10 @@ func (act *CliActions) Upload(c *cli.Context) error {
 	return err
 }
 
-
 func (act *CliActions) ExecCommand() cli.Command {
 	return cli.Command{
-		Name:  "exec",
-		Usage: "Execute job without download nor upload",
+		Name:   "exec",
+		Usage:  "Execute job without download nor upload",
 		Action: act.Exec,
 		Flags: []cli.Flag{
 			act.flagConfig(),
@@ -301,9 +298,8 @@ func (act *CliActions) Exec(c *cli.Context) error {
 	return err
 }
 
-
 func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
-	return act.LoadAndSetupProcessConfigWith(c, func(_ *ProcessConfig) error{ return nil})
+	return act.LoadAndSetupProcessConfigWith(c, func(_ *ProcessConfig) error { return nil })
 }
 
 func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback func(*ProcessConfig) error) *ProcessConfig {
@@ -347,7 +343,7 @@ func (act *CliActions) newProcess(config *ProcessConfig) *Process {
 
 func (act *CliActions) LogConfig(config *ProcessConfig) error {
 	text, err := json.MarshalIndent(config, "", "  ")
-  if err != nil {
+	if err != nil {
 		log.Errorf("Failed to json.MarshalIndent because of %v\n", err)
 		return err
 	}
