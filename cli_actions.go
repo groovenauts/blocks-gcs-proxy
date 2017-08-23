@@ -18,6 +18,8 @@ const (
 	flag_workers = "workers"
 	flag_max_tries = "max_tries"
 	flag_wait = "wait"
+	flag_downloads_dir = "downloads_dir"
+	flag_uploads_dir = "uploads_dir"
 )
 
 var flagAliases = map[string]string{
@@ -26,6 +28,10 @@ var flagAliases = map[string]string{
 	flag_workers: "n",
 	flag_max_tries: "m",
 	flag_wait: "w",
+	// For Download only
+	flag_downloads_dir: "d",
+	// For Upload only
+	flag_uploads_dir: "d",
 }
 
 type CliActions struct {
@@ -121,7 +127,7 @@ func (act *CliActions) DownloadCommand() cli.Command {
 			act.flagConfig(),
 			act.flagLogConfig(),
 			cli.StringFlag{
-				Name:  "downloads_dir, d",
+				Name:  act.flagName(flag_downloads_dir),
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
 			},
 			act.flagWorkers(),
@@ -147,7 +153,7 @@ func (act *CliActions) Download(c *cli.Context) error {
 	}
 	job := &Job{
 		config:              config.Command,
-		downloads_dir:       c.String("downloads_dir"),
+		downloads_dir:       c.String(flag_downloads_dir),
 		remoteDownloadFiles: files,
 		storage:             p.storage,
 		downloadConfig:      config.Download,
@@ -176,7 +182,7 @@ func (act *CliActions) UploadCommand() cli.Command {
 			act.flagConfig(),
 			act.flagLogConfig(),
 			cli.StringFlag{
-				Name:  "uploads_dir, d",
+				Name:  act.flagName(flag_uploads_dir),
 				Usage: "Path to the directory which has bucket_name/path/to/file",
 			},
 			act.flagWorkers(),
@@ -199,7 +205,7 @@ func (act *CliActions) Upload(c *cli.Context) error {
 	p := act.newProcess(config)
 	job := &Job{
 		config:      config.Command,
-		uploads_dir: c.String("uploads_dir"),
+		uploads_dir: c.String(flag_uploads_dir),
 		storage:     p.storage,
 		uploadConfig: config.Upload,
 	}
