@@ -173,37 +173,44 @@ func (act *CliActions) UploadCommand() cli.Command {
 		Usage: "Upload the files under uploads directory",
 		Action: act.Upload,
 		Flags: []cli.Flag{
+			act.flagConfig(),
+			act.flagLogConfig(),
 			cli.StringFlag{
 				Name:  "uploads_dir, d",
 				Usage: "Path to the directory which has bucket_name/path/to/file",
 			},
-			cli.IntFlag{
-				Name:  "uploaders, n",
-				Usage: "Number of uploaders",
-				Value: 6,
-			},
+			act.flagWorkers(),
+			act.flagMaxTries(),
+			act.flagWait(),
 		},
 	}
 }
 
 func (act *CliActions) Upload(c *cli.Context) error {
 	fmt.Printf("Uploading files\n")
-	config := &ProcessConfig{}
-	config.Log = &LogConfig{Level: "debug"}
-	config.setup([]string{})
-	config.Upload.Workers = c.Int("uploaders")
-	config.Job.Sustainer = &JobSustainerConfig{
-		Disabled: true,
-	}
+	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
+		cfg.Upload.Workers = c.Int(flag_workers)
+		cfg.Upload.MaxTries = c.Int(flag_max_tries)
+		cfg.Job.Sustainer = &JobSustainerConfig{
+			Disabled: true,
+		}
+		return nil
+	})
 	p := act.newProcess(config)
-	p.setup()
 	job := &Job{
 		config:      config.Command,
 		uploads_dir: c.String("uploads_dir"),
 		storage:     p.storage,
+		uploadConfig: config.Upload,
 	}
 	fmt.Printf("Uploading files under %v\n", job.uploads_dir)
 	err := job.uploadFiles()
+
+	w := c.Int(flag_wait)
+	if w > 0 {
+		time.Sleep(time.Duration(w) * time.Second)
+	}
+
 	return err
 }
 
