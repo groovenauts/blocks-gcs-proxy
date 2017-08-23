@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	pubsub "google.golang.org/api/pubsub/v1"
 
@@ -38,19 +39,31 @@ func newApp() *cli.App {
 				configFlag,
 			},
 		},
+
 		{
 			Name:  "download",
 			Usage: "Download the files from GCS to downloads directory",
 			Action: func(c *cli.Context) error {
-				config := &ProcessConfig{}
-				config.Log = &LogConfig{Level: "debug"}
+				config_path := c.String("config")
+				var config *ProcessConfig
+				if config_path == "" {
+					config = &ProcessConfig{}
+					config.Log = &LogConfig{Level: "debug"}
+				} else {
+					var err error
+					config, err = LoadProcessConfig(config_path)
+					if err != nil {
+						fmt.Printf("Failed to load config: %v because of %v\n", config_path, err)
+						os.Exit(1)
+					}
+				}
 				config.setup([]string{})
-				config.Download.Workers = c.Int("downloaders")
+				config.Download.Workers = c.Int("workers")
+				config.Download.MaxTries = c.Int("max_tries")
 				config.Job.Sustainer = &JobSustainerConfig{
 					Disabled: true,
 				}
 				p := setupProcess(config)
-				p.setup()
 				files := []interface{}{}
 				for _, arg := range c.Args() {
 					files = append(files, arg)
@@ -60,26 +73,48 @@ func newApp() *cli.App {
 					downloads_dir:       c.String("downloads_dir"),
 					remoteDownloadFiles: files,
 					storage:             p.storage,
+					downloadConfig:      config.Download,
 				}
 				err := job.setupDownloadFiles()
 				if err != nil {
 					return err
 				}
 				err = job.downloadFiles()
+
+				w := c.Int("wait")
+				if w > 0 {
+					time.Sleep(time.Duration(w) * time.Second)
+				}
+
 				return err
 			},
 			Flags: []cli.Flag{
 				cli.StringFlag{
+					Name:  "config, c",
+					Usage: "`FILE` to load configuration",
+				},
+				cli.StringFlag{
 					Name:  "downloads_dir, d",
-					Usage: "Path to the directory which has bucket_name/path/to/file",
+					Usage: "`PATH` to the directory which has bucket_name/path/to/file",
 				},
 				cli.IntFlag{
-					Name:  "downloaders, n",
-					Usage: "Number of downloaders",
-					Value: 6,
+					Name:  "workers, n",
+					Usage: "`NUMBER` of workers",
+					Value: 5,
+				},
+				cli.IntFlag{
+					Name:  "max_tries, m",
+					Usage: "`NUMBER` of max tries",
+					Value: 3,
+				},
+				cli.IntFlag{
+					Name:  "wait, w",
+					Usage: "`NUMBER` of seconds to wait",
+					Value: 0,
 				},
 			},
 		},
+
 		{
 			Name:  "upload",
 			Usage: "Upload the files under uploads directory",
