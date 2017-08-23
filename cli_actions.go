@@ -50,6 +50,30 @@ func (act *CliActions) flagLogConfig() cli.BoolFlag {
 	}
 }
 
+func (act *CliActions) flagWorkers() cli.IntFlag {
+	return cli.IntFlag{
+		Name:  act.flagName(flag_workers),
+		Usage: "`NUMBER` of workers",
+		Value: 5,
+	}
+}
+
+func (act *CliActions) flagMaxTries() cli.IntFlag {
+	return cli.IntFlag{
+		Name:  act.flagName(flag_max_tries),
+		Usage: "`NUMBER` of max tries",
+		Value: 3,
+	}
+}
+
+func (act *CliActions) flagWait() cli.IntFlag {
+	return cli.IntFlag{
+		Name:  act.flagName(flag_wait),
+		Usage: "`NUMBER` of seconds to wait",
+		Value: 0,
+	}
+}
+
 func (act *CliActions) MainFlags() []cli.Flag {
 	return []cli.Flag{
 		act.flagConfig(),
@@ -100,21 +124,9 @@ func (act *CliActions) DownloadCommand() cli.Command {
 				Name:  "downloads_dir, d",
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
 			},
-			cli.IntFlag{
-				Name:  act.flagName(flag_workers),
-				Usage: "`NUMBER` of workers",
-				Value: 5,
-			},
-			cli.IntFlag{
-				Name:  act.flagName(flag_max_tries),
-				Usage: "`NUMBER` of max tries",
-				Value: 3,
-			},
-			cli.IntFlag{
-				Name:  act.flagName(flag_wait),
-				Usage: "`NUMBER` of seconds to wait",
-				Value: 0,
-			},
+			act.flagWorkers(),
+			act.flagMaxTries(),
+			act.flagWait(),
 		},
 	}
 }
