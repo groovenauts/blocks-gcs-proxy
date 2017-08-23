@@ -20,6 +20,7 @@ func (c *CliActions) configFlag() cli.StringFlag {
 	return cli.StringFlag{
 		Name:  "config, c",
 		Usage: "`FILE` to load configuration",
+		Value: "./config.json",
 	}
 }
 
@@ -251,7 +252,7 @@ func (act *CliActions) Exec(c *cli.Context) error {
 
 
 func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
-	path := act.configPath(c)
+	path := c.String("config")
 	config, err := LoadProcessConfig(path)
 	if err != nil {
 		fmt.Printf("Error to load %v cause of %v\n", path, err)
@@ -263,14 +264,6 @@ func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig 
 		os.Exit(1)
 	}
 	return config
-}
-
-func (act *CliActions) configPath(c *cli.Context) string {
-	r := c.String("config")
-	if r == "" {
-		r = "./config.json"
-	}
-	return r
 }
 
 func (act *CliActions) newProcess(config *ProcessConfig) *Process {
