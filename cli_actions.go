@@ -91,12 +91,14 @@ func (act *CliActions) DownloadCommand() cli.Command {
 }
 
 func (act *CliActions) Download(c *cli.Context) error {
-	config = act.LoadAndSetupProcessConfig(c)
-	config.Download.Workers = c.Int("workers")
-	config.Download.MaxTries = c.Int("max_tries")
-	config.Job.Sustainer = &JobSustainerConfig{
-		Disabled: true,
-	}
+	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
+		cfg.Download.Workers = c.Int("workers")
+		cfg.Download.MaxTries = c.Int("max_tries")
+		cfg.Job.Sustainer = &JobSustainerConfig{
+			Disabled: true,
+		}
+		return nil
+	})
 	p := act.newProcess(config)
 	files := []interface{}{}
 	for _, arg := range c.Args() {
@@ -239,6 +241,10 @@ func (act *CliActions) Exec(c *cli.Context) error {
 
 
 func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig {
+	return act.LoadAndSetupProcessConfigWith(c, func(_ *ProcessConfig) error{ return nil})
+}
+
+func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback func(*ProcessConfig) error) *ProcessConfig {
 	path := c.String("config")
 	config, err := LoadProcessConfig(path)
 	if err != nil {
@@ -248,6 +254,11 @@ func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig 
 	err = config.setup(c.Args())
 	if err != nil {
 		fmt.Printf("Error to setup %v cause of %v\n", path, err)
+		os.Exit(1)
+	}
+	err = callback(config)
+	if err != nil {
+		fmt.Printf("Error to callback on setup %v cause of %v\n", path, err)
 		os.Exit(1)
 	}
 	return config
