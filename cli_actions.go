@@ -20,11 +20,15 @@ const (
 	flag_wait = "wait"
 	flag_downloads_dir = "downloads_dir"
 	flag_uploads_dir = "uploads_dir"
+	flag_message = "message"
+	flag_workspace = "workspace"
 )
 
 var flagAliases = map[string]string{
+	// For all
 	flag_config: "c",
 	flag_log_config: "l",
+	// For Download and Upload
 	flag_workers: "n",
 	flag_max_tries: "M",
 	flag_wait: "W",
@@ -32,6 +36,9 @@ var flagAliases = map[string]string{
 	flag_downloads_dir: "d",
 	// For Upload only
 	flag_uploads_dir: "d",
+	// For Exec only
+	flag_message: "m",
+	flag_workspace: "w",
 }
 
 type CliActions struct {
@@ -230,11 +237,11 @@ func (act *CliActions) ExecCommand() cli.Command {
 			act.flagConfig(),
 			act.flagLogConfig(),
 			cli.StringFlag{
-				Name:  "message, m",
+				Name:  act.flagName(flag_message),
 				Usage: "Path to the message json file which has attributes and data",
 			},
 			cli.StringFlag{
-				Name:  "workspace, w",
+				Name:  act.flagName(flag_workspace),
 				Usage: "Path to workspace directory which has downloads and uploads",
 			},
 		},
@@ -244,8 +251,8 @@ func (act *CliActions) ExecCommand() cli.Command {
 func (act *CliActions) Exec(c *cli.Context) error {
 	config := act.LoadAndSetupProcessConfig(c)
 
-	msg_file := c.String("message")
-	workspace := c.String("workspace")
+	msg_file := c.String(flag_message)
+	workspace := c.String(flag_workspace)
 
 	type Msg struct {
 		Attributes  map[string]string `json:"attributes"`
