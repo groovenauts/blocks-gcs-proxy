@@ -21,32 +21,28 @@ type (
 )
 
 func (ct *CloudStorage) Download(bucket, object, destPath string) error {
-	logAttrs := logrus.Fields{"url": "gs://" + bucket + "/" + object, "destPath": destPath}
-	log.WithFields(logAttrs).Debugln("Downloading")
+	log := log.WithFields(logrus.Fields{"url": "gs://" + bucket + "/" + object, "destPath": destPath})
+	log.Debugln("Downloading")
 	dest, err := os.Create(destPath)
 	if err != nil {
-		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Creating dest file")
+		log.WithFields(logrus.Fields{"error": err}).Warnf("Creating dest file")
 		return err
 	}
 	defer dest.Close()
 
 	resp, err := ct.service.Get(bucket, object).Download()
 	if err != nil {
-		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to download")
+		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to download")
 		return err
 	}
 	defer resp.Body.Close()
 
 	n, err := io.Copy(dest, resp.Body)
 	if err != nil {
-		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to copy")
+		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to copy")
 		return err
 	}
-	logAttrs["size"] = n
-	log.WithFields(logAttrs).Debugln("Download successfully")
+	log.WithFields(logrus.Fields{"size": n}).Debugln("Download successfully")
 	return nil
 }
 
@@ -55,14 +51,12 @@ func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
 	log.WithFields(logAttrs).Debugln("Uploading")
 	f, err := os.Open(srcPath)
 	if err != nil {
-		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to open the file")
+		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to open the file")
 		return err
 	}
 	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
 	if err != nil {
-		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorf("Failed to upload")
+		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to upload")
 		return err
 	}
 	log.WithFields(logAttrs).Debugln("Upload successfully")

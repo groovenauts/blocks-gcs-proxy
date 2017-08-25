@@ -1,12 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
-	"os"
-	"strings"
-	"text/template"
+	"time"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
@@ -16,112 +11,9 @@ import (
 	pubsub "google.golang.org/api/pubsub/v1"
 	storage "google.golang.org/api/storage/v1"
 
+	"github.com/cenkalti/backoff"
 	logrus "github.com/sirupsen/logrus"
 )
-
-type (
-	ProcessConfig struct {
-		Command  *CommandConfig              `json:"command,omitempty"`
-		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
-		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
-		Log      *LogConfig                  `json:"log,omitempty"`
-		Download *WorkerConfig               `json:"download"`
-		Upload   *WorkerConfig               `json:"upload"`
-	}
-)
-
-func (c *ProcessConfig) setup(args []string) error {
-	setups := map[string]ConfigSetup{
-		"command": func() *ConfigError {
-			return c.setupCommand(args)
-		},
-		"job":      c.setupJob,
-		"progress": c.setupProgress,
-		"log":      c.setupLog,
-		"download": c.setupDownload,
-		"upload":   c.setupUpload,
-	}
-	for key, setup := range setups {
-		err := setup()
-		if err != nil {
-			err.Add(key)
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *ProcessConfig) setupCommand(args []string) *ConfigError {
-	if c.Command == nil {
-		c.Command = &CommandConfig{}
-	}
-	c.Command.Template = args
-	return c.Command.setup()
-}
-
-func (c *ProcessConfig) setupJob() *ConfigError {
-	if c.Job == nil {
-		c.Job = &JobSubscriptionConfig{}
-	}
-	return c.Job.setup()
-}
-
-func (c *ProcessConfig) setupProgress() *ConfigError {
-	if c.Progress == nil {
-		c.Progress = &ProgressNotificationConfig{}
-	}
-	return c.Progress.setup()
-}
-
-func (c *ProcessConfig) setupLog() *ConfigError {
-	if c.Log == nil {
-		c.Log = &LogConfig{}
-	}
-	return c.Log.setup()
-}
-
-func (c *ProcessConfig) setupDownload() *ConfigError {
-	if c.Download == nil {
-		c.Download = &WorkerConfig{}
-	}
-	return c.Download.setup()
-}
-
-func (c *ProcessConfig) setupUpload() *ConfigError {
-	if c.Upload == nil {
-		c.Upload = &WorkerConfig{}
-	}
-	return c.Upload.setup()
-}
-
-func LoadProcessConfig(path string) (*ProcessConfig, error) {
-	raw, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	funcMap := template.FuncMap{"env": os.Getenv}
-	t, err := template.New("config").Funcs(funcMap).Parse(string(raw))
-	if err != nil {
-		return nil, err
-	}
-
-	env := map[string]string{}
-	for _, s := range os.Environ() {
-		parts := strings.SplitN(s, "=", 2)
-		env[parts[0]] = parts[1]
-	}
-
-	buf := new(bytes.Buffer)
-	t.Execute(buf, env)
-
-	var res ProcessConfig
-	err = json.Unmarshal(buf.Bytes(), &res)
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
 
 type (
 	Process struct {
@@ -170,7 +62,13 @@ func (p *Process) setup() error {
 		return err
 	}
 
-	puller := &pubsubPuller{pubsubService.Projects.Subscriptions}
+	eb := backoff.NewExponentialBackOff()
+	eb.InitialInterval = 10 * time.Second
+	b := backoff.WithMaxTries(eb, 5)
+	puller := &BackoffPuller{
+		Impl:    &pubsubPuller{pubsubService.Projects.Subscriptions},
+		Backoff: b,
+	}
 
 	if !p.config.Job.Sustainer.Disabled {
 		err = p.config.Job.setupSustainer(puller)
@@ -224,7 +122,7 @@ func (p *Process) run() error {
 			storage:              p.storage,
 		}
 		job.setupExecUUID()
-		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID})
+		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID, "message-id": msg.MessageId(), "ack-id": msg.raw.AckId})
 		err := p.replaceGlobalLog(jobLog, func() error {
 			err := job.run()
 			if err != nil {

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/cenkalti/backoff"
+
 	pubsub "google.golang.org/api/pubsub/v1"
 )
 
@@ -38,4 +40,61 @@ func (pp *pubsubPuller) ModifyAckDeadline(subscription string, ackIds []string, 
 
 func (pp *pubsubPuller) Get(subscription string) (*pubsub.Subscription, error) {
 	return pp.subscriptionsService.Get(subscription).Do()
+}
+
+type BackoffPuller struct {
+	Impl    Puller
+	Backoff backoff.BackOff
+}
+
+func (bp *BackoffPuller) Pull(subscription string, pullrequest *pubsub.PullRequest) (res *pubsub.PullResponse, err error) {
+	f := func() error {
+		var e error
+		res, e = bp.Impl.Pull(subscription, pullrequest)
+		return e
+	}
+	err = backoff.Retry(f, bp.Backoff)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (bp *BackoffPuller) Acknowledge(subscription, ackId string) (empty *pubsub.Empty, err error) {
+	f := func() error {
+		var e error
+		empty, e = bp.Impl.Acknowledge(subscription, ackId)
+		return e
+	}
+	err = backoff.Retry(f, bp.Backoff)
+	if err != nil {
+		return nil, err
+	}
+	return empty, nil
+}
+
+func (bp *BackoffPuller) ModifyAckDeadline(subscription string, ackIds []string, ackDeadlineSeconds int64) (empty *pubsub.Empty, err error) {
+	f := func() error {
+		var e error
+		empty, e = bp.Impl.ModifyAckDeadline(subscription, ackIds, ackDeadlineSeconds)
+		return e
+	}
+	err = backoff.Retry(f, bp.Backoff)
+	if err != nil {
+		return nil, err
+	}
+	return empty, nil
+}
+
+func (bp *BackoffPuller) Get(subscription string) (sub *pubsub.Subscription, err error) {
+	f := func() error {
+		var e error
+		sub, e = bp.Impl.Get(subscription)
+		return e
+	}
+	err = backoff.Retry(f, bp.Backoff)
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
 }

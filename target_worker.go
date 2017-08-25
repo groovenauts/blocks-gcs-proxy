@@ -28,6 +28,10 @@ type Target struct {
 	error     error
 }
 
+func (t *Target) URL() string {
+	return fmt.Sprintf("gs://%s/%s", t.Bucket, t.Object)
+}
+
 type TargetWorker struct {
 	name     string
 	targets  chan *Target
@@ -69,7 +73,7 @@ func (w *TargetWorker) run() {
 		err := backoff.Retry(f, b)
 		flds["error"] = err
 		if err != nil {
-			log.WithFields(flds).Errorf("Worker Failed to %v\n", w.name)
+			log.WithFields(flds).Errorf("Worker Failed to %v %v\n", w.name, t.URL())
 			w.done = true
 			w.error = err
 			t.error = err
