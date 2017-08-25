@@ -8,10 +8,6 @@ import (
 )
 
 type (
-	RetryableError interface {
-		Retryable() bool
-	}
-
 	NestableError interface {
 		CausedBy(err error) bool
 	}
@@ -49,10 +45,6 @@ func (e *InvalidJobError) Error() string {
 	return ""
 }
 
-func (e *InvalidJobError) Retryable() bool {
-	return false
-}
-
 func (e *InvalidJobError) CausedBy(err error) bool {
 	return SameErrorType(e.cause, err)
 }
@@ -69,19 +61,6 @@ func (e *CompositeError) Error() string {
 		msgs = append(msgs, err.Error())
 	}
 	return strings.Join(msgs, "\n")
-}
-
-func (e *CompositeError) Retryable() bool {
-	for _, err := range e.errors {
-		switch err.(type) {
-		case RetryableError:
-			e := err.(RetryableError)
-			if !e.Retryable() {
-				return false
-			}
-		}
-	}
-	return true
 }
 
 func (e *CompositeError) CausedBy(err error) bool {

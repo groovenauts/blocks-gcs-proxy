@@ -63,26 +63,11 @@ func (job *Job) run() error {
 	if err == nil {
 		return nil
 	}
-	var f func() error
-	if job.retryable(err) {
-		f = job.withNotify(NACKSENDING, job.message.Nack)
-	} else {
-		f = job.withNotify(CANCELLING, job.message.Ack)
-	}
-	e := f()
+	e := job.withNotify(CANCELLING, job.message.Ack)()
 	if e != nil {
 		return e
 	}
 	return nil
-}
-
-func (job *Job) retryable(err error) bool {
-	switch err.(type) {
-	case RetryableError:
-		e := err.(RetryableError)
-		return e.Retryable()
-	}
-	return true
 }
 
 func (job *Job) runWithoutErrorHandling() error {
