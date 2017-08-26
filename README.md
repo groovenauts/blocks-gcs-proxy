@@ -53,7 +53,7 @@ specified by `job.subscription` in `config.json`.
 | progress | map | True |  |  |
 | progress.topic | string | True | - | The topic name to publish job progress messages |
 | progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
-| progress.hostname | string | False | (hostname) | Hostname attribute value of job progress message |
+| progress.attributes | map[string]string | False | {} | Static attributes of progress notification message |
 | log       | map    | False |  |  |
 | log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | log.command_severity | string | False | `info` | The Log severity of command outputs. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
