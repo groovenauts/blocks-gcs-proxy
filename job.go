@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/groovenauts/blocks-variable"
 	"github.com/satori/go.uuid"
@@ -58,11 +59,18 @@ type Job struct {
 	cmd *exec.Cmd
 }
 
+const (
+	StartTimeKey  = "job.start-time"
+	FinishTimeKey = "job.finish-time"
+)
+
 func (job *Job) run() error {
+	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
 	err := job.runWithoutErrorHandling()
 	if err == nil {
 		return nil
 	}
+	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
 	e := job.withNotify(CANCELLING, job.message.Ack)()
 	if e != nil {
 		return e
