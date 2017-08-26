@@ -76,19 +76,14 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		return nil
 	}
 	attrs := map[string]string{}
-	for k, v := range opts {
-		buf := []byte(v)
-		if len(buf) > 1024 {
-			attrs[k] = string(buf[0:1024])
-		} else {
-			attrs[k] = v
-		}
-	}
-	attrs["progress"] = strconv.Itoa(int(progress))
-	attrs["completed"] = strconv.FormatBool(completed)
-	attrs["job_message_id"] = job_msg_id
-	attrs["level"] = level.String()
-	attrs["host"] = pn.config.Hostname
+	pn.mergeMsgAttrs(attrs, opts)
+	pn.mergeMsgAttrs(attrs, map[string]string{
+		"progress":       strconv.Itoa(int(progress)),
+		"completed":      strconv.FormatBool(completed),
+		"job_message_id": job_msg_id,
+		"level":          level.String(),
+		"host":           pn.config.Hostname,
+	})
 	logAttrs := logrus.Fields{}
 	for k, v := range attrs {
 		logAttrs[k] = v
@@ -102,4 +97,15 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		return err
 	}
 	return nil
+}
+
+func (pn *ProgressNotification) mergeMsgAttrs(dest, src map[string]string) {
+	for k, v := range src {
+		buf := []byte(v)
+		if len(buf) > 1024 {
+			dest[k] = string(buf[0:1024])
+		} else {
+			dest[k] = v
+		}
+	}
 }
