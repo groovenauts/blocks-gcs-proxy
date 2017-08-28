@@ -104,6 +104,7 @@ func (job *Job) runWithoutErrorHandling() error {
 		return err
 	}
 
+	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
 	err = job.withNotify(ACKSENDING, job.message.Ack)()
 	if err != nil {
 		return err
