@@ -67,13 +67,13 @@ const (
 func (job *Job) run() error {
 	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
 	err := job.runWithoutErrorHandling()
-	if err == nil {
-		return nil
-	}
-	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
-	e := job.withNotify(CANCELLING, job.message.Ack)()
-	if e != nil {
-		return e
+	if err != nil {
+		// Notify CANCELLING insted of return err
+		job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
+		e := job.withNotify(CANCELLING, job.message.Ack)()
+		if e != nil {
+			return e
+		}
 	}
 	return nil
 }
