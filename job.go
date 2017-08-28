@@ -68,17 +68,10 @@ func (job *Job) run() error {
 	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
 	err := job.runWithoutErrorHandling()
 	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
-	if err != nil {
-		// Notify CANCELLING insted of return err
-		e := job.withNotify(CANCELLING, job.message.Ack)()
-		if e != nil {
-			return e
-		}
-	} else {
-		e = job.withNotify(ACKSENDING, job.message.Ack)()
-		if e != nil {
-			return e
-		}
+	step := map[bool]JobStep{false: ACKSENDING, true: CANCELLING}[err != nil]
+	e := job.withNotify(step, job.message.Ack)()
+	if e != nil {
+		return e
 	}
 	return nil
 }
