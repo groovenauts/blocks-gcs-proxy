@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
 	"strconv"
 
 	// "golang.org/x/net/context"
@@ -14,23 +13,14 @@ import (
 )
 
 type ProgressNotificationConfig struct {
-	Topic    string `json:"topic"`
-	LogLevel string `json:"log_level"`
-	Hostname string `json:"hostname"`
+	Topic      string            `json:"topic"`
+	LogLevel   string            `json:"log_level"`
+	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 func (c *ProgressNotificationConfig) setup() *ConfigError {
 	if c.LogLevel == "" {
 		c.LogLevel = logrus.InfoLevel.String()
-	}
-
-	if c.Hostname == "" {
-		h, err := os.Hostname()
-		if err != nil {
-			return &ConfigError{Name: "hostname", Message: "failed to get from OS"}
-		} else {
-			c.Hostname = h
-		}
 	}
 	return nil
 }
@@ -76,19 +66,14 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		return nil
 	}
 	attrs := map[string]string{}
-	for k, v := range opts {
-		buf := []byte(v)
-		if len(buf) > 1024 {
-			attrs[k] = string(buf[0:1024])
-		} else {
-			attrs[k] = v
-		}
-	}
-	attrs["progress"] = strconv.Itoa(int(progress))
-	attrs["completed"] = strconv.FormatBool(completed)
-	attrs["job_message_id"] = job_msg_id
-	attrs["level"] = level.String()
-	attrs["host"] = pn.config.Hostname
+	pn.mergeMsgAttrs(attrs, pn.config.Attributes)
+	pn.mergeMsgAttrs(attrs, opts)
+	pn.mergeMsgAttrs(attrs, map[string]string{
+		"progress":       strconv.Itoa(int(progress)),
+		"completed":      strconv.FormatBool(completed),
+		"job_message_id": job_msg_id,
+		"level":          level.String(),
+	})
 	logAttrs := logrus.Fields{}
 	for k, v := range attrs {
 		logAttrs[k] = v
@@ -102,4 +87,15 @@ func (pn *ProgressNotification) notifyProgress(job_msg_id string, progress Progr
 		return err
 	}
 	return nil
+}
+
+func (pn *ProgressNotification) mergeMsgAttrs(dest, src map[string]string) {
+	for k, v := range src {
+		buf := []byte(v)
+		if len(buf) > 1024 {
+			dest[k] = string(buf[0:1024])
+		} else {
+			dest[k] = v
+		}
+	}
 }

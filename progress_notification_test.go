@@ -49,7 +49,9 @@ func TestProgressNotificationNotify(t *testing.T) {
 	config := ProgressNotificationConfig{
 		Topic:    DummyTopic,
 		LogLevel: "info",
-		Hostname: DummyHost,
+		Attributes: map[string]string{
+			"host": DummyHost,
+		},
 	}
 
 	notification := ProgressNotification{

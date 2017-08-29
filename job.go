@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/groovenauts/blocks-variable"
 	"github.com/satori/go.uuid"
@@ -58,12 +59,17 @@ type Job struct {
 	cmd *exec.Cmd
 }
 
+const (
+	StartTimeKey  = "job.start-time"
+	FinishTimeKey = "job.finish-time"
+)
+
 func (job *Job) run() error {
+	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
 	err := job.runWithoutErrorHandling()
-	if err == nil {
-		return nil
-	}
-	e := job.withNotify(CANCELLING, job.message.Ack)()
+	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
+	step := map[bool]JobStep{false: ACKSENDING, true: CANCELLING}[err != nil]
+	e := job.withNotify(step, job.message.Ack)()
 	if e != nil {
 		return e
 	}
@@ -92,11 +98,6 @@ func (job *Job) runWithoutErrorHandling() error {
 	}
 
 	err = job.withNotify(UPLOADING, job.uploadFiles)()
-	if err != nil {
-		return err
-	}
-
-	err = job.withNotify(ACKSENDING, job.message.Ack)()
 	if err != nil {
 		return err
 	}
