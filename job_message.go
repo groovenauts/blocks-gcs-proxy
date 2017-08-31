@@ -63,6 +63,15 @@ func (m *JobMessage) MessageId() string {
 	return m.raw.Message.MessageId
 }
 
+const (
+	ConcurrentBatchJobIdKey     = "concurrent_batch.job_id"
+	ConcurrentBatchJobIdKey4Log = "concurrent_batch_job_id"
+)
+
+func (m *JobMessage) ConcurrentBatchJobId() string {
+	return m.raw.Message.Attributes[ConcurrentBatchJobIdKey]
+}
+
 func (m *JobMessage) InsertExecUUID() {
 }
 

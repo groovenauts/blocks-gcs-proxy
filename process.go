@@ -122,7 +122,7 @@ func (p *Process) run() error {
 			storage:              p.storage,
 		}
 		job.setupExecUUID()
-		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID, "message-id": msg.MessageId(), "ack-id": msg.raw.AckId})
+		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID, "message-id": msg.MessageId(), ConcurrentBatchJobIdKey4Log: msg.ConcurrentBatchJobId()})
 		err := p.replaceGlobalLog(jobLog, func() error {
 			err := job.run()
 			if err != nil {
