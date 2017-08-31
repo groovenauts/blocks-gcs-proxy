@@ -64,7 +64,7 @@ func (m *JobMessage) MessageId() string {
 }
 
 const (
-	ConcurrentBatchJobIdKey = "concurrent_batch.job_id"
+	ConcurrentBatchJobIdKey     = "concurrent_batch.job_id"
 	ConcurrentBatchJobIdKey4Log = "concurrent_batch_job_id"
 )
 
