@@ -117,7 +117,7 @@ func TestLoadProcessConfigWithDefaultValues(t *testing.T) {
 			assert.Equal(t, float64(600), config.Job.Sustainer.Delay)
 			assert.Equal(t, float64(540), config.Job.Sustainer.Interval)
 			assert.Equal(t, fmt.Sprintf("projects/%v/topics/%v-progress-topic", proj, pipeline), config.Progress.Topic)
-			assert.Equal(t, int(8), config.Upload.Workers)
+			assert.Equal(t, int(8), config.Upload.Worker.Workers)
 		}
 	})
 }

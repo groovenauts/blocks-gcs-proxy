@@ -15,8 +15,8 @@ type (
 		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig                  `json:"log,omitempty"`
-		Download *WorkerConfig               `json:"download"`
-		Upload   *WorkerConfig               `json:"upload"`
+		Download *DownloadConfig             `json:"download"`
+		Upload   *UploadConfig               `json:"upload"`
 	}
 )
 
@@ -72,16 +72,20 @@ func (c *ProcessConfig) setupLog() *ConfigError {
 
 func (c *ProcessConfig) setupDownload() *ConfigError {
 	if c.Download == nil {
-		c.Download = &WorkerConfig{}
+		c.Download = &DownloadConfig{
+			Worker: &WorkerConfig{},
+		}
 	}
-	return c.Download.setup()
+	return c.Download.Worker.setup()
 }
 
 func (c *ProcessConfig) setupUpload() *ConfigError {
 	if c.Upload == nil {
-		c.Upload = &WorkerConfig{}
+		c.Upload = &UploadConfig{
+			Worker: &WorkerConfig{},
+		}
 	}
-	return c.Upload.setup()
+	return c.Upload.Worker.setup()
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {

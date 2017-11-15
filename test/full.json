@@ -22,11 +22,15 @@
     "level": "debug"
   },
   "download": {
-    "workers": 5,
-    "max_tries": 6
+    "worker": {
+      "workers": 5,
+      "max_tries": 6
+    }
   },
   "upload": {
-    "workers": 8,
-    "max_tries": 9
+    "worker": {
+      "workers": 8,
+      "max_tries": 9
+    }
   }
 }

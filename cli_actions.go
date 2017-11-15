@@ -145,8 +145,8 @@ func (act *CliActions) DownloadCommand() cli.Command {
 
 func (act *CliActions) Download(c *cli.Context) error {
 	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
-		cfg.Download.Workers = c.Int(flag_workers)
-		cfg.Download.MaxTries = c.Int(flag_max_tries)
+		cfg.Download.Worker.Workers = c.Int(flag_workers)
+		cfg.Download.Worker.MaxTries = c.Int(flag_max_tries)
 		cfg.Job.Sustainer = &JobSustainerConfig{
 			Disabled: true,
 		}
@@ -200,8 +200,8 @@ func (act *CliActions) UploadCommand() cli.Command {
 func (act *CliActions) Upload(c *cli.Context) error {
 	fmt.Printf("Uploading files\n")
 	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
-		cfg.Upload.Workers = c.Int(flag_workers)
-		cfg.Upload.MaxTries = c.Int(flag_max_tries)
+		cfg.Upload.Worker.Workers = c.Int(flag_workers)
+		cfg.Upload.Worker.MaxTries = c.Int(flag_max_tries)
 		cfg.Job.Sustainer = &JobSustainerConfig{
 			Disabled: true,
 		}

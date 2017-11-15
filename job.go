@@ -35,8 +35,8 @@ type Job struct {
 
 	commandSeverityLevel logrus.Level // From LogConfig
 
-	downloadConfig *WorkerConfig
-	uploadConfig   *WorkerConfig
+	downloadConfig *DownloadConfig
+	uploadConfig   *UploadConfig
 
 	// https://godoc.org/google.golang.org/genproto/googleapis/pubsub/v1#ReceivedMessage
 	message      *JobMessage
@@ -413,11 +413,11 @@ func (job *Job) downloadFiles() error {
 	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Download Prepared")
 
 	downloaders := TargetWorkers{}
-	for i := 0; i < job.downloadConfig.Workers; i++ {
+	for i := 0; i < job.downloadConfig.Worker.Workers; i++ {
 		downloader := &TargetWorker{
 			name:     "downoad",
 			impl:     job.storage.Download,
-			maxTries: job.downloadConfig.MaxTries,
+			maxTries: job.downloadConfig.Worker.MaxTries,
 		}
 		downloaders = append(downloaders, downloader)
 	}
@@ -467,11 +467,11 @@ func (job *Job) uploadFiles() error {
 	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Upload Prepared")
 
 	uploaders := TargetWorkers{}
-	for i := 0; i < job.uploadConfig.Workers; i++ {
+	for i := 0; i < job.uploadConfig.Worker.Workers; i++ {
 		uploader := &TargetWorker{
 			name:     "upload",
 			impl:     job.storage.Upload,
-			maxTries: job.uploadConfig.MaxTries,
+			maxTries: job.uploadConfig.Worker.MaxTries,
 		}
 		uploaders = append(uploaders, uploader)
 	}
