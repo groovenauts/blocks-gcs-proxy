@@ -2,7 +2,9 @@ package main
 
 import (
 	"io"
+	"mime"
 	"os"
+	"path"
 
 	storage "google.golang.org/api/storage/v1"
 
@@ -14,7 +16,8 @@ type DownloadConfig struct {
 }
 
 type UploadConfig struct {
-	Worker *WorkerConfig `json:"worker,omitempty"`
+	Worker           *WorkerConfig `json:"worker,omitempty"`
+	ContentTypeByExt bool          `json:"content_type_by_ext,omitempty"`
 }
 
 type (
@@ -24,7 +27,8 @@ type (
 	}
 
 	CloudStorage struct {
-		service *storage.ObjectsService
+		service          *storage.ObjectsService
+		ContentTypeByExt bool
 	}
 )
 
@@ -62,7 +66,11 @@ func (ct *CloudStorage) Upload(bucket, object, srcPath string) error {
 		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to open the file")
 		return err
 	}
-	_, err = ct.service.Insert(bucket, &storage.Object{Name: object}).Media(f).Do()
+	obj := &storage.Object{Name: object}
+	if ct.ContentTypeByExt {
+		obj.ContentType = mime.TypeByExtension(path.Ext(object))
+	}
+	_, err = ct.service.Insert(bucket, obj).Media(f).Do()
 	if err != nil {
 		log.WithFields(logrus.Fields{"error": err}).Warnf("Failed to upload")
 		return err
