@@ -13,15 +13,16 @@ import (
 )
 
 const (
-	flag_config        = "config"
-	flag_log_config    = "log-config"
-	flag_workers       = "workers"
-	flag_max_tries     = "max_tries"
-	flag_wait          = "wait"
-	flag_downloads_dir = "downloads_dir"
-	flag_uploads_dir   = "uploads_dir"
-	flag_message       = "message"
-	flag_workspace     = "workspace"
+	flag_config              = "config"
+	flag_log_config          = "log-config"
+	flag_workers             = "workers"
+	flag_max_tries           = "max_tries"
+	flag_wait                = "wait"
+	flag_downloads_dir       = "downloads_dir"
+	flag_uploads_dir         = "uploads_dir"
+	flag_content_type_by_ext = "content_type_by_ext"
+	flag_message             = "message"
+	flag_workspace           = "workspace"
 )
 
 var flagAliases = map[string]string{
@@ -190,6 +191,10 @@ func (act *CliActions) UploadCommand() cli.Command {
 				Name:  act.flagName(flag_uploads_dir),
 				Usage: "Path to the directory which has bucket_name/path/to/file",
 			},
+			cli.BoolFlag{
+				Name:  act.flagName(flag_content_type_by_ext),
+				Usage: "Set Content-Type by file extension with /etc/mime.types, /etc/apache2/mime.types or /etc/apache/mime.types",
+			},
 			act.flagWorkers(),
 			act.flagMaxTries(),
 			act.flagWait(),
@@ -200,6 +205,7 @@ func (act *CliActions) UploadCommand() cli.Command {
 func (act *CliActions) Upload(c *cli.Context) error {
 	fmt.Printf("Uploading files\n")
 	config := act.LoadAndSetupProcessConfigWith(c, func(cfg *ProcessConfig) error {
+		cfg.Upload.ContentTypeByExt = c.Bool(flag_content_type_by_ext)
 		cfg.Upload.Worker.Workers = c.Int(flag_workers)
 		cfg.Upload.Worker.MaxTries = c.Int(flag_max_tries)
 		cfg.Job.Sustainer = &JobSustainerConfig{
