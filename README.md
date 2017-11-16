@@ -66,12 +66,15 @@ specified by `job.subscription` in `config.json`.
 | command   | map | False |  |  |
 | command.dryrun | bool | False | `false` | Don't run the command if this is true. |
 | command.options | map[key][]string | False |  | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
-| download           | map | False |  |  |
-| download.workers   | int | False | 1 | The number of thread to download. |
-| download.max_tries | int | False | 0 | The number of tries to download. |
-| upload           | map | False |  |  |
-| upload.workers   | int | False | 1 | The number of thread to upload. |
-| upload.max_tries | int | False | 0 | The number of tries to upload. |
+| download                  | map | False |  |  |
+| download.worker           | map | False |  |  |
+| download.worker.workers   | int | False | 1 | The number of thread to download. |
+| download.worker.max_tries | int | False | 0 | The number of tries to download. |
+| upload                  | map | False |  |  |
+| upload.worker           | map | False |  |  |
+| upload.worker.workers   | int | False | 1 | The number of thread to upload. |
+| upload.worker.max_tries | int | False | 0 | The number of tries to upload. |
+| upload.content_type_by_ext | bool | False |  | Set content type by file extension when uploading to GCS |
 
 
 ### Multiple command options

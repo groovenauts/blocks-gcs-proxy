@@ -52,7 +52,10 @@ func (p *Process) setup() error {
 		log.WithFields(logAttrs).Fatalln("Failed to create storage.Service")
 		return err
 	}
-	p.storage = &CloudStorage{storageService.Objects}
+	p.storage = &CloudStorage{
+		service:          storageService.Objects,
+		ContentTypeByExt: p.config.Upload.ContentTypeByExt,
+	}
 
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)

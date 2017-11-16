@@ -17,6 +17,8 @@
     "topic": "projects/{{ .GCP_PROJECT }}/topics/{{ or .PIPELINE "pipeline01" }}-progress-topic"
   },
   "upload": {
-    "workers": {{ or .UPLOADERS 8}}
+    "worker": {
+      "workers": {{ or .UPLOADERS 8}}
+    }
   }
 }
