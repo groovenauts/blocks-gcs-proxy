@@ -21,6 +21,10 @@ func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
 	flds := logrus.Fields{"subscription": c.Subscription}
 	if c.Sustainer != nil {
 		cs := c.Sustainer
+		if cs.Disabled {
+			log.WithFields(flds).Infoln("Sustainer is disabled")
+			return nil
+		}
 		if cs.Delay > 0 && cs.Interval > 0 {
 			flds["delay"] = cs.Delay
 			flds["interval"] = cs.Interval
