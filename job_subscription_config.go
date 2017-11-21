@@ -14,25 +14,27 @@ func (c *JobSubscriptionConfig) setup() *ConfigError {
 	if c.PullInterval == 0 {
 		c.PullInterval = 10
 	}
+	if c.Sustainer == nil {
+		c.Sustainer = &JobSustainerConfig{}
+	}
 	return nil
 }
 
 func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
 	flds := logrus.Fields{"subscription": c.Subscription}
-	if c.Sustainer != nil {
-		cs := c.Sustainer
-		if cs.Disabled {
-			log.WithFields(flds).Infoln("Sustainer is disabled")
-			return nil
-		}
-		if cs.Delay > 0 && cs.Interval > 0 {
-			flds["delay"] = cs.Delay
-			flds["interval"] = cs.Interval
-			log.WithFields(flds).Infoln("Sustainer config OK")
-			return nil
-		}
-	} else {
+	if c.Sustainer == nil {
 		c.Sustainer = &JobSustainerConfig{}
+	}
+	cs := c.Sustainer
+	if cs.Disabled {
+		log.WithFields(flds).Infoln("Sustainer is disabled")
+		return nil
+	}
+	if cs.Delay > 0 && cs.Interval > 0 {
+		flds["delay"] = cs.Delay
+		flds["interval"] = cs.Interval
+		log.WithFields(flds).Infoln("Sustainer config OK")
+		return nil
 	}
 
 	subscription, err := puller.Get(c.Subscription)
@@ -45,7 +47,6 @@ func (c *JobSubscriptionConfig) setupSustainer(puller Puller) error {
 	flds["AckDeadline"] = deadline
 	log.WithFields(flds).Infoln("AckDeadlineSeconds")
 
-	cs := c.Sustainer
 	if cs.Delay == 0 {
 		cs.Delay = float64(deadline)
 	}
