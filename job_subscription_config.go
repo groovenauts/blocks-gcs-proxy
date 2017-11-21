@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	logrus "github.com/sirupsen/logrus"
 )
 
@@ -11,6 +14,9 @@ type JobSubscriptionConfig struct {
 }
 
 func (c *JobSubscriptionConfig) setup() *ConfigError {
+	if c.Subscription == "" {
+		c.Subscription = fmt.Sprintf("projects/%s/subscriptions/%s-job-subscription", os.Getenv("GCP_PROJECT"), os.Getenv("PIPELINE"))
+	}
 	if c.PullInterval == 0 {
 		c.PullInterval = 10
 	}
