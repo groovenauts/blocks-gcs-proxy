@@ -1,0 +1,20 @@
+# [config] IMAGE_NAME: "groovenauts/concurrent_batch_ruby_example"
+# [config]
+# [config] WORKING_DIR: "."
+# [config] VERSION_SCRIPT: 'grep VERSION ../../version.go | cut -f2 -d\"'
+# [config] GIT_TAG_PREFIX: 'examples/ruby/'
+
+FROM ruby:2.4-jessie
+
+ENV APP_HOME /usr/app/batch_type_example
+COPY . $APP_HOME
+WORKDIR $APP_HOME
+
+ENV BLOCKS_GCS_PROXY_VERSION 0.8.0
+RUN mkdir -p /usr/app && \
+    curl -L --output ${APP_HOME}/blocks-gcs-proxy \
+         https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
+    chmod +x ${APP_HOME}/blocks-gcs-proxy && \
+    ./blocks-gcs-proxy --version
+
+CMD ["./blocks-gcs-proxy", "./app.rb", "%{download_files.0}", "%{downloads_dir}", "%{uploads_dir}", "test"]
