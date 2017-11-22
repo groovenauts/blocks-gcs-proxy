@@ -53,7 +53,6 @@ func (act *CliActions) flagConfig() cli.StringFlag {
 	return cli.StringFlag{
 		Name:  act.flagName(flag_config),
 		Usage: "`FILE` to load configuration",
-		Value: "./config.json",
 	}
 }
 
@@ -310,12 +309,18 @@ func (act *CliActions) LoadAndSetupProcessConfig(c *cli.Context) *ProcessConfig 
 
 func (act *CliActions) LoadAndSetupProcessConfigWith(c *cli.Context, callback func(*ProcessConfig) error) *ProcessConfig {
 	path := c.String(flag_config)
-	config, err := LoadProcessConfig(path)
-	if err != nil {
-		fmt.Printf("Error to load %v cause of %v\n", path, err)
-		os.Exit(1)
+	var config *ProcessConfig
+	if path != "" {
+		var err error
+		config, err = LoadProcessConfig(path)
+		if err != nil {
+			fmt.Printf("Error to load %v cause of %v\n", path, err)
+			os.Exit(1)
+		}
+	} else {
+		config = &ProcessConfig{}
 	}
-	err = config.setup(c.Args())
+	err := config.setup(c.Args())
 	if err != nil {
 		fmt.Printf("Error to setup %v cause of %v\n", path, err)
 		os.Exit(1)
