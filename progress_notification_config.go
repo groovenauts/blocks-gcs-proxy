@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	logrus "github.com/sirupsen/logrus"
 )
@@ -15,7 +14,7 @@ type ProgressNotificationConfig struct {
 
 func (c *ProgressNotificationConfig) setup() *ConfigError {
 	if c.Topic == "" {
-		c.Topic = fmt.Sprintf("projects/%s/topics/%s-progress-topic", os.Getenv("GCP_PROJECT"), os.Getenv("PIPELINE"))
+		c.Topic = fmt.Sprintf("projects/%s/topics/%s-progress-topic", GcpProjectId, Pipeline)
 	}
 	if c.LogLevel == "" {
 		c.LogLevel = logrus.InfoLevel.String()
