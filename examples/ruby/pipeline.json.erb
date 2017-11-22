@@ -1,3 +1,9 @@
+<%-
+  # ## Usage
+  # $ erb -T - pipeline.json.erb > pipeline.json
+  path = File.expand_path('../../../version.go', __FILE__)
+  version = File.read(path).scan(/\"(.+)\"/).flatten.first
+-%>
 {
   "name":"concurrent-batch-ruby-example1",
   "project_id":"scenic-doodad-617",
@@ -8,7 +14,7 @@
   "machine_type":"f1-micro",
   "target_size":1,
   "container_size":1,
-  "container_name":"groovenauts/concurrent_batch_ruby_example:0.8.0",
+  "container_name":"groovenauts/concurrent_batch_ruby_example:<%= version %>",
   "command":"",
   "token_consumption": 1
 }
