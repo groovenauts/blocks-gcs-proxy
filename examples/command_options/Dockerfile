@@ -16,4 +16,4 @@ RUN mkdir -p /usr/app && \
          https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
     chmod +x ${APP_HOME}/blocks-gcs-proxy
 
-CMD ["./blocks-gcs-proxy", "%{attrs.cmd}"]
+CMD ["./blocks-gcs-proxy", "-c", "config.json", "%{attrs.cmd}"]

@@ -26,4 +26,4 @@ ADD config.json $APP_HOME/config.json
 ENV WORKERS 10
 ENV TOPIC projects/proj-dummy-999/topics/topic-test
 
-CMD ["./blocks-gcs-proxy", "./pubsub-devpub", "--filepath", "%{download_files.0}", "--loglevel", "debug"]
+CMD ["./blocks-gcs-proxy", "-c", "config.json", "./pubsub-devpub", "--filepath", "%{download_files.0}", "--loglevel", "debug"]
