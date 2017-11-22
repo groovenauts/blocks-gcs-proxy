@@ -43,15 +43,15 @@ specified by `job.subscription` in `config.json`.
 
 | Key     | Type | Required | Default | Description  |
 |---------|------|----------|---------|---------------|
-| job     | map | True |  |  |
-| job.subscription | string | True | - | The subscription name to pull job messages |
+| job     | map | False |  |  |
+| job.subscription | string | False | `projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription` | The subscription name to pull job messages |
 | job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
 | job.sustainer     | map | False |  |  |
 | job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
 | job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
 | job.sustainer.disabled | bool | False | See [Sustainer](#sustainer) | Disable sustainer if it's true |
-| progress | map | True |  |  |
-| progress.topic | string | True | - | The topic name to publish job progress messages |
+| progress | map | False |  |  |
+| progress.topic | string | False | `projects/{{ .GCP_PROJECT }}/topics/{{ .PIPELINE }}-progress-topic` | The topic name to publish job progress messages |
 | progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | progress.attributes | map[string]string | False | {} | Static attributes of progress notification message |
 | log       | map    | False |  |  |
