@@ -1,0 +1,8 @@
+{
+  "messageId": "dummy-message-id",
+  "ackId": "dummy-ack-id",
+  "attributes": {
+    "download_files": "[\"gs://bucket1/dir1/test.txt\"]"
+  },
+  "publishTime": "2017-06-19T10:53:40+09000"
+}

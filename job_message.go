@@ -34,12 +34,6 @@ func (s JobMessageStatus) String() string {
 }
 
 type (
-	JobSustainerConfig struct {
-		Disabled bool    `json:"disabled,omitempty"`
-		Delay    float64 `json:"delay,omitempty"`
-		Interval float64 `json:"interval,omitempty"`
-	}
-
 	JobMessage struct {
 		sub    string
 		raw    *pubsub.ReceivedMessage

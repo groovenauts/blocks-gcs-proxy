@@ -11,15 +11,6 @@ import (
 	logrus "github.com/sirupsen/logrus"
 )
 
-type DownloadConfig struct {
-	Worker *WorkerConfig `json:"worker,omitempty"`
-}
-
-type UploadConfig struct {
-	Worker           *WorkerConfig `json:"worker,omitempty"`
-	ContentTypeByExt bool          `json:"content_type_by_ext,omitempty"`
-}
-
 type (
 	Storage interface {
 		Download(bucket, object, destPath string) error

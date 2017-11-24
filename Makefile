@@ -41,3 +41,11 @@ version:
 
 clean:
 	rm -rf ${PKGDIR}
+
+git_tag:
+	git tag v${VERSION}
+
+git_push_tag:
+	git push origin v${VERSION}
+
+tag: git_tag git_push_tag
