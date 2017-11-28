@@ -77,9 +77,9 @@ packages: fmt vendor packages-tools | $(BASE) ; $(info $(M) Building packages…
 
 .PHONY: prerelease release release-tools
 release-tools: | $(GHR)
-release: packages release-tools | $(BASE) ; $(info $(M) Making a Release on github…) @ ## Run ghr
+release: git_guard packages release-tools | $(BASE) ; $(info $(M) Making a Release on github…) @ ## Run ghr
 	$(GHR) -u $(GITHUB_ORG) -r $(GITHUB_REPO) --replace --draft ${VERSION} pkg
-prerelease: packages release-tools | $(BASE) ; $(info $(M) Making a Pre-Release on github…) @ ## Run ghr
+prerelease: git_guard packages release-tools | $(BASE) ; $(info $(M) Making a Pre-Release on github…) @ ## Run ghr
 	$(GHR) -u $(GITHUB_ORG) -r $(GITHUB_REPO) --replace --draft --prerelease ${VERSION} pkg
 
 # Tests
@@ -169,3 +169,12 @@ help:
 .PHONY: version
 version:
 	@echo $(VERSION)
+
+.PHONY: git_guard git_tag git_push_tag tag
+git_guard:
+	$Q git diff --exit-code
+git_tag:
+	git tag v${VERSION}
+git_push_tag:
+	git push origin v${VERSION}
+tag: git_tag git_push_tag
