@@ -3,5 +3,5 @@
 /.env
 /config.yml
 /vendor
-/blocks-gcs-proxy
+/bin/blocks-gcs-proxy
 /config.json
