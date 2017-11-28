@@ -25,7 +25,6 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 all: fmt vendor | $(BASE) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q cd $(BASE) && $(GO) build \
 		-tags release \
-		-ldflags '-X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o bin/$(PACKAGE) *.go
 
 $(BASE): ; $(info $(M) setting GOPATH…)
