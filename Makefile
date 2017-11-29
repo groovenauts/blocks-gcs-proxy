@@ -178,3 +178,7 @@ git_tag:
 git_push_tag:
 	git push origin v${VERSION}
 tag: git_tag git_push_tag
+
+
+.PHONY: ci
+ci:	fmt git_guard test
