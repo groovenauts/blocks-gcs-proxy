@@ -139,6 +139,9 @@ vendor: Gopkg.toml Gopkg.lock | $(BASE) $(GODEP) ; $(info $(M) retrieving depend
 	$Q cd $(BASE) && $(GODEP) ensure
 	@ln -nsf . vendor/src
 	@touch $@
+.PHONY: vendor-init
+vendor-init: $(BASE)
+	cd $(BASE) && dep init
 .PHONY: vendor-update
 vendor-update: vendor | $(BASE) $(GODEP)
 ifeq "$(origin PKG)" "command line"
