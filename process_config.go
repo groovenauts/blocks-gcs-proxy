@@ -72,20 +72,16 @@ func (c *ProcessConfig) setupLog() *ConfigError {
 
 func (c *ProcessConfig) setupDownload() *ConfigError {
 	if c.Download == nil {
-		c.Download = &DownloadConfig{
-			Worker: &WorkerConfig{},
-		}
+		c.Download = &DownloadConfig{}
 	}
-	return c.Download.Worker.setup()
+	return c.Download.setup()
 }
 
 func (c *ProcessConfig) setupUpload() *ConfigError {
 	if c.Upload == nil {
-		c.Upload = &UploadConfig{
-			Worker: &WorkerConfig{},
-		}
+		c.Upload = &UploadConfig{}
 	}
-	return c.Upload.Worker.setup()
+	return c.Upload.setup()
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {
