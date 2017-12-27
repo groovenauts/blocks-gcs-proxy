@@ -18,6 +18,9 @@ func (c *WorkerConfig) setup() *ConfigError {
 	if c.Workers < 1 {
 		c.Workers = 1
 	}
+	if c.MaxTries < 1 {
+		c.MaxTries = 5
+	}
 	return nil
 }
 
@@ -25,11 +28,26 @@ type Target struct {
 	Bucket    string
 	Object    string
 	LocalPath string
-	error     error
+	Error     error
 }
 
 func (t *Target) URL() string {
 	return fmt.Sprintf("gs://%s/%s", t.Bucket, t.Object)
+}
+
+type Targets []*Target
+
+func (targets Targets) error() error {
+	messages := []string{}
+	for _, t := range targets {
+		if t.Error != nil {
+			messages = append(messages, t.Error.Error())
+		}
+	}
+	if len(messages) == 0 {
+		return nil
+	}
+	return fmt.Errorf(strings.Join(messages, "\n"))
 }
 
 type TargetWorker struct {
@@ -37,8 +55,8 @@ type TargetWorker struct {
 	targets  chan *Target
 	impl     func(bucket, object, srcPath string) error
 	done     bool
-	error    error
 	maxTries int
+	interval time.Duration
 }
 
 func (w *TargetWorker) run() {
@@ -53,10 +71,9 @@ func (w *TargetWorker) run() {
 		if t == nil {
 			log.Debugln("No target found any more")
 			w.done = true
-			w.error = nil
 			break
 		}
-		if t.error != nil {
+		if t.Error != nil {
 			continue
 		}
 
@@ -68,15 +85,14 @@ func (w *TargetWorker) run() {
 		}
 
 		eb := backoff.NewExponentialBackOff()
-		eb.InitialInterval = 30 * time.Second
+		eb.InitialInterval = w.interval
 		b := backoff.WithMaxTries(eb, uint64(w.maxTries))
-		err := backoff.Retry(f, b)
+		// err := backoff.Retry(f, b)
+		err := RetryWithSleep(f, b)
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Worker Failed to %v %v\n", w.name, t.URL())
-			w.done = true
-			w.error = err
-			t.error = err
+			t.Error = err
 			continue
 		}
 		log.WithFields(flds).Debugf("Worker Finished to %v\n", w.name)
@@ -85,13 +101,14 @@ func (w *TargetWorker) run() {
 
 type TargetWorkers []*TargetWorker
 
-func (ws TargetWorkers) process(targets []*Target) error {
+func (ws TargetWorkers) process(targets Targets) error {
 	c := make(chan *Target, len(targets))
 	for _, t := range targets {
 		c <- t
 	}
 
 	for _, w := range ws {
+		w.done = false
 		w.targets = c
 		go w.run()
 	}
@@ -103,7 +120,7 @@ func (ws TargetWorkers) process(targets []*Target) error {
 		}
 	}
 
-	return ws.error()
+	return targets.error()
 }
 
 func (ws TargetWorkers) done() bool {
@@ -113,17 +130,4 @@ func (ws TargetWorkers) done() bool {
 		}
 	}
 	return true
-}
-
-func (ws TargetWorkers) error() error {
-	messages := []string{}
-	for _, w := range ws {
-		if w.error != nil {
-			messages = append(messages, w.error.Error())
-		}
-	}
-	if len(messages) == 0 {
-		return nil
-	}
-	return fmt.Errorf(strings.Join(messages, "\n"))
 }
