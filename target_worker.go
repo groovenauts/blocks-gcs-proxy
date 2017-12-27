@@ -106,6 +106,7 @@ func (ws TargetWorkers) process(targets Targets) error {
 	}
 
 	for _, w := range ws {
+		w.done = false
 		w.targets = c
 		go w.run()
 	}
