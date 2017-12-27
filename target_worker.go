@@ -55,7 +55,6 @@ type TargetWorker struct {
 	targets  chan *Target
 	impl     func(bucket, object, srcPath string) error
 	done     bool
-	error    error
 	maxTries int
 }
 
@@ -71,7 +70,6 @@ func (w *TargetWorker) run() {
 		if t == nil {
 			log.Debugln("No target found any more")
 			w.done = true
-			w.error = nil
 			break
 		}
 		if t.Error != nil {
@@ -93,7 +91,6 @@ func (w *TargetWorker) run() {
 		if err != nil {
 			log.WithFields(flds).Errorf("Worker Failed to %v %v\n", w.name, t.URL())
 			w.done = true
-			w.error = err
 			t.Error = err
 			continue
 		}
