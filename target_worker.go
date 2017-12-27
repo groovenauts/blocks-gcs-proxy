@@ -121,7 +121,7 @@ func (ws TargetWorkers) process(targets Targets) error {
 		}
 	}
 
-	return ws.error()
+	return targets.error()
 }
 
 func (ws TargetWorkers) done() bool {
@@ -131,17 +131,4 @@ func (ws TargetWorkers) done() bool {
 		}
 	}
 	return true
-}
-
-func (ws TargetWorkers) error() error {
-	messages := []string{}
-	for _, w := range ws {
-		if w.error != nil {
-			messages = append(messages, w.error.Error())
-		}
-	}
-	if len(messages) == 0 {
-		return nil
-	}
-	return fmt.Errorf(strings.Join(messages, "\n"))
 }
