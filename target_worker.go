@@ -18,6 +18,9 @@ func (c *WorkerConfig) setup() *ConfigError {
 	if c.Workers < 1 {
 		c.Workers = 1
 	}
+	if c.MaxTries < 1 {
+		c.MaxTries = 5
+	}
 	return nil
 }
 
