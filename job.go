@@ -408,6 +408,7 @@ func (job *Job) downloadFiles() error {
 			name:     "downoad",
 			impl:     job.storage.Download,
 			maxTries: job.downloadConfig.Worker.MaxTries,
+			interval: 30 * time.Second,
 		}
 		downloaders = append(downloaders, downloader)
 	}
@@ -462,6 +463,7 @@ func (job *Job) uploadFiles() error {
 			name:     "upload",
 			impl:     job.storage.Upload,
 			maxTries: job.uploadConfig.Worker.MaxTries,
+			interval: 30 * time.Second,
 		}
 		uploaders = append(uploaders, uploader)
 	}
