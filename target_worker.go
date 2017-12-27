@@ -35,6 +35,21 @@ func (t *Target) URL() string {
 	return fmt.Sprintf("gs://%s/%s", t.Bucket, t.Object)
 }
 
+type Targets []*Target
+
+func (targets Targets) error() error {
+	messages := []string{}
+	for _, t := range targets {
+		if t.Error != nil {
+			messages = append(messages, t.Error.Error())
+		}
+	}
+	if len(messages) == 0 {
+		return nil
+	}
+	return fmt.Errorf(strings.Join(messages, "\n"))
+}
+
 type TargetWorker struct {
 	name     string
 	targets  chan *Target
@@ -88,7 +103,7 @@ func (w *TargetWorker) run() {
 
 type TargetWorkers []*TargetWorker
 
-func (ws TargetWorkers) process(targets []*Target) error {
+func (ws TargetWorkers) process(targets Targets) error {
 	c := make(chan *Target, len(targets))
 	for _, t := range targets {
 		c <- t
