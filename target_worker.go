@@ -90,7 +90,6 @@ func (w *TargetWorker) run() {
 		flds["error"] = err
 		if err != nil {
 			log.WithFields(flds).Errorf("Worker Failed to %v %v\n", w.name, t.URL())
-			w.done = true
 			t.Error = err
 			continue
 		}
