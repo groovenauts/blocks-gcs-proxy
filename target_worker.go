@@ -28,7 +28,7 @@ type Target struct {
 	Bucket    string
 	Object    string
 	LocalPath string
-	error     error
+	Error     error
 }
 
 func (t *Target) URL() string {
@@ -59,7 +59,7 @@ func (w *TargetWorker) run() {
 			w.error = nil
 			break
 		}
-		if t.error != nil {
+		if t.Error != nil {
 			continue
 		}
 
@@ -79,7 +79,7 @@ func (w *TargetWorker) run() {
 			log.WithFields(flds).Errorf("Worker Failed to %v %v\n", w.name, t.URL())
 			w.done = true
 			w.error = err
-			t.error = err
+			t.Error = err
 			continue
 		}
 		log.WithFields(flds).Debugf("Worker Finished to %v\n", w.name)
