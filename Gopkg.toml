@@ -58,3 +58,7 @@
 
 [[constraint]]
   name = "google.golang.org/api"
+
+[[constraint]]
+  name = "github.com/groovenauts/concurrent-go"
+  version = "0.0.1"
