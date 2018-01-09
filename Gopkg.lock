@@ -52,6 +52,12 @@
   revision = "833d2f1e70b82c8a0a1149827906ab32aed40276"
 
 [[projects]]
+  name = "github.com/groovenauts/concurrent-go"
+  packages = ["."]
+  revision = "e415e1308323b703188d3c3e3e39eaf9904a0e0c"
+  version = "0.0.1"
+
+[[projects]]
   name = "github.com/knq/jwt"
   packages = [".","bearer","gserviceaccount"]
   revision = "0d31af81a9cbb15756a576eef5054666a1266bb6"
@@ -143,6 +149,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6b84f382a30a745d1c3cf25b1c3609c0dc6bae2e7e651a0244018dcb93d09b72"
+  inputs-digest = "a5765b4b8caed99d5425a57a18ede6cc9b065b782af155acd9c56caa8c1ada41"
   solver-name = "gps-cdcl"
   solver-version = 1

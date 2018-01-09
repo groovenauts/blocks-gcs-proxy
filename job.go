@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/groovenauts/blocks-variable"
+	"github.com/groovenauts/concurrent-go"
 	"github.com/satori/go.uuid"
 
 	logrus "github.com/sirupsen/logrus"
@@ -402,21 +403,30 @@ func (job *Job) downloadFiles() error {
 	}
 	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Download Prepared")
 
-	downloaders := TargetWorkers{}
-	for i := 0; i < job.downloadConfig.Worker.Workers; i++ {
-		downloader := &TargetWorker{
-			name:     "downoad",
-			impl:     job.storage.Download,
-			maxTries: job.downloadConfig.Worker.MaxTries,
-			interval: 30 * time.Second,
-		}
-		downloaders = append(downloaders, downloader)
+	jobs := concurrent.Jobs{}
+	for _, target := range targets {
+		jobs = append(jobs, &concurrent.Job{Payload: target})
 	}
+
+	rf := &RetryableFunc{
+		name:     "downoad",
+		maxTries: job.downloadConfig.Worker.MaxTries,
+		interval: 30 * time.Second,
+	}
+	f := rf.WithLog(rf.Wrap(func(j *concurrent.Job) error {
+		t, ok := j.Payload.(*Target)
+		if !ok {
+			return fmt.Errorf("Unknown Payload: %v\n", j.Payload)
+		}
+		return job.storage.Download(t.Bucket, t.Object, t.LocalPath)
+	}))
+
+	downloaders := concurrent.NewWorkers(f, job.downloadConfig.Worker.Workers)
 	log.WithFields(logrus.Fields{"downloaders": len(downloaders)}).Debugln("Downloaders are running")
 
 	log.WithFields(logrus.Fields{"targets": targets}).Debugln("downloaders processing")
-	err := downloaders.process(targets)
-	return err
+	downloaders.Process(jobs)
+	return jobs.Error()
 }
 
 func (job *Job) execute() error {
@@ -457,20 +467,29 @@ func (job *Job) uploadFiles() error {
 	}
 	log.WithFields(logrus.Fields{"targets": targets}).Debugln("Upload Prepared")
 
-	uploaders := TargetWorkers{}
-	for i := 0; i < job.uploadConfig.Worker.Workers; i++ {
-		uploader := &TargetWorker{
-			name:     "upload",
-			impl:     job.storage.Upload,
-			maxTries: job.uploadConfig.Worker.MaxTries,
-			interval: 30 * time.Second,
-		}
-		uploaders = append(uploaders, uploader)
+	jobs := concurrent.Jobs{}
+	for _, target := range targets {
+		jobs = append(jobs, &concurrent.Job{Payload: target})
 	}
+
+	rf := &RetryableFunc{
+		name:     "upload",
+		maxTries: job.uploadConfig.Worker.MaxTries,
+		interval: 30 * time.Second,
+	}
+	f := rf.WithLog(rf.Wrap(func(j *concurrent.Job) error {
+		t, ok := j.Payload.(*Target)
+		if !ok {
+			return fmt.Errorf("Unknown Payload: %v\n", j.Payload)
+		}
+		return job.storage.Upload(t.Bucket, t.Object, t.LocalPath)
+	}))
+
+	uploaders := concurrent.NewWorkers(f, job.uploadConfig.Worker.Workers)
 	log.WithFields(logrus.Fields{"uploaders": len(uploaders)}).Debugln("Uploaders are running")
 
-	err = uploaders.process(targets)
-	return err
+	uploaders.Process(jobs)
+	return jobs.Error()
 }
 
 func (job *Job) listFiles(dir string) ([]string, error) {
