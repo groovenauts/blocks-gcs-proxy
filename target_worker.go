@@ -48,7 +48,7 @@ func (w *RetryableFunc) Wrap(orig func(*concurrent.Job) error) func(*concurrent.
 
 		eb := backoff.NewExponentialBackOff()
 		eb.InitialInterval = w.interval
-		b := backoff.WithMaxTries(eb, uint64(w.maxTries))
+		b := backoff.WithMaxRetries(eb, uint64(w.maxTries))
 		// err := backoff.Retry(f, b)
 		err := RetryWithSleep(f, b)
 
