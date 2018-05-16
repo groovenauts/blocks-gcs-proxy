@@ -1,5 +1,4 @@
 {
-  "id_by_client": "dummy-job1",
   "message":{
     "attributes":{
       "download_files":"[\"gs://blocks-gcs-proxy-test1/images/GitX-dev.dmg\"]"
