@@ -341,9 +341,10 @@ func (job *Job) build() error {
 	}
 	w := &LogrusWriter{Dest: log, Severity: job.commandSeverityLevel}
 	w.Setup()
-	job.cmd = exec.Command(values[0], values[1:]...)
-	job.cmd.Stdout = w
-	job.cmd.Stderr = w
+	cmd := exec.Command(values[0], values[1:]...)
+	cmd.Stdout = w
+	cmd.Stderr = w
+	job.cmd = cmd
 	log.WithFields(logrus.Fields{"job.cmd": job.cmd}).Debugln("Job#build has done")
 	return nil
 }
