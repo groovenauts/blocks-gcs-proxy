@@ -67,7 +67,7 @@ func (p *Process) setup() error {
 
 	eb := backoff.NewExponentialBackOff()
 	eb.InitialInterval = 10 * time.Second
-	b := backoff.WithMaxTries(eb, 5)
+	b := backoff.WithMaxRetries(eb, 5)
 	puller := &BackoffPuller{
 		Impl:    &pubsubPuller{pubsubService.Projects.Subscriptions},
 		Backoff: b,
