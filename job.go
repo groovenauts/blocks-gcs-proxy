@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -46,6 +47,8 @@ type Job struct {
 
 	// This is set at setupExecUUID
 	execUUID string
+
+	outputBuffer *bytes.Buffer
 
 	cmd *exec.Cmd
 }
@@ -339,11 +342,13 @@ func (job *Job) build() error {
 			return err
 		}
 	}
+	job.outputBuffer = &bytes.Buffer{}
 	w := &LogrusWriter{Dest: log, Severity: job.commandSeverityLevel}
 	w.Setup()
+	out := &CompositeWriter{Main: job.outputBuffer, Sub: w}
 	cmd := exec.Command(values[0], values[1:]...)
-	cmd.Stdout = w
-	cmd.Stderr = w
+	cmd.Stdout = out
+	cmd.Stderr = out
 	job.cmd = cmd
 	log.WithFields(logrus.Fields{"job.cmd": job.cmd}).Debugln("Job#build has done")
 	return nil
@@ -439,7 +444,7 @@ func (job *Job) execute() error {
 	err := job.cmd.Run()
 	if err != nil {
 		log.WithFields(logrus.Fields{"error": err}).Errorln("Command returned error")
-		return err
+		return fmt.Errorf("[%T] %v\noutput:\n%s", err, err.Error(), job.outputBuffer.String())
 	}
 	return nil
 }
