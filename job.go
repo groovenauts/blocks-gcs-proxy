@@ -50,6 +50,8 @@ type Job struct {
 
 	outputBuffer *bytes.Buffer
 
+	NackOnError bool
+
 	cmd *exec.Cmd
 }
 
@@ -60,10 +62,22 @@ const (
 
 func (job *Job) run() error {
 	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
-	err := job.runWithoutErrorHandling()
+
+	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if job.prepare retuns error
+	err := job.withNotify(INITIALIZING, job.prepare)()
+
+	reaction := job.message.Ack
+
+	if err == nil {
+		err = job.runWithoutErrorHandling()
+		if err != nil && job.NackOnError {
+			reaction = job.message.Nack
+		}
+	}
+
 	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
 	step := map[bool]JobStep{false: ACKSENDING, true: CANCELLING}[err != nil]
-	e := job.withNotify(step, job.message.Ack)()
+	e := job.withNotify(step, reaction)()
 	if e != nil {
 		return e
 	}
@@ -71,17 +85,10 @@ func (job *Job) run() error {
 }
 
 func (job *Job) runWithoutErrorHandling() error {
-	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if setupWorkspace retuns error
-
-	err := job.withNotify(INITIALIZING, job.prepare)()
-	if err != nil {
-		return err
-	}
-
 	go job.message.sendMADPeriodically(job.notification)
 	defer job.message.Done()
 
-	err = job.withNotify(DOWNLOADING, job.downloadFiles)()
+	err := job.withNotify(DOWNLOADING, job.downloadFiles)()
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,6 @@
+{
+  "job": {
+    "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PUBSUB_SUBSCRIPTION }}",
+    "nack_on_error": true
+  }
+}
