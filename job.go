@@ -50,6 +50,8 @@ type Job struct {
 
 	outputBuffer *bytes.Buffer
 
+	NackOnError bool
+
 	cmd *exec.Cmd
 }
 
@@ -64,13 +66,18 @@ func (job *Job) run() error {
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if job.prepare retuns error
 	err := job.withNotify(INITIALIZING, job.prepare)()
 
+	reaction := job.message.Ack
+
 	if err == nil {
 		err = job.runWithoutErrorHandling()
+		if err != nil && job.NackOnError {
+			reaction = job.message.Nack
+		}
 	}
 
 	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
 	step := map[bool]JobStep{false: ACKSENDING, true: CANCELLING}[err != nil]
-	e := job.withNotify(step, job.message.Ack)()
+	e := job.withNotify(step, reaction)()
 	if e != nil {
 		return e
 	}
