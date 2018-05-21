@@ -10,6 +10,7 @@ type JobSubscriptionConfig struct {
 	Subscription string              `json:"subscription,omitempty"`
 	PullInterval int                 `json:"pull_interval,omitempty"`
 	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
+	NackOnError  bool                `json:"nack_on_error,omitempty"`
 }
 
 func (c *JobSubscriptionConfig) setup() *ConfigError {
