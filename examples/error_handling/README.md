@@ -2,9 +2,11 @@
 
 ## Setup
 
-Start pubsub emulator in a new terminal.
-
 ```bash
+$ cd path/to/blocks-gcs-proxy
+$ export BLOCKS_GCS_PROXY_VERSION=$(make version)
+$ cd examples/error_handling
+$ export BLOCKS_GCS_PROXY_VERSION=$(make version)
 $ export GCP_PROJECT=[YOUR PROJECT]
 $ export PUBSUB_BASE_NAME=test1
 $ export PUBSUB_TOPIC=$PUBSUB_BASE_NAME-topic
@@ -16,11 +18,17 @@ $ gcloud --project $GCP_PROJECT pubsub subscriptions list
 ```
 
 ```
-$ export BLOCKS_GCS_PROXY_VERSION=$(make version)
-$ curl -L --output ./blocks-gcs-proxy https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64
+$ export BLOCKS_GCS_PROXY_FILE=blocks-gcs-proxy_darwin_amd64
+```
+
+```
+$ export BLOCKS_GCS_PROXY_FILE=blocks-gcs-proxy_linux_amd64
+```
+
+```
+$ curl -L --output ./blocks-gcs-proxy https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/$BLOCKS_GCS_PROXY_FILE
 $ chmod +x ./blocks-gcs-proxy
 $ ./blocks-gcs-proxy --version
-
 
 
 ## Without NackOnError
@@ -28,7 +36,7 @@ $ ./blocks-gcs-proxy --version
 Start blocks-gcs-proxy with app.rb
 
 ```
-$ ./blocks-gcs-proxy --config config_without_nack_on_error.json app.rb %{attrs.exit_code}
+$ ./blocks-gcs-proxy --config config_without_nack_on_error.json ./app.rb %{attrs.exit_code}
 ```
 
 Send messages from another terminal.
@@ -46,7 +54,7 @@ Each of the messages must show you that app.rb is called once.
 Start blocks-gcs-proxy with app.rb
 
 ```
-$ ./blocks-gcs-proxy --config config_with_nack_on_error.json app.rb %{attrs.exit_code}
+$ ./blocks-gcs-proxy --config config_with_nack_on_error.json ./app.rb %{attrs.exit_code}
 ```
 
 Send messages from another terminal.
@@ -57,3 +65,4 @@ $ gcloud --project $GCP_PROJECT pubsub topics publish projects/$GCP_PROJECT/topi
 ```
 
 The 2nd message must show you that app.rb is called repeatedly.
+Stop the process by `Ctrl+C`.
