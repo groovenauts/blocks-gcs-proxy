@@ -45,38 +45,38 @@ specified by `job.subscription` in `config.json`.
 |---------|------|----------|---------|---------------|
 | job     | map | False |  |  |
 | job.error_response | string | False | `ack` | Response type on error. It must be one of {ack, nack, none} |
-| job.subscription | string | False | `projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription` | The subscription name to pull job messages |
-| job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
 | job.interval_on_error | int | False | 0 | The interval time in second to return response on error |
+| job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
+| job.subscription | string | False | `projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription` | The subscription name to pull job messages |
 | job.sustainer     | map | False |  |  |
 | job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
-| job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
 | job.sustainer.disabled | bool | False | See [Sustainer](#sustainer) | Disable sustainer if it's true |
+| job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
 | progress | map | False |  |  |
-| progress.topic | string | False | `projects/{{ .GCP_PROJECT }}/topics/{{ .PIPELINE }}-progress-topic` | The topic name to publish job progress messages |
-| progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | progress.attributes | map[string]string | False | {} | Static attributes of progress notification message |
+| progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| progress.topic | string | False | `projects/{{ .GCP_PROJECT }}/topics/{{ .PIPELINE }}-progress-topic` | The topic name to publish job progress messages |
 | log       | map    | False |  |  |
-| log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | log.command_severity | string | False | `info` | The Log severity of command outputs. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
+| log.level | string | False | `info` | Log level of processing of `blocks-gcs-proxy`. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
 | log.stackdriver | map | False |  |  |
-| log.stackdriver.project_id | string        | True |  | GCP Project ID |
-| log.stackdriver.log_name   | string        | True |  | The resource name of the log that will receive the log entries |
-| log.stackdriver.type   | string            | True |  | The type of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
-| log.stackdriver.labels | map[string]string | True |  | The labels of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
 | log.stackdriver.error_reporting_service | string | False |  | The service name of [ServiceContext](https://cloud.google.com/error-reporting/reference/rest/v1beta1/ServiceContext) |
+| log.stackdriver.labels | map[string]string | True |  | The labels of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
+| log.stackdriver.log_name   | string        | True |  | The resource name of the log that will receive the log entries |
+| log.stackdriver.project_id | string        | True |  | GCP Project ID |
+| log.stackdriver.type   | string            | True |  | The type of [Monitored resource](https://cloud.google.com/logging/docs/api/v2/resource-list) |
 | command   | map | False |  |  |
 | command.dryrun | bool | False | `false` | Don't run the command if this is true. |
 | command.options | map[key][]string | False |  | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
 | download                  | map | False |  |  |
 | download.worker           | map | False |  |  |
-| download.worker.workers   | int | False | 1 | The number of thread to download. |
 | download.worker.max_tries | int | False | 0 | The number of tries to download. |
+| download.worker.workers   | int | False | 1 | The number of thread to download. |
 | upload                  | map | False |  |  |
-| upload.worker           | map | False |  |  |
-| upload.worker.workers   | int | False | 1 | The number of thread to upload. |
-| upload.worker.max_tries | int | False | 0 | The number of tries to upload. |
 | upload.content_type_by_ext | bool | False |  | Set content type by file extension when uploading to GCS |
+| upload.worker           | map | False |  |  |
+| upload.worker.max_tries | int | False | 0 | The number of tries to upload. |
+| upload.worker.workers   | int | False | 1 | The number of thread to upload. |
 
 
 ### Multiple command options
