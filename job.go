@@ -50,7 +50,8 @@ type Job struct {
 
 	outputBuffer *bytes.Buffer
 
-	NackOnError bool
+	NackInterval int // seconds
+	NackOnError  bool
 
 	cmd *exec.Cmd
 }
@@ -72,6 +73,7 @@ func (job *Job) run() error {
 		err = job.runWithoutErrorHandling()
 		if err != nil && job.NackOnError {
 			reaction = job.message.Nack
+			time.Sleep(time.Duration(job.NackInterval) * time.Second)
 		}
 	}
 
