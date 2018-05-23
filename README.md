@@ -44,10 +44,10 @@ specified by `job.subscription` in `config.json`.
 | Key     | Type | Required | Default | Description  |
 |---------|------|----------|---------|---------------|
 | job     | map | False |  |  |
+| job.error_response | string | False | `ack` | Response type on error. It must be one of {ack, nack, none} |
 | job.subscription | string | False | `projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription` | The subscription name to pull job messages |
 | job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
 | job.nack_interval | int | False | 0 | The interval time in second to return NACK when job gets error with `job.nack_on_error` |
-| job.nack_on_error | bool | False | False | Send NACK on error instead of ACK |
 | job.sustainer     | map | False |  |  |
 | job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
 | job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
