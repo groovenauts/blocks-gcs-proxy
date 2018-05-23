@@ -1,5 +1,0 @@
-{
-  "job": {
-    "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PUBSUB_SUBSCRIPTION }}"
-  }
-}

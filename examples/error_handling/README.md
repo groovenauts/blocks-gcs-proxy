@@ -6,7 +6,6 @@
 $ cd path/to/blocks-gcs-proxy
 $ export BLOCKS_GCS_PROXY_VERSION=$(make version)
 $ cd examples/error_handling
-$ export BLOCKS_GCS_PROXY_VERSION=$(make version)
 $ export GCP_PROJECT=[YOUR PROJECT]
 $ export PUBSUB_BASE_NAME=test1
 $ export PUBSUB_TOPIC=$PUBSUB_BASE_NAME-topic
