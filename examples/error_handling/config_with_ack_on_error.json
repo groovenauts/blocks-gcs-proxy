@@ -1,6 +1,6 @@
 {
   "job": {
     "subscription": "projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PUBSUB_SUBSCRIPTION }}",
-    "interval_on_error": 10
+    "interval_on_error": 5
   }
 }
