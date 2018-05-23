@@ -94,7 +94,7 @@ type Job struct {
 	outputBuffer *bytes.Buffer
 
 	NackInterval int // seconds
-	NackOnError  bool
+	ErrorResponse   ResponseType
 
 	cmd *exec.Cmd
 }
@@ -114,9 +114,9 @@ func (job *Job) run() error {
 
 	if err == nil {
 		err = job.runWithoutErrorHandling()
-		if err != nil && job.NackOnError {
-			reaction = job.message.Nack
 			time.Sleep(time.Duration(job.NackInterval) * time.Second)
+		if err != nil {
+			reaction = job.ErrorResponse.ResponseMethod(job)
 		}
 	}
 

@@ -7,11 +7,12 @@ import (
 )
 
 type JobSubscriptionConfig struct {
-	Subscription string              `json:"subscription,omitempty"`
-	PullInterval int                 `json:"pull_interval,omitempty"`
-	Sustainer    *JobSustainerConfig `json:"sustainer,omitempty"`
 	NackInterval int                 `json:"nack_interval,omitempty"`
-	NackOnError  bool                `json:"nack_on_error,omitempty"`
+	Subscription     string              `json:"subscription,omitempty"`
+	PullInterval     int                 `json:"pull_interval,omitempty"`
+	Sustainer        *JobSustainerConfig `json:"sustainer,omitempty"`
+	ErrorResponseStr string              `json:"error_response,omitempty"`
+	ErrorResponse    ResponseType        `json:"-"`
 }
 
 func (c *JobSubscriptionConfig) setup() *ConfigError {
@@ -24,6 +25,15 @@ func (c *JobSubscriptionConfig) setup() *ConfigError {
 	if c.Sustainer == nil {
 		c.Sustainer = &JobSustainerConfig{}
 	}
+	if c.ErrorResponseStr == "" {
+		c.ErrorResponseStr = "ack"
+	}
+	rt, err := ParseResponseType(c.ErrorResponseStr)
+	if err != nil {
+		return &ConfigError{Name: "error_response", Message: fmt.Sprintf("%q is invalid because of %v", c.ErrorResponseStr, err)}
+	}
+	c.ErrorResponse = rt
+
 	return nil
 }
 

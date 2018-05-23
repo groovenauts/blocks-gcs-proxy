@@ -122,7 +122,7 @@ func (p *Process) run() error {
 			notification:         p.notification,
 			storage:              p.storage,
 			NackInterval:         p.config.Job.NackInterval,
-			NackOnError:          p.config.Job.NackOnError,
+			ErrorResponse:        p.config.Job.ErrorResponse,
 		}
 		job.setupExecUUID()
 		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID, "message-id": msg.MessageId(), ConcurrentBatchJobIdKey4Log: msg.ConcurrentBatchJobId()})
