@@ -46,6 +46,7 @@ specified by `job.subscription` in `config.json`.
 | job     | map | False |  |  |
 | job.subscription | string | False | `projects/{{ .GCP_PROJECT }}/subscriptions/{{ .PIPELINE }}-job-subscription` | The subscription name to pull job messages |
 | job.pull_interval | int | False | 10 | The interval time in second to pull when it gets no job message. |
+| job.nack_interval | int | False | 0 | The interval time in second to return NACK when job gets error with `job.nack_on_error` |
 | job.nack_on_error | bool | False | False | Send NACK on error instead of ACK |
 | job.sustainer     | map | False |  |  |
 | job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
