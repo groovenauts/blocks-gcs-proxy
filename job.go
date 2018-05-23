@@ -22,6 +22,49 @@ import (
 	logrus "github.com/sirupsen/logrus"
 )
 
+type ResponseType int
+
+const (
+	ACK ResponseType = iota
+	NACK
+	NONE
+)
+
+var ResponseTypeName2Value = map[string]ResponseType{"ack": ACK, "nack": NACK, "none": NONE}
+var ResponseTypeValue2Name = map[ResponseType]string{ACK: "ack", NACK: "nack", NONE: "none"}
+
+func NoResponse() error {
+	return nil
+}
+
+func (rt ResponseType) String() string {
+	return ResponseTypeValue2Name[rt]
+}
+
+func ParseResponseType(s string) (ResponseType, error) {
+	r, ok := ResponseTypeName2Value[strings.ToLower(s)]
+	if !ok {
+		keys := []string{}
+		for key, _ := range ResponseTypeName2Value {
+			keys = append(keys, key)
+		}
+		err := fmt.Errorf("No ResponseType found for %s. It must be one of %v", s, keys)
+		return ACK, err
+	}
+	return r, nil
+}
+
+func (rt ResponseType) ResponseMethod(job *Job) func() error {
+	switch rt {
+	case NACK:
+		return job.message.Nack
+	case NONE:
+		return NoResponse
+	default:
+		return job.message.Ack
+	}
+}
+
 type Job struct {
 	config *CommandConfig
 
