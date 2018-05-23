@@ -7,10 +7,10 @@ import (
 )
 
 type JobSubscriptionConfig struct {
-	NackInterval int                 `json:"nack_interval,omitempty"`
 	Subscription     string              `json:"subscription,omitempty"`
 	PullInterval     int                 `json:"pull_interval,omitempty"`
 	Sustainer        *JobSustainerConfig `json:"sustainer,omitempty"`
+	IntervalOnError  int                 `json:"interval_on_error,omitempty"`
 	ErrorResponseStr string              `json:"error_response,omitempty"`
 	ErrorResponse    ResponseType        `json:"-"`
 }

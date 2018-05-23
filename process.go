@@ -121,7 +121,7 @@ func (p *Process) run() error {
 			message:              msg,
 			notification:         p.notification,
 			storage:              p.storage,
-			NackInterval:         p.config.Job.NackInterval,
+			IntervalOnError:      p.config.Job.IntervalOnError,
 			ErrorResponse:        p.config.Job.ErrorResponse,
 		}
 		job.setupExecUUID()
