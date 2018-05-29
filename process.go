@@ -125,9 +125,13 @@ func (p *Process) run() error {
 			ErrorResponse:        p.config.Job.ErrorResponse,
 		}
 		job.setupExecUUID()
-		jobLog := logger.WithFields(logrus.Fields{"exec-uuid": job.execUUID, "message-id": msg.MessageId(), ConcurrentBatchJobIdKey4Log: msg.ConcurrentBatchJobId()})
+		jobLog := logger.WithFields(logrus.Fields{
+			"exec-uuid":                 job.execUUID,
+			"message-id":                msg.MessageId(),
+			ConcurrentBatchJobIdKey4Log: msg.ConcurrentBatchJobId(),
+		})
 		err := p.replaceGlobalLog(jobLog, func() error {
-			err := job.run()
+			err := p.checkJobToExecute(job, job.run)
 			if err != nil {
 				logAttrs := logrus.Fields{"error": err, "msg": msg}
 				log.WithFields(logAttrs).Fatalln("Job Error")
@@ -151,4 +155,9 @@ func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
 		log = logBackup
 	}()
 	return f()
+}
+
+func (p *Process) checkJobToExecute(job *Job, f func() error) error {
+	check := p.config.JobCheck.Checker()
+	return check(job, f)
 }

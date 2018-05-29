@@ -52,6 +52,10 @@ specified by `job.subscription` in `config.json`.
 | job.sustainer.delay | int | False | See [Sustainer](#sustainer) | The new deadline in second to extend deadline to ack |
 | job.sustainer.disabled | bool | False | See [Sustainer](#sustainer) | Disable sustainer if it's true |
 | job.sustainer.interval | int | False | See [Sustainer](#sustainer) | The interval in second to send the message which extends deadline to ack |
+| job_check | map | False | | |
+| job_check.method | string | True | "none" | Method to check job before running. You can set one of `none` or `buntdb`  |
+| job_check.database | string | False |  | The database name to store job execution data. The usage depends on `method` |
+| job_check.bucket   | string | False |  | The bucket name to store job execution data. The usage depends on `method` |
 | progress | map | False |  |  |
 | progress.attributes | map[string]string | False | {} | Static attributes of progress notification message |
 | progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
