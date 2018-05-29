@@ -13,6 +13,7 @@ type (
 	ProcessConfig struct {
 		Command  *CommandConfig              `json:"command,omitempty"`
 		Job      *JobSubscriptionConfig      `json:"job,omitempty"`
+		JobCheck *JobCheckConfig             `json:"job_check,omitempty"`
 		Progress *ProgressNotificationConfig `json:"progress,omitempty"`
 		Log      *LogConfig                  `json:"log,omitempty"`
 		Download *DownloadConfig             `json:"download"`
@@ -25,11 +26,12 @@ func (c *ProcessConfig) setup(args []string) error {
 		"command": func() *ConfigError {
 			return c.setupCommand(args)
 		},
-		"job":      c.setupJob,
-		"progress": c.setupProgress,
-		"log":      c.setupLog,
-		"download": c.setupDownload,
-		"upload":   c.setupUpload,
+		"job":       c.setupJob,
+		"job_check": c.setupJobCheck,
+		"progress":  c.setupProgress,
+		"log":       c.setupLog,
+		"download":  c.setupDownload,
+		"upload":    c.setupUpload,
 	}
 	for key, setup := range setups {
 		err := setup()
@@ -54,6 +56,13 @@ func (c *ProcessConfig) setupJob() *ConfigError {
 		c.Job = &JobSubscriptionConfig{}
 	}
 	return c.Job.setup()
+}
+
+func (c *ProcessConfig) setupJobCheck() *ConfigError {
+	if c.JobCheck == nil {
+		c.JobCheck = &JobCheckConfig{}
+	}
+	return c.JobCheck.setup()
 }
 
 func (c *ProcessConfig) setupProgress() *ConfigError {
