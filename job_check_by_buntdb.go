@@ -10,6 +10,7 @@ type JobCheckByBuntDB struct {
 }
 
 func (jc *JobCheckByBuntDB) Check(job_id string, ack func() error, f func() error) error {
+	skip := false
 	key := jc.Prefix + job_id
 	err := jc.Open(func(tx *buntdb.Tx) error {
 		jobStatus, err := jc.GetStatus(tx, key)
@@ -17,6 +18,7 @@ func (jc *JobCheckByBuntDB) Check(job_id string, ack func() error, f func() erro
 			return err
 		}
 		if jobStatus != "" {
+			skip = true
 			log.Infof("Job %q is %s. So it will be skipped.\n", key, jobStatus)
 			err := ack()
 			if err != nil {
@@ -34,6 +36,9 @@ func (jc *JobCheckByBuntDB) Check(job_id string, ack func() error, f func() erro
 	})
 	if err != nil {
 		return err
+	}
+	if skip {
+		return nil
 	}
 
 	err = f()
