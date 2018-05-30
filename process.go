@@ -159,5 +159,5 @@ func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
 
 func (p *Process) checkJobToExecute(job *Job, f func() error) error {
 	check := p.config.JobCheck.Checker()
-	return check(job, f)
+	return check(job.message.ConcurrentBatchJobId(), job.message.Ack, f)
 }
