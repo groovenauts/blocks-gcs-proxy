@@ -55,10 +55,10 @@ func (c *JobCheckConfig) Validate() *ConfigError {
 	}
 }
 
-func (c *JobCheckConfig) Checker() func(*Job, func() error) error {
+func (c *JobCheckConfig) Checker() func(string, func() error, func() error) error {
 	switch c.Method {
 	case JobCheckMethodNone:
-		return func(job *Job, f func() error) error {
+		return func(job_id string, ack, f func() error) error {
 			return f()
 		}
 	case JobCheckMethodBuntDB:
@@ -68,7 +68,7 @@ func (c *JobCheckConfig) Checker() func(*Job, func() error) error {
 		}
 		return checker.Check
 	default:
-		return func(job *Job, f func() error) error {
+		return func(job_id string, ack, f func() error) error {
 			return &ConfigError{Name: "method", Message: fmt.Sprintf("%q is invalid. It must be one of %v", c.Method, JobCheckMethods)}
 		}
 	}

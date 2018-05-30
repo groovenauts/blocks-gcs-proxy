@@ -9,8 +9,8 @@ type JobCheckByBuntDB struct {
 	Prefix string
 }
 
-func (jc *JobCheckByBuntDB) Check(job *Job, f func() error) error {
-	key := jc.Prefix + job.message.ConcurrentBatchJobId()
+func (jc *JobCheckByBuntDB) Check(job_id string, ack func() error, f func() error) error {
+	key := jc.Prefix + job_id
 	err := jc.Open(func(tx *buntdb.Tx) error {
 		jobStatus, err := jc.GetStatus(tx, key)
 		if err != nil {
@@ -18,7 +18,7 @@ func (jc *JobCheckByBuntDB) Check(job *Job, f func() error) error {
 		}
 		if jobStatus != "" {
 			log.Infof("Job %q is %s. So it will be skipped.\n", key, jobStatus)
-			err := job.message.Ack()
+			err := ack()
 			if err != nil {
 				log.Warningf("Failed to send ACK to skip Job %q.\n", key)
 			}
