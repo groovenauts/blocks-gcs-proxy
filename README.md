@@ -56,6 +56,7 @@ specified by `job.subscription` in `config.json`.
 | job_check.method | string | True | "none" | Method to check job before running. You can set one of `none` or `buntdb`  |
 | job_check.database | string | False |  | The database name to store job execution data. The usage depends on `method` |
 | job_check.bucket   | string | False |  | The bucket name to store job execution data. The usage depends on `method` |
+| job_check.timeout  | string | False |  | The timeout expression like '1h10m10s'. The usage depends on `method` |
 | progress | map | False |  |  |
 | progress.attributes | map[string]string | False | {} | Static attributes of progress notification message |
 | progress.level | string | False | `info` | Log level to publish job progress. You can set one of `debug`, `info`, `warn`, `error`, `fatal` and `panic`. |
