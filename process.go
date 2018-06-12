@@ -56,6 +56,7 @@ func (p *Process) setup() error {
 		service:          storageService.Objects,
 		ContentTypeByExt: p.config.Upload.ContentTypeByExt,
 	}
+	p.config.JobCheck.storage = p.storage
 
 	// Creates a pubsubService
 	pubsubService, err := pubsub.New(client)
