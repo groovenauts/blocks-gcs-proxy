@@ -122,7 +122,7 @@ func (m *JobMessage) Ack() error {
 	}
 
 	logAttrs["status"] = m.status
-	log.WithFields(logAttrs).Debugln("Updating status to acked")
+	log.WithFields(logAttrs).Infoln("Updating status to acked")
 
 	m.status = acked
 	return nil
@@ -144,7 +144,7 @@ func (m *JobMessage) Nack() error {
 	}
 
 	logAttrs["status"] = m.status
-	log.WithFields(logAttrs).Debugln("Updating status to done")
+	log.WithFields(logAttrs).Infoln("Updating status to done")
 
 	m.status = done
 	return nil
@@ -166,7 +166,7 @@ func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) err
 	if m.config.Disabled {
 		return nil
 	}
-	log.Printf("sendMADPeriodically start\n")
+	log.Infof("sendMADPeriodically start\n")
 	for {
 		nextLimit := time.Now().Add(time.Duration(m.config.Interval) * time.Second)
 		err := m.waitAndSendMAD(notification, nextLimit)
@@ -175,7 +175,7 @@ func (m *JobMessage) sendMADPeriodically(notification *ProgressNotification) err
 			return err
 		}
 		if !m.running() {
-			log.Debugln("sendMADPeriodically return")
+			log.Infof("sendMADPeriodically stopped\n")
 			return nil
 		}
 	}

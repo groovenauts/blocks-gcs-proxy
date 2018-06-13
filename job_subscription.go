@@ -34,7 +34,9 @@ func (s *JobSubscription) process(f func(*JobMessage) error) (bool, error) {
 		return false, nil
 	}
 
-	log.WithFields(logrus.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message}).Infoln("Message received")
+	logger := log.WithFields(logrus.Fields{"job_message_id": msg.Message.MessageId, "message": msg.Message})
+	logger.Infoln("Message received")
+	defer logger.Infoln("Message processed")
 
 	jobMsg := &JobMessage{
 		sub:    s.config.Subscription,

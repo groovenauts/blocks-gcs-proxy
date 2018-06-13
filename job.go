@@ -290,7 +290,7 @@ func (job *Job) setupDownloadFiles() error {
 		case string:
 			remoteUrls = append(remoteUrls, obj.(string))
 		default:
-			log.WithFields(logrus.Fields{"url": obj}).Errorf("Invalid download file URL: %T\n", obj)
+			log.WithFields(logrus.Fields{"url": obj}).Warningf("Invalid download file URL: %T\n", obj)
 		}
 	}
 	for _, remote_url := range remoteUrls {
