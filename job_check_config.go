@@ -37,7 +37,7 @@ func (c *JobCheckConfig) Prepare() {
 			c.Database = "gcslocks"
 		}
 		if c.Timeout == "" {
-			c.Timeout = "6h"
+			c.Timeout = "10m"
 		}
 	}
 }
