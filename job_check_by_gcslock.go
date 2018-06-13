@@ -29,6 +29,7 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 
 	logger := log.WithFields(logrus.Fields{"lock": url})
 	logger.Infoln("JobCheckByGcslock Start")
+	defer logger.Infoln("JobCheckByGcslock done")
 
 	ok, err := jc.DeleteIfTimedout(object)
 	if err != nil {
@@ -53,8 +54,8 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 
 	go jc.StartTouching(object, time.Duration(int64(jc.Timeout)/10))
 
-	logger.Infoln("JobCheckByGcslock passed")
-	defer logger.Infoln("JobCheckByGcslock done")
+	logger.Debugln("JobCheckByGcslock handler starting")
+	defer logger.Debugln("JobCheckByGcslock handler done")
 
 	err = f()
 
