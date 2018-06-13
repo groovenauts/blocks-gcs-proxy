@@ -283,6 +283,9 @@ func (job *Job) setupDownloadFiles() error {
 	objects := job.flatten(job.remoteDownloadFiles)
 	remoteUrls := []string{}
 	for _, obj := range objects {
+		if obj == nil {
+			continue
+		}
 		switch obj.(type) {
 		case string:
 			remoteUrls = append(remoteUrls, obj.(string))
