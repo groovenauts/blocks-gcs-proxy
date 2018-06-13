@@ -27,6 +27,9 @@ type JobCheckByGcslock struct {
 func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() error) error {
 	object := jc.DirPath + "/" + job_id + ".gcslock"
 
+	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
+	logger.Infoln("JobCheckByGcslock Start")
+
 	ctx := context.Background()
 
 	err := jc.DeleteIfTimedout(object)
@@ -48,6 +51,9 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 
 	go jc.StartTouching(object, time.Duration(int64(jc.Timeout)/10))
 
+	logger.Infoln("JobCheckByGcslock passed")
+	defer logger.Infoln("JobCheckByGcslock done")
+
 	err = f()
 
 	jc.mux.Lock()
@@ -59,6 +65,10 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 }
 
 func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
+	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
+	logger.Debugln("DeleteIfTimedout Start")
+	defer logger.Debugln("DeleteIfTimedout Done")
+
 	f, err := jc.Storage.Get(jc.Bucket, object)
 	if err != nil {
 		if IsGoogleApiError(err, http.StatusNotFound) {
@@ -79,17 +89,21 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
 		return fmt.Errorf("Deadline hasn't come yet. It seems another process is working.")
 	}
 
+	logger.Debugln("Deleting exceeded lock file")
 	err = jc.Storage.Delete(jc.Bucket, object)
 	if err != nil {
 		if !IsGoogleApiError(err, http.StatusNotFound) {
+			logger.Debugln("Failed to delete exceeded lock file")
 			return err
 		}
 	}
+	logger.Debugln("Delete exceeded lock file successfully")
 
 	return nil
 }
 
 func (jc *JobCheckByGcslock) Lock(ctx context.Context, m gcslock.ContextLocker) error {
+	log.Debugln("JobCheckByGcslock.Lock start")
 
 	// Wait up to 1 second to acquire a lock.
 	if err := m.ContextLock(ctx); err != nil {
@@ -97,18 +111,27 @@ func (jc *JobCheckByGcslock) Lock(ctx context.Context, m gcslock.ContextLocker) 
 		return err
 	}
 
+	log.Infoln("JobCheckByGcslock.Lock done")
 	return nil
 }
 
 func (jc *JobCheckByGcslock) Unlock(ctx context.Context, m gcslock.ContextLocker) error {
+	log.Debugln("JobCheckByGcslock.Unlock start")
+
 	if err := m.ContextUnlock(ctx); err != nil {
 		log.Errorf("Failed to ContextUnlock because of %v\n", err)
 		return err
 	}
+
+	log.Infoln("JobCheckByGcslock.Unlock done")
 	return nil
 }
 
 func (jc *JobCheckByGcslock) StartTouching(object string, interval time.Duration) error {
+	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
+	logger.Infoln("JobCheckByGcslock.StartTouching Start")
+	defer logger.Infoln("JobCheckByGcslock.StartTouching Finished")
+
 	jc.working = true
 	for {
 		nextLimit := time.Now().Add(time.Duration(interval) * time.Second)
@@ -140,11 +163,11 @@ func (jc *JobCheckByGcslock) WaitAndTouch(object string, nextLimit time.Time) er
 	jc.mux.Lock()
 	defer jc.mux.Unlock()
 
-	logAttrs := logrus.Fields{"bucket": jc.Bucket, "object": object}
-	log.WithFields(logAttrs).Debugln("WaitAndTouch")
+	logger := log.WithFields(logrus.Fields{"bucket": jc.Bucket, "object": object})
+	logger.Debugln("WaitAndTouch")
 
 	if !jc.working {
-		log.WithFields(logAttrs).Infoln("WaitAndTouch working is done")
+		logger.Infoln("WaitAndTouch working is done")
 		return nil
 	}
 
@@ -153,12 +176,15 @@ func (jc *JobCheckByGcslock) WaitAndTouch(object string, nextLimit time.Time) er
 			"JobCheckByGcslock": time.Now().Format(time.RFC3339),
 		},
 	}
+
+	logger.Debugln("Updating lock file")
 	_, err := jc.Storage.Update(jc.Bucket, object, metadata)
 	if err != nil {
-		if IsGoogleApiError(err, http.StatusNotFound) {
-			return nil
+		if !IsGoogleApiError(err, http.StatusNotFound) {
+			logger.Errorln("Failed to updatelock file")
+			return err
 		}
-		return err
 	}
+	logger.Debugln("Update lock file successfully")
 	return nil
 }
