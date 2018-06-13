@@ -65,9 +65,10 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 }
 
 func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
+	prefix := "JobCheckByGcslock.DeleteIfTimedout"
 	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
-	logger.Debugln("DeleteIfTimedout Start")
-	defer logger.Debugln("DeleteIfTimedout Done")
+	logger.Debugf("%s Start\n", prefix)
+	defer logger.Debugf("%s Done\n", prefix)
 
 	f, err := jc.Storage.Get(jc.Bucket, object)
 	if err != nil {
@@ -80,21 +81,23 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
 
 	ut, err := time.Parse(time.RFC3339, f.Updated)
 	if err != nil {
-		log.Errorf("Failed to parse file update time %q of %v because of %v\n", f.Updated, f, err)
+		log.Errorf("%s error parsing file update time %q of %v because of %v\n", prefix, f.Updated, f, err)
 		return err
 	}
 
 	deadline := ut.Add(jc.Timeout)
 	if deadline.After(time.Now()) {
 		// deadline hasn't come yet
-		return fmt.Errorf("Deadline hasn't come yet. It seems another process is working.")
+		return fmt.Warningf("%s deadline hasn't come yet. It seems another process is working.\n", prefix)
 	}
 
-	logger.Debugln("Deleting exceeded lock file")
+	logger.Debugf("%s delete exceeded lock file starting.\n", prefix)
 	err = jc.Storage.Delete(jc.Bucket, object)
 	if err != nil {
+		logger.Errorf("%s delete exceeded lock file error.\n", prefix)
+		return err
 	}
-	logger.Debugln("Delete exceeded lock file successfully")
+	logger.Infof("%s delete exceeded lock file successfully.\n", prefix)
 
 	return nil
 }
