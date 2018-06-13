@@ -51,12 +51,13 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 		return err
 	}
 	defer jc.Unlock(m, func() error {
+		logger.Debugf("Deleting lock file instead of unlock starting.\n")
 		err = jc.Storage.Delete(jc.Bucket, object)
 		if err != nil {
-			logger.Warningf("Deleting exceeded lock file instead of unlock error.\n")
+			logger.Warningf("Deleting lock file instead of unlock error.\n")
 			return err
 		}
-		logger.Infof("Deleting exceeded lock file instead of unlock success.\n")
+		logger.Infof("Deleting lock file instead of unlock success.\n")
 		return nil
 	})
 
