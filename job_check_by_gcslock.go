@@ -50,7 +50,15 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 	if err := jc.Lock(m); err != nil {
 		return err
 	}
-	defer jc.Unlock(m)
+	defer jc.Unlock(m, func() error {
+		err = jc.Storage.Delete(jc.Bucket, object)
+		if err != nil {
+			logger.Warningf("Deleting exceeded lock file instead of unlock error.\n")
+			return err
+		}
+		logger.Infof("Deleting exceeded lock file instead of unlock success.\n")
+		return nil
+	})
 
 	go jc.StartTouching(object, time.Duration(int64(jc.Timeout)/10))
 
@@ -122,15 +130,19 @@ func (jc *JobCheckByGcslock) Lock(m gcslock.ContextLocker) error {
 	return nil
 }
 
-func (jc *JobCheckByGcslock) Unlock(m gcslock.ContextLocker) error {
+func (jc *JobCheckByGcslock) Unlock(m gcslock.ContextLocker, f func() error) error {
 	log.Debugln("JobCheckByGcslock.Unlock start")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := m.ContextUnlock(ctx); err != nil {
-		log.Errorf("Failed to ContextUnlock because of %v\n", err)
-		return err
+		if f == nil {
+			log.Warningf("Failed to ContextUnlock because of %v\n", err)
+			return err
+		} else {
+			return f()
+		}
 	}
 
 	log.Infoln("JobCheckByGcslock.Unlock done")
