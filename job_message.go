@@ -111,18 +111,18 @@ func (m *JobMessage) Ack() error {
 	defer m.mux.Unlock()
 
 	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
-	log.WithFields(logAttrs).Debugln("Sending ACK")
+	log.WithFields(logAttrs).Debugln("JobMessage.Ack starting")
 
 	_, err := m.puller.Acknowledge(m.sub, m.raw.AckId)
 	if err != nil {
 		logAttrs["raw"] = fmt.Sprintf("%v", m.raw)
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorln("Failed to acknowledge")
+		log.WithFields(logAttrs).Errorln("JobMessage.Ack error")
 		return err
 	}
 
 	logAttrs["status"] = m.status
-	log.WithFields(logAttrs).Infoln("Updating status to acked")
+	log.WithFields(logAttrs).Infoln("JobMessage.Ack success")
 
 	m.status = acked
 	return nil
@@ -133,18 +133,18 @@ func (m *JobMessage) Nack() error {
 	defer m.mux.Unlock()
 
 	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "ack_id": m.raw.AckId}
-	log.WithFields(logAttrs).Debugln("Sending NACK")
+	log.WithFields(logAttrs).Debugln("JobMessage.Nack")
 
 	_, err := m.puller.ModifyAckDeadline(m.sub, []string{m.raw.AckId}, 0)
 	if err != nil {
 		logAttrs["raw"] = fmt.Sprintf("%v", m.raw)
 		logAttrs["error"] = err
-		log.WithFields(logAttrs).Errorln("Failed to send ModifyAckDeadline as a NACK")
+		log.WithFields(logAttrs).Errorln("JobMessage.Nack error")
 		return err
 	}
 
 	logAttrs["status"] = m.status
-	log.WithFields(logAttrs).Infoln("Updating status to done")
+	log.WithFields(logAttrs).Infoln("JobMessage.Nack success")
 
 	m.status = done
 	return nil
@@ -152,7 +152,7 @@ func (m *JobMessage) Nack() error {
 
 func (m *JobMessage) Done() {
 	logAttrs := logrus.Fields{"job_message_id": m.MessageId(), "status": m.status}
-	log.WithFields(logAttrs).Debugln("Done()")
+	log.WithFields(logAttrs).Debugln("JobMessage.Done")
 	if m.status == running {
 		m.status = done
 	}
