@@ -108,8 +108,11 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) (bool, error) {
 func (jc *JobCheckByGcslock) Lock(m gcslock.ContextLocker) error {
 	log.Debugln("JobCheckByGcslock.Lock start")
 
-	// Wait up to 1 second to acquire a lock.
-	if err := m.ContextLock(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Wait up to 10 seconds to acquire a lock.
+	if err := m.ContextLock(ctx); err != nil {
 		log.Errorf("Failed to ContextLock because of %v\n", err)
 		return err
 	}
@@ -121,7 +124,10 @@ func (jc *JobCheckByGcslock) Lock(m gcslock.ContextLocker) error {
 func (jc *JobCheckByGcslock) Unlock(m gcslock.ContextLocker) error {
 	log.Debugln("JobCheckByGcslock.Unlock start")
 
-	if err := m.ContextUnlock(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := m.ContextUnlock(ctx); err != nil {
 		log.Errorf("Failed to ContextUnlock because of %v\n", err)
 		return err
 	}
