@@ -177,10 +177,8 @@ func (jc *JobCheckByGcslock) WaitAndTouch(object string, nextLimit time.Time) er
 	logger.Debugln("Updating lock file")
 	_, err := jc.Storage.Update(jc.Bucket, object, metadata)
 	if err != nil {
-		if !IsGoogleApiError(err, http.StatusNotFound) {
-			logger.Errorln("Failed to updatelock file")
-			return err
-		}
+		logger.Errorln("Failed to updatelock file")
+		return err
 	}
 	logger.Debugln("Update lock file successfully")
 	return nil
