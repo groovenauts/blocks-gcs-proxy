@@ -79,8 +79,12 @@ func (ct *CloudStorage) Get(bucket, object string) (*storage.Object, error) {
 	log.Debugln("Getting file info")
 	obj, err := ct.service.Get(bucket, object).Do()
 	if err != nil {
-		log.WithFields(logrus.Fields{"error": err}).Errorf("Failed to get GCS file info")
-		return nil, err
+		if IsGoogleApiError(err, http.StatusNotFound) {
+			return nil, nil
+		} else {
+			log.WithFields(logrus.Fields{"error": err}).Errorf("Failed to get GCS file info")
+			return nil, err
+		}
 	}
 	return obj, err
 }
@@ -90,8 +94,13 @@ func (ct *CloudStorage) Delete(bucket, object string) error {
 	log.Debugln("Deleting file")
 	err := ct.service.Delete(bucket, object).Do()
 	if err != nil {
-		log.WithFields(logrus.Fields{"error": err}).Errorf("Failed to delete GCS file")
-		return err
+		if IsGoogleApiError(err, http.StatusNotFound) {
+			log.Warningf("File not found")
+			return nil
+		} else {
+			log.WithFields(logrus.Fields{"error": err}).Errorf("Failed to delete GCS file")
+			return err
+		}
 	}
 	return err
 }

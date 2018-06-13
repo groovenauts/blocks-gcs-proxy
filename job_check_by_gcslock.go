@@ -71,10 +71,11 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
 
 	f, err := jc.Storage.Get(jc.Bucket, object)
 	if err != nil {
-		if IsGoogleApiError(err, http.StatusNotFound) {
-			return nil
-		}
 		return err
+	}
+	// Ok unless the file exists
+	if f == nil {
+		return nil
 	}
 
 	ut, err := time.Parse(time.RFC3339, f.Updated)
@@ -92,10 +93,6 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
 	logger.Debugln("Deleting exceeded lock file")
 	err = jc.Storage.Delete(jc.Bucket, object)
 	if err != nil {
-		if !IsGoogleApiError(err, http.StatusNotFound) {
-			logger.Debugln("Failed to delete exceeded lock file")
-			return err
-		}
 	}
 	logger.Debugln("Delete exceeded lock file successfully")
 
