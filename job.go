@@ -105,6 +105,9 @@ const (
 )
 
 func (job *Job) run() error {
+	log.Debugln("Job.run start")
+	defer log.Debugln("Job.run done")
+
 	job.message.raw.Message.Attributes[StartTimeKey] = time.Now().Format(time.RFC3339)
 
 	defer job.withNotify(CLEANUP, job.clearWorkspace)() // Call clearWorkspace even if job.prepare retuns error
@@ -130,6 +133,9 @@ func (job *Job) run() error {
 }
 
 func (job *Job) runWithoutErrorHandling() error {
+	log.Debugln("Job.runWithoutErrorHandling start")
+	defer log.Debugln("Job.runWithoutErrorHandling done")
+
 	go job.message.sendMADPeriodically(job.notification)
 	defer job.message.Done()
 
