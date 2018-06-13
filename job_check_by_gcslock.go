@@ -143,7 +143,7 @@ func (jc *JobCheckByGcslock) StartTouching(object string, interval time.Duration
 
 	jc.working = true
 	for {
-		nextLimit := time.Now().Add(time.Duration(interval) * time.Second)
+		nextLimit := time.Now().Add(interval)
 		err := jc.WaitAndTouch(object, nextLimit)
 		if err != nil {
 			log.WithFields(logrus.Fields{"error": err}).Errorln("Error in StartTouching")
