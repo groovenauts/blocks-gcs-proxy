@@ -174,18 +174,18 @@ func (jc *JobCheckByGcslock) WaitAndTouch(object string, nextLimit time.Time) er
 		return nil
 	}
 
-	metadata := &storage.Object{
-		Metadata: map[string]string{
-			"JobCheckByGcslock": time.Now().Format(time.RFC3339),
-		},
+	metadata := map[string]string{
+		"JobCheckByGcslock": time.Now().Format(time.RFC3339),
 	}
+	msg := &storage.Object{Metadata: metadata}
 
-	logger.Debugln("Updating lock file")
-	_, err := jc.Storage.Update(jc.Bucket, object, metadata)
+	logger = logger.WithFields(logrus.Fields{"metadata": metadata})
+	logger.Debugln("WaitAndTouch Update lock file starting")
+	_, err := jc.Storage.Update(jc.Bucket, object, msg)
 	if err != nil {
-		logger.Errorln("Failed to updatelock file")
+		logger.Errorf("WaitAndTouch Update lock file error because of %v\n", err)
 		return err
 	}
-	logger.Debugln("Update lock file successfully")
+	logger.Debugln("WaitAndTouch Update lock file success")
 	return nil
 }
