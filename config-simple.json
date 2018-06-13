@@ -1,8 +1,8 @@
 {
   "job":{
-    "subscription":"projects/scenic-doodad-617/subscriptions/akm-pipeline01-job-subscription"
+    "subscription":"projects/your-gcs-project/subscriptions/akm-pipeline01-job-subscription"
   },
   "progress":{
-    "topic":"projects/scenic-doodad-617/topics/akm-pipeline01-progress-topic"
+    "topic":"projects/your-gcs-project/topics/akm-pipeline01-progress-topic"
   },
 }
