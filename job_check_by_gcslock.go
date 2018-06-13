@@ -137,7 +137,7 @@ func (jc *JobCheckByGcslock) Unlock(m gcslock.ContextLocker) error {
 }
 
 func (jc *JobCheckByGcslock) StartTouching(object string, interval time.Duration) error {
-	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
+	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object), "interval": interval})
 	logger.Infoln("JobCheckByGcslock.StartTouching Start")
 	defer logger.Infoln("JobCheckByGcslock.StartTouching Finished")
 
