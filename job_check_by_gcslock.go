@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
@@ -26,16 +25,21 @@ type JobCheckByGcslock struct {
 
 func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() error) error {
 	object := jc.DirPath + "/" + job_id + ".gcslock"
+	url := fmt.Sprintf("gs://%s/%s", jc.Bucket, object)
 
-	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
+	logger := log.WithFields(logrus.Fields{"lock": url})
 	logger.Infoln("JobCheckByGcslock Start")
 
 	ctx := context.Background()
 
-	err := jc.DeleteIfTimedout(object)
+	ok, err := jc.DeleteIfTimedout(object)
 	if err != nil {
-		log.Errorf("Failed to DeleteIfTimedout gs://%s/%s because of %v\n", jc.Bucket, object, err)
+		log.Errorf("Failed to DeleteIfTimedout %s because of %v\n", url, err)
 		return err
+	}
+	if !ok {
+		log.Warningf("Quit running job because %s already exists\n", url)
+		return nil
 	}
 
 	m, err := gcslock.New(ctx, jc.Bucket, object)
@@ -64,7 +68,7 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 	return err
 }
 
-func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
+func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) (bool, error) {
 	prefix := "JobCheckByGcslock.DeleteIfTimedout"
 	logger := log.WithFields(logrus.Fields{"lock": fmt.Sprintf("gs://%s/%s", jc.Bucket, object)})
 	logger.Debugf("%s Start\n", prefix)
@@ -72,34 +76,35 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) error {
 
 	f, err := jc.Storage.Get(jc.Bucket, object)
 	if err != nil {
-		return err
+		return false, err
 	}
 	// Ok unless the file exists
 	if f == nil {
-		return nil
+		return true, nil
 	}
 
 	ut, err := time.Parse(time.RFC3339, f.Updated)
 	if err != nil {
-		log.Errorf("%s error parsing file update time %q of %v because of %v\n", prefix, f.Updated, f, err)
-		return err
+		logger.Errorf("%s error parsing file update time %q of %v because of %v\n", prefix, f.Updated, f, err)
+		return false, err
 	}
 
 	deadline := ut.Add(jc.Timeout)
 	if deadline.After(time.Now()) {
 		// deadline hasn't come yet
-		return fmt.Warningf("%s deadline hasn't come yet. It seems another process is working.\n", prefix)
+		logger.Warningf("%s deadline hasn't come yet. It seems another process is working.\n", prefix)
+		return false, nil
 	}
 
 	logger.Debugf("%s delete exceeded lock file starting.\n", prefix)
 	err = jc.Storage.Delete(jc.Bucket, object)
 	if err != nil {
 		logger.Errorf("%s delete exceeded lock file error.\n", prefix)
-		return err
+		return false, err
 	}
 	logger.Infof("%s delete exceeded lock file successfully.\n", prefix)
 
-	return nil
+	return true, nil
 }
 
 func (jc *JobCheckByGcslock) Lock(ctx context.Context, m gcslock.ContextLocker) error {
