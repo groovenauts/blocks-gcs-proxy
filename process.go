@@ -114,6 +114,9 @@ func (p *Process) run() error {
 		}
 	log.WithFields(logAttrs).Infoln("Start listening")
 	err := p.subscription.listen(func(msg *JobMessage) error {
+		log.Debugln("Process subscription handler start")
+		defer log.Debugln("Process subscription handler done")
+
 		job := &Job{
 			config:               p.config.Command,
 			commandSeverityLevel: p.config.Log.commandSeverityLevel,
@@ -125,13 +128,18 @@ func (p *Process) run() error {
 			IntervalOnError:      p.config.Job.IntervalOnError,
 			ErrorResponse:        p.config.Job.ErrorResponse,
 		}
+		log.Debugln("Process subscription handler #1")
 		job.setupExecUUID()
+		log.Debugln("Process subscription handler #2")
 		jobLog := logger.WithFields(logrus.Fields{
 			"exec-uuid":                 job.execUUID,
 			"message-id":                msg.MessageId(),
 			ConcurrentBatchJobIdKey4Log: msg.ConcurrentBatchJobId(),
 		})
+		log.Debugln("Process subscription handler #3")
 		err := p.replaceGlobalLog(jobLog, func() error {
+			log.Debugln("Process subscription handler #4 start")
+			defer log.Debugln("Process subscription handler #4 done")
 			err := p.checkJobToExecute(job, job.run)
 			if err != nil {
 				logAttrs := logrus.Fields{"error": err, "msg": msg}
@@ -140,6 +148,7 @@ func (p *Process) run() error {
 			}
 			return nil
 		})
+		log.Debugln("Process subscription handler #5")
 		if err != nil {
 			return err
 		}
@@ -149,6 +158,9 @@ func (p *Process) run() error {
 }
 
 func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
+	log.Debugln("Process.replaceGlobalLog start")
+	defer log.Debugln("Process.replaceGlobalLog done")
+
 	// `log` is a global variable
 	logBackup := log
 	log = newLog
@@ -159,6 +171,9 @@ func (p *Process) replaceGlobalLog(newLog *logrus.Entry, f func() error) error {
 }
 
 func (p *Process) checkJobToExecute(job *Job, f func() error) error {
+	log.Debugln("Process.checkJobToExecute start")
+	defer log.Debugln("Process.checkJobToExecute done")
+
 	check := p.config.JobCheck.Checker()
 	return check(job.message.ConcurrentBatchJobId(), job.message.Ack, f)
 }
