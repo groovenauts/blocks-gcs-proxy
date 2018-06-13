@@ -30,8 +30,6 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 	logger := log.WithFields(logrus.Fields{"lock": url})
 	logger.Infoln("JobCheckByGcslock Start")
 
-	ctx := context.Background()
-
 	ok, err := jc.DeleteIfTimedout(object)
 	if err != nil {
 		log.Errorf("Failed to DeleteIfTimedout %s because of %v\n", url, err)
@@ -42,16 +40,16 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 		return nil
 	}
 
-	m, err := gcslock.New(ctx, jc.Bucket, object)
+	m, err := gcslock.New(nil, jc.Bucket, object)
 	if err != nil {
 		log.Errorf("Failed to gcslock.New because of %v\n", err)
 		return err
 	}
 
-	if err := jc.Lock(ctx, m); err != nil {
+	if err := jc.Lock(m); err != nil {
 		return err
 	}
-	defer jc.Unlock(ctx, m)
+	defer jc.Unlock(m)
 
 	go jc.StartTouching(object, time.Duration(int64(jc.Timeout)/10))
 
@@ -107,11 +105,11 @@ func (jc *JobCheckByGcslock) DeleteIfTimedout(object string) (bool, error) {
 	return true, nil
 }
 
-func (jc *JobCheckByGcslock) Lock(ctx context.Context, m gcslock.ContextLocker) error {
+func (jc *JobCheckByGcslock) Lock(m gcslock.ContextLocker) error {
 	log.Debugln("JobCheckByGcslock.Lock start")
 
 	// Wait up to 1 second to acquire a lock.
-	if err := m.ContextLock(ctx); err != nil {
+	if err := m.ContextLock(context.Background()); err != nil {
 		log.Errorf("Failed to ContextLock because of %v\n", err)
 		return err
 	}
@@ -120,10 +118,10 @@ func (jc *JobCheckByGcslock) Lock(ctx context.Context, m gcslock.ContextLocker) 
 	return nil
 }
 
-func (jc *JobCheckByGcslock) Unlock(ctx context.Context, m gcslock.ContextLocker) error {
+func (jc *JobCheckByGcslock) Unlock(m gcslock.ContextLocker) error {
 	log.Debugln("JobCheckByGcslock.Unlock start")
 
-	if err := m.ContextUnlock(ctx); err != nil {
+	if err := m.ContextUnlock(context.Background()); err != nil {
 		log.Errorf("Failed to ContextUnlock because of %v\n", err)
 		return err
 	}
