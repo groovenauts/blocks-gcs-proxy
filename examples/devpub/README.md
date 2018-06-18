@@ -9,11 +9,11 @@ If you have some [JSON lines](http://jsonlines.org/) files like the following on
 you can publish messages for each line of the file by using [pubsub-devpub](https://github.com/groovenauts/pubsub-devpub).
 
 ```
-{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000001\"]"}}
-{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000002\"]"}}
-{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000003\"]"}}
-{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000004\"]"}}
-{"topic":"projects/scenic-doodad-617/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000005\"]"}}
+{"topic":"projects/your-gcs-project/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000001\"]"}}
+{"topic":"projects/your-gcs-project/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000002\"]"}}
+{"topic":"projects/your-gcs-project/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000003\"]"}}
+{"topic":"projects/your-gcs-project/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000004\"]"}}
+{"topic":"projects/your-gcs-project/topics/devpub-target-topic","attributes":{"download_files":"[\"gs://akm-test/path/to/file000005\"]"}}
 (snip)
 ```
 

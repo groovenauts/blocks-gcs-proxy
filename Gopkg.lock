@@ -4,8 +4,8 @@
 [[projects]]
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
-  revision = "056a55f54a6cc77b440b31a56a5e7c3982d32811"
-  version = "v0.22.0"
+  revision = "0fd7230b2a7505833d5f69b75cbd6c9582401479"
+  version = "v0.23.0"
 
 [[projects]]
   branch = "master"
@@ -66,7 +66,7 @@
   branch = "master"
   name = "github.com/knq/pemutil"
   packages = ["."]
-  revision = "e7ebaf079fb4b0fc071be79e23c25bc41ee283e9"
+  revision = "a6a7785bc45acb2584f823861c3ad9a70e04f787"
 
 [[projects]]
   branch = "fix/error_reporting"
@@ -74,6 +74,12 @@
   packages = ["."]
   revision = "c63826842414963a8d536e33d13817e89fa23160"
   source = "https://github.com/groovenauts/sdhook.git"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/marcacohen/gcslock"
+  packages = ["."]
+  revision = "5782a95db7e207c634ebf85ca8fcd970b7a27ac5"
 
 [[projects]]
   name = "github.com/philhofer/fwd"
@@ -103,8 +109,8 @@
 [[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
@@ -164,31 +170,31 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp"]
-  revision = "2491c5de3490fced2f6cff376127c667efeed857"
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
   packages = [".","google","internal","jws","jwt"]
-  revision = "cdc340f7c179dbbfa4afd43b7614e8fcadde4269"
+  revision = "1e0a3fa8ba9a5c9eb35c271780101fdaf1b205d7"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
+  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/api"
   packages = ["clouderrorreporting/v1beta1","gensupport","googleapi","googleapi/internal/uritemplates","logging/v2beta1","pubsub/v1","storage/v1"]
-  revision = "d7aa31fbd7da4467a8056610e654315a4c1f068e"
+  revision = "ef86ce4234efee96020bde00391d6a9cfae66561"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -199,6 +205,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "45db544d901d1b9be9c63211bb1cc927c3cf317fc3142b674c37edf3eecf0931"
+  inputs-digest = "5ab1063f1e96e36f6c7929319810637dcfa71455abd07525ab50a992ae88064a"
   solver-name = "gps-cdcl"
   solver-version = 1
