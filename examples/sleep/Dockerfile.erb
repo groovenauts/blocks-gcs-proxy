@@ -1,0 +1,20 @@
+# [config] IMAGE_NAME: "groovenauts/concurrent_batch_sleep_example"
+# [config]
+# [config] WORKING_DIR: "."
+# [config] VERSION_SCRIPT: 'grep VERSION ../../version.go | cut -f2 -d\"'
+# [config] GIT_TAG_PREFIX: 'examples/sleep/'
+
+FROM ruby:2.4-jessie
+
+ENV APP_HOME /usr/app/batch_type_example
+COPY . $APP_HOME
+WORKDIR $APP_HOME
+
+ENV BLOCKS_GCS_PROXY_VERSION <%= require './version'; GCS_PROXY_VERSION %>
+RUN mkdir -p /usr/app && \
+    curl -L --output ${APP_HOME}/blocks-gcs-proxy \
+         https://github.com/groovenauts/blocks-gcs-proxy/releases/download/v${BLOCKS_GCS_PROXY_VERSION}/blocks-gcs-proxy_linux_amd64 && \
+    chmod +x ${APP_HOME}/blocks-gcs-proxy && \
+    ./blocks-gcs-proxy --version
+
+CMD ["./blocks-gcs-proxy", "-c", "./config.json", "sleep", "%{attrs.sleep_time}"]

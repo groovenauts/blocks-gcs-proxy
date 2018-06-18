@@ -127,8 +127,8 @@
 [[projects]]
   name = "github.com/tidwall/gjson"
   packages = ["."]
-  revision = "01f00f129617a6fe98941fb920d6c760241b54d2"
-  version = "v1.1.0"
+  revision = "afaeb9562041a8018c74e006551143666aed08bf"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -170,7 +170,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
+  revision = "027cca12c2d63e3d62b670d901e8a2c95854feec"
 
 [[projects]]
   branch = "master"
@@ -188,23 +188,23 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
+  revision = "6c888cc515d3ed83fc103cf1d84468aad274b0a7"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/api"
   packages = ["clouderrorreporting/v1beta1","gensupport","googleapi","googleapi/internal/uritemplates","logging/v2beta1","pubsub/v1","storage/v1"]
-  revision = "ef86ce4234efee96020bde00391d6a9cfae66561"
+  revision = "2eea9ba0a3d94f6ab46508083e299a00bbbc65f6"
 
 [[projects]]
   name = "google.golang.org/appengine"
   packages = [".","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/modules","internal/remote_api","internal/urlfetch","urlfetch"]
-  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
-  version = "v1.0.0"
+  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
+  version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5ab1063f1e96e36f6c7929319810637dcfa71455abd07525ab50a992ae88064a"
+  inputs-digest = "9385b6e010eb76a0a02138c92ec068b082af245bb7d1e846ce8b94895aa4562c"
   solver-name = "gps-cdcl"
   solver-version = 1

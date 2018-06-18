@@ -1,0 +1,19 @@
+{
+  "name":"concurrent-batch-sleep-example1",
+  "project_id":"<%= ENV['GCS_PROJECT'] %>",
+  "zone":"asia-east1-a",
+  "boot_disk": {
+    "source_image":"https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/family/cos-stable"
+  },
+  "machine_type":"f1-micro",
+  "target_size":1,
+  "container_size":1,
+  "container_name":"groovenauts/concurrent_batch_sleep_example:<%= require './version'; GCS_PROXY_VERSION %>",
+  "token_consumption": 1,
+  "hibernation_delay": 180,
+  "job_scaler": {
+    "enabled": true,
+    "max_instance_size": 3
+  },
+  "docker_run_options": "--restart=on-failure:5 -e GCSLOCK_BUCKET=<%= ENV['GCSLOCK_BUCKET'] %>"
+}

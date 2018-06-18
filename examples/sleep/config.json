@@ -1,0 +1,10 @@
+{
+  "job_check": {
+    "method": "gcslock",
+    "bucket": "{{ .GCSLOCK_BUCKET }}"
+  },
+  "log": {
+    "level": "debug",
+    "command_severity": "debug"
+  }
+}
