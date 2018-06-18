@@ -1,3 +1,4 @@
 /Dockerfile
 /tmp
 /pipeline.json
+/.env
