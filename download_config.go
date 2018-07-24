@@ -1,7 +1,8 @@
 package main
 
 type DownloadConfig struct {
-	Worker *WorkerConfig `json:"worker,omitempty"`
+	Worker            *WorkerConfig `json:"worker,omitempty"`
+	AllowIrregularUrl bool          `json:"allow_irregular_url,omitempty"`
 }
 
 func (c *DownloadConfig) setup() *ConfigError {
