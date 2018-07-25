@@ -74,6 +74,7 @@ specified by `job.subscription` in `config.json`.
 | command.dryrun | bool | False | `false` | Don't run the command if this is true. |
 | command.options | map[key][]string | False |  | Define if you have to run one of multiple command. See [Multiple command options](#multiple-command-options) for more detail. |
 | download                  | map | False |  |  |
+| download.allow_irregular_url | bool | False | False | Allow not strict URL to download |
 | download.worker           | map | False |  |  |
 | download.worker.max_tries | int | False | 0 | The number of tries to download. |
 | download.worker.workers   | int | False | 1 | The number of thread to download. |

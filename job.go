@@ -300,7 +300,7 @@ func (job *Job) setupDownloadFiles() error {
 		}
 	}
 	for _, remote_url := range remoteUrls {
-		url, err := url.Parse(remote_url)
+		url, err := job.parseUrl(remote_url)
 		if err != nil {
 			log.WithFields(logrus.Fields{"url": remote_url}).Errorln("Invalid download file URL")
 			return err
@@ -449,7 +449,7 @@ func (job *Job) convertError(src error) error {
 func (job *Job) downloadFiles() error {
 	targets := []*Target{}
 	for remoteURL, destPath := range job.downloadFileMap {
-		url, err := url.Parse(remoteURL)
+		url, err := job.parseUrl(remoteURL)
 		if err != nil {
 			log.WithFields(logrus.Fields{"url": remoteURL, "error": err}).Errorln("Invalid URL")
 			return err
@@ -600,4 +600,14 @@ func (job *Job) flatten(obj interface{}) []interface{} {
 	default:
 		return []interface{}{obj}
 	}
+}
+
+func (job *Job) parseUrl(s string) (*url.URL, error) {
+	var f func(string) (*url.URL, error)
+	if job.downloadConfig != nil && job.downloadConfig.AllowIrregularUrl {
+		f = urlParse
+	} else {
+		f = url.Parse
+	}
+	return f(s)
 }
