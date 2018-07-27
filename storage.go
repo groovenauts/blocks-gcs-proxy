@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"mime"
 	"net/http"
@@ -133,7 +134,8 @@ func IsGoogleApiError(err error, code int) bool {
 func (ct *CloudStorage) CreateEmptyFile(bucket, object string) (*storage.Object, error) {
 	logAttrs := logrus.Fields{"url": "gs://" + bucket + "/" + object}
 	obj := &storage.Object{Name: object, ContentType: "text/plain"}
-	res, err := ct.service.Insert(bucket, obj).Do()
+	buf := bytes.NewBufferString("")
+	res, err := ct.service.Insert(bucket, obj).Media(buf).Do()
 	if err != nil {
 		logAttrs["error"] = err
 		log.WithFields(logAttrs).Warnf("Failed to create empty file")
