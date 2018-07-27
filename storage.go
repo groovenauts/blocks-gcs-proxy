@@ -20,6 +20,7 @@ type (
 		Get(bucket, object string) (*storage.Object, error)
 		Delete(bucket, object string) error
 		Update(bucket, object string, body *storage.Object) (*storage.Object, error)
+		CreateEmptyFile(bucket, object string) (*storage.Object, error)
 	}
 
 	CloudStorage struct {
@@ -127,4 +128,17 @@ func IsGoogleApiError(err error, code int) bool {
 		}
 	}
 	return false
+}
+
+func (ct *CloudStorage) CreateEmptyFile(bucket, object string) (*storage.Object, error) {
+	logAttrs := logrus.Fields{"url": "gs://" + bucket + "/" + object}
+	obj := &storage.Object{Name: object, ContentType: "text/plain"}
+	res, err := ct.service.Insert(bucket, obj).Do()
+	if err != nil {
+		logAttrs["error"] = err
+		log.WithFields(logAttrs).Warnf("Failed to create empty file")
+		return nil, err
+	}
+	log.WithFields(logAttrs).Debugln("Upload successfully")
+	return res, nil
 }
