@@ -61,6 +61,17 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 		return nil
 	})
 
+	completePath := jc.DirPath + "/" + job_id + ".complete"
+	completeObj, err := jc.Storage.Get(jc.Bucket, completePath)
+	if err != nil {
+		log.Errorf("Failed to FileExist for gs://%s/%s because of %v\n", jc.Bucket, completePath, err)
+		return err
+	}
+	if completeObj != nil {
+		log.Warningf("Quit running job which is completed because %s already exists\n", completePath)
+		return nil
+	}
+
 	go jc.StartTouching(object, time.Duration(int64(jc.Timeout)/10))
 
 	logger.Debugln("JobCheckByGcslock handler starting")
@@ -72,6 +83,11 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 	defer jc.mux.Unlock()
 
 	jc.working = false
+
+	if _, err := jc.Storage.CreateEmptyFile(jc.Bucket, completePath); err != nil {
+		log.Warningf("Failed to touch complete file gs://%s/%s\n", jc.Bucket, completePath)
+		return nil
+	}
 
 	return err
 }
