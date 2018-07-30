@@ -23,7 +23,7 @@ type JobCheckByGcslock struct {
 	mux     sync.Mutex
 }
 
-func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() error) error {
+func (jc *JobCheckByGcslock) Check(job_id string, ack func() error, f func() error) error {
 	object := jc.DirPath + "/" + job_id + ".gcslock"
 	url := fmt.Sprintf("gs://%s/%s", jc.Bucket, object)
 
@@ -48,6 +48,9 @@ func (jc *JobCheckByGcslock) Check(job_id string, _ack func() error, f func() er
 	}
 
 	if err := jc.Lock(m); err != nil {
+		if err2 := ack(); err2 != nil {
+			log.Errorf("Failed to Ack for getting lock failure because of %v\n", err2)
+		}
 		return err
 	}
 	defer jc.Unlock(m, func() error {
