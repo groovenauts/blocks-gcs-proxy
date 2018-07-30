@@ -49,7 +49,7 @@ func (jc *JobCheckByGcslock) Check(job_id string, ack func() error, f func() err
 
 	if err := jc.Lock(m); err != nil {
 		if err2 := ack(); err2 != nil {
-			log.Errorf("Failed to Ack for getting lock failure because of %v\n", err2)
+			log.Errorf("Failed to Ack for quitting for getting lock failure because of %v\n", err2)
 		}
 		return err
 	}
@@ -72,6 +72,9 @@ func (jc *JobCheckByGcslock) Check(job_id string, ack func() error, f func() err
 	}
 	if completeObj != nil {
 		log.Warningf("Quit running job which is completed because %s already exists\n", completePath)
+		if err := ack(); err != nil {
+			log.Errorf("Failed to Ack for quitting for job completion because of %v\n", err)
+		}
 		return nil
 	}
 
