@@ -124,7 +124,12 @@ func (job *Job) run() error {
 	}
 
 	job.message.raw.Message.Attributes[FinishTimeKey] = time.Now().Format(time.RFC3339)
-	step := map[bool]JobStep{false: ACKSENDING, true: CANCELLING}[err != nil]
+	var step JobStep
+	if err != nil {
+		step = CANCELLING
+	} else {
+		step = ACKSENDING
+	}
 	e := job.withNotify(step, reaction)()
 	if e != nil {
 		return e
