@@ -14,7 +14,7 @@ const (
 	bucket = "bucket1"
 	path1  = "path/to/file1"
 	url1   = "gs://" + bucket + "/" + path1
-	local1 = downloads_dir + "/" + bucket + "/" + path1
+	local1 = workspace + "/" + bucket + "/" + path1
 )
 
 var (
@@ -52,7 +52,7 @@ var (
 func TestJobSetupWithPubSubNotification1(t *testing.T) {
 	job := &Job{
 		config: &CommandConfig{
-			Template: []string{"cmd1", "%{download_files}", "%{uploads_dir}"},
+			Template: []string{"cmd1", "%{download_files}", "%{workspace}"},
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -64,9 +64,7 @@ func TestJobSetupWithPubSubNotification1(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	job.remoteDownloadFiles = job.message.DownloadFiles()
@@ -84,5 +82,5 @@ func TestJobSetupWithPubSubNotification1(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "cmd1", job.cmd.Path)
-	assert.Equal(t, []string{"cmd1", local1, uploads_dir}, job.cmd.Args)
+	assert.Equal(t, []string{"cmd1", local1, workspace}, job.cmd.Args)
 }

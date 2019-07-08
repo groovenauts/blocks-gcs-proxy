@@ -79,9 +79,7 @@ type Job struct {
 	storage      Storage
 
 	// These are set at at setupWorkspace
-	workspace     string
-	downloads_dir string
-	uploads_dir   string
+	workspace string
 
 	// These are set at setupDownloadFiles
 	downloadFileMap     map[string]string
@@ -224,19 +222,7 @@ func (job *Job) setupWorkspace() error {
 			return err
 		}
 	}
-	subdirs := []string{
-		filepath.Join(dir, "downloads"),
-		filepath.Join(dir, "uploads"),
-	}
-	for _, subdir := range subdirs {
-		err := os.MkdirAll(subdir, 0700)
-		if err != nil {
-			return err
-		}
-	}
 	job.workspace = dir
-	job.downloads_dir = subdirs[0]
-	job.uploads_dir = subdirs[1]
 	return nil
 }
 
@@ -311,7 +297,7 @@ func (job *Job) setupDownloadFiles() error {
 			return err
 		}
 		urlstr := fmt.Sprintf("gs://%v%v", url.Host, url.Path)
-		destPath := filepath.Join(job.downloads_dir, url.Host, url.Path)
+		destPath := filepath.Join(job.workspace, url.Host, url.Path)
 		job.downloadFileMap[urlstr] = destPath
 	}
 	job.localDownloadFiles = job.copyWithFileMap(job.remoteDownloadFiles)
@@ -343,8 +329,6 @@ func (job *Job) buildVariable() *bvariable.Variable {
 	return &bvariable.Variable{
 		Data: map[string]interface{}{
 			"workspace":             job.workspace,
-			"downloads_dir":         job.downloads_dir,
-			"uploads_dir":           job.uploads_dir,
 			"download_files":        job.localDownloadFiles,
 			"local_download_files":  job.localDownloadFiles,
 			"remote_download_files": job.remoteDownloadFiles,
@@ -516,16 +500,19 @@ func (job *Job) execute() error {
 }
 
 func (job *Job) uploadFiles() error {
-	localPaths, err := job.listFiles(job.uploads_dir)
+	localPaths, err := job.listFiles(job.workspace)
 	if err != nil {
 		return err
 	}
+
+	// TODO Remove not modified files from localPaths
+
 	log.WithFields(logrus.Fields{"files": localPaths}).Debugln("Uploading files found")
 	targets := []*Target{}
 	for _, localPath := range localPaths {
-		relPath, err := filepath.Rel(job.uploads_dir, localPath)
+		relPath, err := filepath.Rel(job.workspace, localPath)
 		if err != nil {
-			log.WithFields(logrus.Fields{"error": err, "localPath": localPath, "uploads_dir": job.uploads_dir}).Errorln("Failed to get relative path")
+			log.WithFields(logrus.Fields{"error": err, "localPath": localPath, "workspace": job.workspace}).Errorln("Failed to get relative path")
 			return err
 		}
 		sep := string([]rune{os.PathSeparator})
@@ -573,7 +560,7 @@ func (job *Job) listFiles(dir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		log.WithFields(logrus.Fields{"error": err}).Errorln("Error to list upload files")
+		log.WithFields(logrus.Fields{"error": err}).Errorln("Error to list files")
 		return nil, err
 	}
 	return result, nil

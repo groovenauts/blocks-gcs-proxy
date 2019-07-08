@@ -18,8 +18,6 @@ const (
 	flag_workers             = "workers"
 	flag_max_tries           = "max_tries"
 	flag_wait                = "wait"
-	flag_downloads_dir       = "downloads_dir"
-	flag_uploads_dir         = "uploads_dir"
 	flag_content_type_by_ext = "content_type_by_ext"
 	flag_message             = "message"
 	flag_workspace           = "workspace"
@@ -33,12 +31,9 @@ var flagAliases = map[string]string{
 	flag_workers:   "n",
 	flag_max_tries: "M",
 	flag_wait:      "W",
-	// For Download only
-	flag_downloads_dir: "d",
-	// For Upload only
-	flag_uploads_dir: "d",
 	// For Exec only
-	flag_message:   "m",
+	flag_message: "m",
+	// For Download and Upload and Exec
 	flag_workspace: "w",
 }
 
@@ -133,7 +128,7 @@ func (act *CliActions) DownloadCommand() cli.Command {
 			act.flagConfig(),
 			act.flagLogConfig(),
 			cli.StringFlag{
-				Name:  act.flagName(flag_downloads_dir),
+				Name:  act.flagName(flag_workspace),
 				Usage: "`PATH` to the directory which has bucket_name/path/to/file",
 			},
 			act.flagWorkers(),
@@ -159,7 +154,7 @@ func (act *CliActions) Download(c *cli.Context) error {
 	}
 	job := &Job{
 		config:              config.Command,
-		downloads_dir:       c.String(flag_downloads_dir),
+		workspace:           c.String(flag_workspace),
 		remoteDownloadFiles: files,
 		storage:             p.storage,
 		downloadConfig:      config.Download,
@@ -187,7 +182,7 @@ func (act *CliActions) UploadCommand() cli.Command {
 			act.flagConfig(),
 			act.flagLogConfig(),
 			cli.StringFlag{
-				Name:  act.flagName(flag_uploads_dir),
+				Name:  act.flagName(flag_workspace),
 				Usage: "Path to the directory which has bucket_name/path/to/file",
 			},
 			cli.BoolFlag{
@@ -215,11 +210,11 @@ func (act *CliActions) Upload(c *cli.Context) error {
 	p := act.newProcess(config)
 	job := &Job{
 		config:       config.Command,
-		uploads_dir:  c.String(flag_uploads_dir),
+		workspace:    c.String(flag_workspace),
 		storage:      p.storage,
 		uploadConfig: config.Upload,
 	}
-	fmt.Printf("Uploading files under %v\n", job.uploads_dir)
+	fmt.Printf("Uploading files under %v\n", job.workspace)
 	err := job.uploadFiles()
 
 	w := c.Int(flag_wait)

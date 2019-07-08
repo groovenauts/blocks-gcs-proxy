@@ -11,20 +11,16 @@ import (
 )
 
 const (
-	workspace     = "/tmp/workspace"
-	downloads_dir = workspace + "/downloads"
-	uploads_dir   = workspace + "/uploads"
+	workspace = "/tmp/workspace"
 )
 
 func NewBasicJob() *Job {
 	return &Job{
 		config: &CommandConfig{
-			Template: []string{"./app.sh", "%{uploads_dir}", "%{download_files.0}"},
+			Template: []string{"./app.sh", "%{workspace}", "%{download_files.0}"},
 		},
 		workspace:           workspace,
-		downloads_dir:       downloads_dir,
-		uploads_dir:         uploads_dir,
-		localDownloadFiles:  []string{downloads_dir + "/bucket1/foo"},
+		localDownloadFiles:  []string{workspace + "/bucket1/foo"},
 		remoteDownloadFiles: []string{"gs://bucket1/foo"},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -72,7 +68,7 @@ func AssertCompositeErrorWithInvalidJobError(t *testing.T, err error) bool {
 // Invalid index for the array "download_files"
 func TestJobBuildWithInvalidIndexForArray(t *testing.T) {
 	job := NewBasicJob()
-	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files.1}"}
+	job.config.Template = []string{"./app.sh", "%{workspace}", "%{download_files.1}"}
 	err := job.build()
 	AssertCompositeErrorWithInvalidJobError(t, err)
 }
@@ -80,7 +76,7 @@ func TestJobBuildWithInvalidIndexForArray(t *testing.T) {
 // Key string is given for the array "download_files"
 func TestJobBuildWithStringKeyForArray(t *testing.T) {
 	job := NewBasicJob()
-	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files.foo}"}
+	job.config.Template = []string{"./app.sh", "%{workspace}", "%{download_files.foo}"}
 	err := job.build()
 	AssertCompositeErrorWithInvalidJobError(t, err)
 }
@@ -88,9 +84,9 @@ func TestJobBuildWithStringKeyForArray(t *testing.T) {
 // Invalid key given for the map "download_files"
 func TestJobBuildWithInvalidKeyForMap(t *testing.T) {
 	job := NewBasicJob()
-	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files.baz}"}
+	job.config.Template = []string{"./app.sh", "%{workspace}", "%{download_files.baz}"}
 	job.localDownloadFiles = map[string]interface{}{
-		"foo": downloads_dir + "/bucket1/foo",
+		"foo": workspace + "/bucket1/foo",
 	}
 	err := job.build()
 	AssertCompositeErrorWithInvalidJobError(t, err)
@@ -109,7 +105,7 @@ func TestJobBuildWithInvalidIndexAndKeyInAttrs(t *testing.T) {
 // Invalid reference download_files in spite of no download_files given
 func TestJobBuildWithInvalidDownloadFilesReference(t *testing.T) {
 	job := NewBasicJob()
-	job.config.Template = []string{"./app.sh", "%{uploads_dir}", "%{download_files}"}
+	job.config.Template = []string{"./app.sh", "%{workspace}", "%{download_files}"}
 	job.localDownloadFiles = nil
 	err := job.build()
 	if assert.Error(t, err) {

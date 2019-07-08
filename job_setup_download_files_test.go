@@ -18,16 +18,14 @@ func generateJSON(t *testing.T, obj interface{}) string {
 
 func TestJobSetupCase1(t *testing.T) {
 	workspace := "/tmp/workspace"
-	downloads_dir := workspace + "/downloads"
-	uploads_dir := workspace + "/uploads"
 	bucket := "bucket1"
 	path1 := "path/to/file1"
 	url1 := "gs://" + bucket + "/" + path1
-	local1 := downloads_dir + "/" + bucket + "/" + path1
+	local1 := workspace + "/" + bucket + "/" + path1
 
 	job := &Job{
 		config: &CommandConfig{
-			Template: []string{"cmd1", "%{download_files}", "%{uploads_dir}"},
+			Template: []string{"cmd1", "%{download_files}", "%{workspace}"},
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -41,9 +39,7 @@ func TestJobSetupCase1(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	job.remoteDownloadFiles = job.message.DownloadFiles()
@@ -61,13 +57,11 @@ func TestJobSetupCase1(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "cmd1", job.cmd.Path)
-	assert.Equal(t, []string{"cmd1", local1, uploads_dir}, job.cmd.Args)
+	assert.Equal(t, []string{"cmd1", local1, workspace}, job.cmd.Args)
 }
 
 func TestJobSetupCase2(t *testing.T) {
 	workspace := "/tmp/workspace"
-	downloads_dir := workspace + "/downloads"
-	uploads_dir := workspace + "/uploads"
 	bucket := "bucket1"
 	path1 := "path/to/file1"
 	path2 := "path/to/file2"
@@ -75,13 +69,13 @@ func TestJobSetupCase2(t *testing.T) {
 	url1 := "gs://" + bucket + "/" + path1
 	url2 := "gs://" + bucket + "/" + path2
 	url3 := "gs://" + bucket + "/" + path3
-	local1 := downloads_dir + "/" + bucket + "/" + path1
-	local2 := downloads_dir + "/" + bucket + "/" + path2
-	local3 := downloads_dir + "/" + bucket + "/" + path3
+	local1 := workspace + "/" + bucket + "/" + path1
+	local2 := workspace + "/" + bucket + "/" + path2
+	local3 := workspace + "/" + bucket + "/" + path3
 
 	job := &Job{
 		config: &CommandConfig{
-			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
+			Template: []string{"cmd1", "%{workspace}", "%{download_files.foo}", "%{download_files.bar}"},
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -98,9 +92,7 @@ func TestJobSetupCase2(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	job.remoteDownloadFiles = job.message.DownloadFiles()
@@ -126,13 +118,11 @@ func TestJobSetupCase2(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "cmd1", job.cmd.Path)
-	assert.Equal(t, []string{"cmd1", uploads_dir, local1, local2, local3}, job.cmd.Args)
+	assert.Equal(t, []string{"cmd1", workspace, local1, local2, local3}, job.cmd.Args)
 }
 
 func TestJobSetupCase3(t *testing.T) {
 	workspace := "/tmp/workspace"
-	downloads_dir := workspace + "/downloads"
-	uploads_dir := workspace + "/uploads"
 	bucket := "bucket1"
 	path1 := "path/to/file1"
 	path2 := "path/to/file2"
@@ -140,9 +130,9 @@ func TestJobSetupCase3(t *testing.T) {
 	url1 := "gs://" + bucket + "/" + path1
 	url2 := "gs://" + bucket + "/" + path2
 	url3 := "gs://" + bucket + "/" + path3
-	local1 := downloads_dir + "/" + bucket + "/" + path1
-	local2 := downloads_dir + "/" + bucket + "/" + path2
-	local3 := downloads_dir + "/" + bucket + "/" + path3
+	local1 := workspace + "/" + bucket + "/" + path1
+	local2 := workspace + "/" + bucket + "/" + path2
+	local3 := workspace + "/" + bucket + "/" + path3
 
 	attrs := map[string]string{
 		"download_files": generateJSON(t, []interface{}{url1, url2, url3}),
@@ -152,7 +142,7 @@ func TestJobSetupCase3(t *testing.T) {
 	}
 	job := &Job{
 		config: &CommandConfig{
-			Template: []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
+			Template: []string{"cmd1", "%{workspace}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -164,9 +154,7 @@ func TestJobSetupCase3(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	v := job.buildVariable()
@@ -199,13 +187,11 @@ func TestJobSetupCase3(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "cmd1", job.cmd.Path)
-	assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
+	assert.Equal(t, []string{"cmd1", workspace, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
 }
 
 func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	workspace := "/tmp/workspace"
-	downloads_dir := workspace + "/downloads"
-	uploads_dir := workspace + "/uploads"
 	bucket := "bucket1"
 	path1 := "path/to/file1"
 	path2 := "path/to/file2"
@@ -213,15 +199,15 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	url1 := "gs://" + bucket + "/" + path1
 	url2 := "gs://" + bucket + "/" + path2
 	url3 := "gs://" + bucket + "/" + path3
-	local1 := downloads_dir + "/" + bucket + "/" + path1
-	local2 := downloads_dir + "/" + bucket + "/" + path2
-	local3 := downloads_dir + "/" + bucket + "/" + path3
+	local1 := workspace + "/" + bucket + "/" + path1
+	local2 := workspace + "/" + bucket + "/" + path2
+	local3 := workspace + "/" + bucket + "/" + path3
 
 	config := &CommandConfig{
 		Template: []string{"%{attrs.cmd}"},
 		Options: map[string][]string{
-			"default": []string{"cmd1", "%{uploads_dir}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
-			"key2":    []string{"cmd2", "%{uploads_dir}", "%{download_files}"},
+			"default": []string{"cmd1", "%{workspace}", "%{attrs.foo}/%{attrs.bar}", "%{attrs.baz}", "%{download_files}"},
+			"key2":    []string{"cmd2", "%{workspace}", "%{download_files}"},
 		},
 	}
 
@@ -244,9 +230,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	v := job.buildVariable()
@@ -278,7 +262,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	err = job.build()
 	if assert.NoError(t, err) {
 		assert.Equal(t, "cmd1", job.cmd.Path)
-		assert.Equal(t, []string{"cmd1", uploads_dir, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
+		assert.Equal(t, []string{"cmd1", workspace, "ABC/DEFG", "HIJKL", local1, local2, local3}, job.cmd.Args)
 	}
 
 	// Use "key2" option for the message with attrs.cmd
@@ -301,9 +285,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 	job.remoteDownloadFiles = job.message.DownloadFiles()
 	err = job.setupDownloadFiles()
@@ -322,7 +304,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "cmd2", job.cmd.Path)
-	assert.Equal(t, []string{"cmd2", uploads_dir, local1, local2, local3}, job.cmd.Args)
+	assert.Equal(t, []string{"cmd2", workspace, local1, local2, local3}, job.cmd.Args)
 
 	// Use "invalid_key" option for the message with attrs.cmd
 	attrs = map[string]string{
@@ -344,9 +326,7 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	job.remoteDownloadFiles = job.message.DownloadFiles()
@@ -361,8 +341,6 @@ func TestJobSetupCaseWithCommandOptions(t *testing.T) {
 
 func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
 	workspace := "/tmp/workspace"
-	downloads_dir := workspace + "/downloads"
-	uploads_dir := workspace + "/uploads"
 	bucket := "bucket1"
 	path1 := "path/to/file1"
 	path2 := "path/to/file2"
@@ -370,13 +348,13 @@ func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
 	url1 := "gs://" + bucket + "/" + path1
 	url2 := "gs://" + bucket + "/" + path2
 	url3 := "gs://" + bucket + "/" + path3
-	// local1 := downloads_dir + "/" + bucket + "/" + path1
-	// local2 := downloads_dir + "/" + bucket + "/" + path2
-	// local3 := downloads_dir + "/" + bucket + "/" + path3
+	// local1 := workspace + "/" + bucket + "/" + path1
+	// local2 := workspace + "/" + bucket + "/" + path2
+	// local3 := workspace + "/" + bucket + "/" + path3
 
 	job := &Job{
 		config: &CommandConfig{
-			Template: []string{"cmd1", "%{uploads_dir}", "%{download_files.foo}", "%{download_files.bar}"},
+			Template: []string{"cmd1", "%{workspace}", "%{download_files.foo}", "%{download_files.bar}"},
 		},
 		message: &JobMessage{
 			raw: &pubsub.ReceivedMessage{
@@ -396,9 +374,7 @@ func TestJobSetupWithUseDataAsAttributes(t *testing.T) {
 				},
 			},
 		},
-		workspace:     workspace,
-		downloads_dir: downloads_dir,
-		uploads_dir:   uploads_dir,
+		workspace: workspace,
 	}
 
 	assert.Equal(t, "", job.message.raw.Message.Attributes["foo"])
