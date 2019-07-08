@@ -86,6 +86,8 @@ type Job struct {
 	remoteDownloadFiles interface{}
 	localDownloadFiles  interface{}
 
+	localFileTimestamps map[string]time.Time
+
 	// This is set at setupExecUUID
 	execUUID string
 
@@ -192,6 +194,12 @@ func (job *Job) prepare() error {
 	err = job.setupDownloadFiles()
 	if err != nil {
 		return err
+	}
+
+	if tsMap, err := job.listFiles(job.workspace); err != nil {
+		return err
+	} else {
+		job.localFileTimestamps = tsMap
 	}
 
 	err = job.build()
@@ -500,12 +508,18 @@ func (job *Job) execute() error {
 }
 
 func (job *Job) uploadFiles() error {
-	localPaths, err := job.listFiles(job.workspace)
-	if err != nil {
+	localPaths := []string{}
+	if tsMap, err := job.listFiles(job.workspace); err != nil {
 		return err
+	} else {
+		for currPath, currTS := range tsMap {
+			oldTS, ok := job.localFileTimestamps[currPath]
+			if ok && !oldTS.Before(currTS) {
+				continue
+			}
+			localPaths = append(localPaths, currPath)
+		}
 	}
-
-	// TODO Remove not modified files from localPaths
 
 	log.WithFields(logrus.Fields{"files": localPaths}).Debugln("Uploading files found")
 	targets := []*Target{}
@@ -551,11 +565,16 @@ func (job *Job) uploadFiles() error {
 	return jobs.Error()
 }
 
-func (job *Job) listFiles(dir string) ([]string, error) {
-	result := []string{}
+func (job *Job) listFiles(dir string) (map[string]time.Time, error) {
+	result := map[string]time.Time{}
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			result = append(result, path)
+			info, err := os.Stat(path)
+			if err != nil {
+				log.WithFields(logrus.Fields{"error": err}).Errorf("Error to get FileInfo for %s\n", path)
+				return err
+			}
+			result[path] = info.ModTime()
 		}
 		return nil
 	})
